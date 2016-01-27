@@ -1,8 +1,8 @@
 Modelos de Regressão para Dados de Contagem com o R
 ===================================================
 
-Cesar Augusto Taconeli
-Eduardo Elias Ribeiro Jr
+Cesar Augusto Taconeli\
+Eduardo Elias Ribeiro Jr\
 Walmes Marques Zeviani
 
 Resumo
