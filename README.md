@@ -16,23 +16,31 @@ Dados de contagens configuram variáveis aleatórias que assumem valores inteiro
 negativos.  Correspondem, possivelmente, ao primeiro tipo de variável aleatória que o homem
 percebeu ou considerou para a tomada de decisões, antes mesmo do surgimento da
 escrita.
+
+
 Na era atual, métodos para inferência em dados de contagem estão bem
 aquém da quantidade disponível para dados contínuos. Não é raro,
 inclusive, que dados de contagem sejam analisados com base em modelos para dados
 contínuos. Se por um lado existem muitos modelos disponíveis nessa
 classe, por outro, seu uso para dados discretos é, na melhor das
 hipóteses, uma aproximação sujeita a imperfeições relevantes.
+
+
 O modelo Poisson é o principal e mais usado para inferência em dados de
 contagem, estando disponível na maioria dos softwares Estatísticos e
 grades curriculares. Apesar disso, reconhece-se que, na prática, as suposições inerentes a esse modelo
 são frequentemente não atendidas, de tal forma que, nessas
 situações, seu uso é não recomendado.
+
+
 Contagens com excesso de zeros, sub ou super dispersão, limitadas,
 censuradas, provenientes de experimentos/amostragem multinível, são
 exemplos que demandam modelos mais flexíveis ou mais gerais que o
 Poisson. No software R, vários pacotes disponibilizam alternativas
 interessantes, prontamente disponíveis para uso, de modelos para dados de
 contagens.
+
+
 Uma vez que dados de contagem estão presentes em todas as áreas da ciência (agronomia,
 ecologia, demografia, medicina, ciências sociais e políticas, etc),
 relacionados a problemas de inferência, não se deve subestimar a
