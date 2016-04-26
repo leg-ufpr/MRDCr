@@ -1,0 +1,10 @@
+html_document:
+  fig_width: 6
+  fig_height: 6
+  toc: true
+  toc_dep: 3
+  css: _style.css
+  fig_caption: yes
+  highlight: default
+  includes:
+    in_header: _MathJax.html
