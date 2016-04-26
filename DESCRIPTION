@@ -1,0 +1,45 @@
+Package: MRDCr
+Title: Modelos de Regressão para Dados de Contagem
+Version: 0.0-1
+Date: 2016-04-26
+Authors@R: as.person(c(
+    "Walmes Marques Zeviani <walmes@ufpr.br> [cre,aut]",
+    "Eduardo Elias Ribeiro Junior <edujrrib@gmail.com> [aut]",
+    "Cesar Augusto Taconeli <taconeli@ufpr.br> [aut]"))
+Description: Esse é um pacote com o material do Curso "Modelos de
+     Regressão para Dados de Contagem" oferecido pelos autores na 61
+     RBRAS (rbras2016.ufba.br) que aconteceu entre 23 e 25 de
+     Maio em Salvador, Bahia.
+     O objetivo desse Curso é apresentar diferentes modelos de
+     regressão para análise de dados de contagem, discutir suas
+     principais propriedades e ilustrar suas aplicações em dados reais
+     por meio do software R. Dentre os modelos considerados estão o
+     modelo Poisson, algumas extensões para acomodação de super (ou
+     sub) dispersão (Quasi-Poisson, COM-Poisson, Count-Gamma,
+     Binomial-Nagativo), modelos para dados inflacionados de zeros e
+     com a inclusão de efeitos aleatórios.
+     Neste pacote estão disponíveis as vignettes que mostram como
+     coordenar funções do R para análise dos dados, os slides do
+     Curso, as funções e alguns dos dados utitizados nos estudos de
+     caso.
+License: GPL-3
+URL: https://gitlab.c3sl.ufpr.br/leg/MRDCr
+BugReports: https://gitlab.c3sl.ufpr.br/leg/MRDCr/issues
+LazyData: true
+Encoding: UTF-8
+Depends:
+    R (>= 3.2.3)
+Suggests:
+    lattice,
+    latticeExtra,
+    ggplot2,
+    reshape,
+    reshape2,
+    car,
+    MASS,
+    multcomp,
+    knitr,
+    rmarkdown,
+    shiny
+VignetteBuilder: knitr
+RoxygenNote: 5.0.1
