@@ -1,1 +1,16 @@
+\#*\#
+^\.\#*
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.gitlab-ci.yml$
 ^data-raw$
+Rplots.pdf
+README.*
+STYLEGUIDE.*
+CONTRIBUTING.*
+LICENSE
+_output.yaml
+ci-c3sl.R
+roteiro.R
+style.css
+plano.*
