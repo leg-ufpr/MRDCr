@@ -1,0 +1,206 @@
+---
+title: "Análise de Contagens com Modelo Linear Genralizado Poisson"
+author: "Walmes, Eduardo & Cesar"
+vignette: >
+  %\VignetteIndexEntry{Análise de Contagens com Modelo Linear Genralizado Poisson}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+source("_setup.R")
+```
+
+## Análise exploratória
+
+```{r, include=FALSE}
+library(devtools)
+if (!suppressWarnings(require(MRDCr))) {
+    switch(Sys.info()["user"],
+           "walmes" = {
+               load_all("~/repos/MRDCr")
+           },
+           "eduardo" = NULL,
+           "cesar" = NULL)
+}
+ls("package:MRDCr")
+```
+```{r, eval=FALSE}
+library(MRDCr)
+help(soja)
+```
+
+```{r}
+ls("package:MRDCr")
+
+library(lattice)
+
+data(soja)
+str(soja)
+
+xtabs(~umid + K, data = soja[-75, ])
+
+xyplot(nvag + ngra ~ K, groups = umid, outer = TRUE,
+       data = soja[-74, ],
+       type = c("p", "a"), scales = "free",
+       ylab = NULL,
+       xlab = expression("Nível de potássio aplicado"~(mg~dm^{-3})),
+       auto.key = list(title = "Umidade do solo (%)",
+                       cex.title = 1,
+                       columns = 3),
+       strip = strip.custom(
+           factor.levels = c("Número de vagens",
+                             "Número de grãos")))
+
+soja <- soja[-74, ]
+```
+
+## GLM Poisson para número de vagens viáveis por vaso
+
+```{r, message=FALSE}
+# Considerar K categórico.
+soja <- transform(soja, K = factor(K))
+
+m0 <- glm(nvag ~ bloc + umid * K, data = soja, family = poisson)
+
+par(mfrow = c(2, 2))
+plot(m0); layout(1)
+
+#-----------------------------------------------------------------------
+
+deviance(m0)
+df.residual(m0)
+
+summary(m0)
+
+anova(m0, test = "Chisq")
+
+#-----------------------------------------------------------------------
+# Predição com intervalos de confiança.
+
+library(doBy)
+library(multcomp)
+
+X <- LSmatrix(m0, effect = c("umid", "K"))
+
+pred <- attr(X, "grid")
+pred <- transform(pred,
+                  K = as.integer(as.character(K)),
+                  umid = factor(umid))
+
+# Quantil normal para fazer um IC de 95%.
+qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
+
+# Preditos pela Poisson.
+# aux <- predict(m0, newdata = pred$pois, se.fit = TRUE)
+# aux <- exp(aux$fit + outer(aux$se.fit, qn, FUN = "*"))
+# pred$pois <- cbind(pred$pois, aux)
+aux <- confint(glht(m0, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred <- cbind(pred, exp(aux))
+str(pred)
+
+urls <-
+    paste0("https://raw.githubusercontent.com/walmes/wzRfun/master/R/",
+           c("prepanel.cbH.R", "panel.cbH.R"))
+sapply(urls, source)
+
+xyplot(fit ~ K | umid, data = pred,
+       layout = c(NA, 1), as.table = TRUE,
+       ylab = "Número de vagens por vaso",
+       xlab = expression("Nível de potássio aplicado"~(mg~dm^{-3})),
+       xlim = extendrange(range(pred$K), f = 0.1),
+       ly = pred$lwr, uy = pred$upr, cty = "bars", length = 0,
+       prepanel = prepanel.cbH,
+       panel = panel.cbH)
+
+#-----------------------------------------------------------------------
+# Comparações múltiplas.
+
+urls <-
+    paste0("https://raw.githubusercontent.com/walmes/wzRfun/master/R/",
+           c("apc.R"))
+sapply(urls, source)
+
+L <- by(X, INDICES = pred$umid, FUN = as.matrix)
+names(L) <- levels(soja$umid)
+L <- lapply(L, "rownames<-", levels(soja$K))
+K <- lapply(L, apc)
+apc(L[[1]])
+
+lapply(K,
+       FUN = function(k) {
+           summary(glht(model = m0, linfct = k),
+                   test = adjusted(type = "fdr"))
+       })
+```
+
+## GLM Poisson para número de grãos por vaso
+
+```{r, message=FALSE}
+m1 <- glm(ngra ~ bloc + umid * K, data = soja, family = poisson)
+
+par(mfrow = c(2, 2))
+plot(m1); layout(1)
+
+#-----------------------------------------------------------------------
+
+deviance(m1)
+df.residual(m1)
+
+summary(m1)
+
+anova(m1, test = "Chisq")
+
+#-----------------------------------------------------------------------
+# Predição com intervalos de confiança.
+
+X <- LSmatrix(m1, effect = c("umid", "K"))
+
+pred <- attr(X, "grid")
+pred <- transform(pred,
+                  K = as.integer(as.character(K)),
+                  umid = factor(umid))
+
+# Quantil normal para fazer um IC de 95%.
+qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
+
+aux <- confint(glht(m1, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred <- cbind(pred, exp(aux))
+str(pred)
+
+xyplot(fit ~ K | umid, data = pred,
+       layout = c(NA, 1), as.table = TRUE,
+       ylab = "Número de grãos por vaso",
+       xlab = expression("Nível de potássio aplicado"~(mg~dm^{-3})),
+       xlim = extendrange(range(pred$K), f = 0.1),
+       ly = pred$lwr, uy = pred$upr, cty = "bars", length = 0,
+       prepanel = prepanel.cbH,
+       panel = panel.cbH)
+
+#-----------------------------------------------------------------------
+# Comparações múltiplas.
+
+L <- by(X, INDICES = pred$umid, FUN = as.matrix)
+names(L) <- levels(soja$umid)
+L <- lapply(L, "rownames<-", levels(soja$K))
+K <- lapply(L, apc)
+apc(L[[1]])
+
+lapply(K,
+       FUN = function(k) {
+           summary(glht(model = m1, linfct = k),
+                   test = adjusted(type = "fdr"))
+       })
+```
+
+## Informações da sessão
+
+```{r}
+sessionInfo()
+```
+
+<!------------------------------------------- -->

@@ -1,1 +1,6 @@
 README.html
+.Rhistory
+vignettes/*.html
+!vignettes/_before_body.html
+!vignettes/_after_body.html
+!vignettes/_MathJax.html
