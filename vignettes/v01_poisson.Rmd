@@ -1,6 +1,9 @@
 ---
-title: "Análise de Contagens com Modelo Linear Genralizado Poisson"
-author: "Walmes, Eduardo & Cesar"
+title: "Análise de Contagens com Modelo Linear Generalizado Poisson"
+author: >
+  Walmes M. Zeviani,
+  Eduardo E. Ribeiro Jr &
+  Cesar A. Taconeli
 vignette: >
   %\VignetteIndexEntry{Análise de Contagens com Modelo Linear Genralizado Poisson}
   %\VignetteEngine{knitr::rmarkdown}
@@ -13,24 +16,12 @@ source("_setup.R")
 
 ## Análise exploratória
 
-```{r, include=FALSE}
-library(devtools)
-if (!suppressWarnings(require(MRDCr))) {
-    switch(Sys.info()["user"],
-           "walmes" = {
-               load_all("~/repos/MRDCr")
-           },
-           "eduardo" = NULL,
-           "cesar" = NULL)
-}
-ls("package:MRDCr")
-```
-```{r, eval=FALSE}
+```{r}
 library(MRDCr)
-help(soja)
 ```
 
 ```{r}
+# help(soja)
 ls("package:MRDCr")
 
 library(lattice)
@@ -199,7 +190,9 @@ lapply(K,
 
 ## Informações da sessão
 
-```{r}
+```{r, echo=FALSE, results="hold"}
+cat(format(Sys.time(),
+           format = "Atualizado em %d de %B de %Y.\n\n"))
 sessionInfo()
 ```
 
