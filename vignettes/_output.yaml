@@ -8,3 +8,5 @@ html_document:
   highlight: default
   includes:
     in_header: _MathJax.html
+    before_body: _before_body.html
+    after_body: _after_body.html
