@@ -37,6 +37,8 @@ Suggests:
     reshape2,
     car,
     MASS,
+    plyr,
+    doBy,
     multcomp,
     knitr,
     rmarkdown,
