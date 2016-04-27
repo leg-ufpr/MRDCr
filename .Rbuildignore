@@ -4,6 +4,9 @@
 ^\.Rproj\.user$
 ^\.gitlab-ci.yml$
 ^data-raw$
+^.build_package.R$
+^.gitlab-ci.yml$
+^.travis.yml$
 Rplots.pdf
 README.*
 STYLEGUIDE.*
