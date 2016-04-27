@@ -1,23 +1,11 @@
 ## ----setup, include=FALSE-----------------------------------------
 source("_setup.R")
 
-## ---- include=FALSE-----------------------------------------------
-library(devtools)
-if (!suppressWarnings(require(MRDCr))) {
-    switch(Sys.info()["user"],
-           "walmes" = {
-               load_all("~/repos/MRDCr")
-           },
-           "eduardo" = NULL,
-           "cesar" = NULL)
-}
-ls("package:MRDCr")
-
-## ---- eval=FALSE--------------------------------------------------
-#  library(MRDCr)
-#  help(soja)
+## -----------------------------------------------------------------
+library(MRDCr)
 
 ## -----------------------------------------------------------------
+# help(soja)
 ls("package:MRDCr")
 
 library(lattice)
@@ -177,6 +165,8 @@ lapply(K,
                    test = adjusted(type = "fdr"))
        })
 
-## -----------------------------------------------------------------
+## ---- echo=FALSE, results="hold"----------------------------------
+cat(format(Sys.time(),
+           format = "Atualizado em %d de %B de %Y.\n\n"))
 sessionInfo()
 
