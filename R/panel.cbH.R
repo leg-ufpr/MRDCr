@@ -128,7 +128,6 @@ panel.cbH <- function(x, y, ly, uy,
 #' @name prepanel.cbH
 #' @rdname panel.cbH
 #' @author Walmes Zeviani baseado na lista de discussão R-help.
-#' @import lattice latticeExtra
 #' @export
 prepanel.cbH <- function(y, ly, uy, subscripts){
     ly <- as.numeric(ly[subscripts])
