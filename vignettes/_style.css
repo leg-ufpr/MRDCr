@@ -24,7 +24,7 @@ code {
 
 /* R input */
 pre, code {
-    border-radius: 3px;
+    border-radius: 0px;
     background-color: #EDEDED;
     color: #333;
 }
@@ -46,12 +46,12 @@ img {
 
 #header {
     text-align: center;
-    margin: 20px 0px 20px 0px; 
+    margin: 20px 0px 20px 0px;
 }
 
 #TOC {
-    /* border-bottom: 1px solid red; */
-    margin: 0px 0px 20px 0px; 
+    font-size: 15px;
+    margin: 0px 0px 20px 0px;
 }
 
 #TOC li {
@@ -68,4 +68,14 @@ blockquote {
 blockquote > blockquote > p {
     color: "red";
     text-align: right;
+}
+
+a {
+    color: #149494;
+    text-decoration: none;
+}
+
+a:hover, a:focus {
+    color: #004E4E;
+    text-decoration: underline;
 }
