@@ -32,12 +32,12 @@ Depends:
 Imports:
     lattice,
     latticeExtra,
+    doBy,
+    multcomp
+Suggests:
     MASS,
     car,
-    doBy,
-    multcomp,
-    plyr
-Suggests:
+    plyr,
     ggplot2,
     reshape,
     reshape2,
