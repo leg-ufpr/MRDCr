@@ -5,3 +5,4 @@ vignettes/*.html
 !vignettes/_after_body.html
 !vignettes/_MathJax.html
 inst/doc/*.Rmd
+playground.R
