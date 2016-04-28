@@ -29,17 +29,18 @@ LazyData: true
 Encoding: UTF-8
 Depends:
     R (>= 3.2.3)
-Suggests:
+Imports:
     lattice,
     latticeExtra,
+    MASS,
+    car,
+    doBy,
+    multcomp,
+    plyr
+Suggests:
     ggplot2,
     reshape,
     reshape2,
-    car,
-    MASS,
-    plyr,
-    doBy,
-    multcomp,
     knitr,
     rmarkdown,
     shiny
