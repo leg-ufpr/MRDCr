@@ -20,8 +20,6 @@ sessionInfo()
 #--------------------------------------------
 # Carregar objetos do pacote.
 
-file.create("NAMESPACE")
-
 load_all()
 
 ls("package:MRDCr")
