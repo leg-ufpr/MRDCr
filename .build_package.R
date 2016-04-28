@@ -28,6 +28,10 @@ ls("package:MRDCr")
 packageVersion("MRDCr")
 
 #--------------------------------------------
+# Ignora check de caracteres non-ASCII nos datasets
+Sys.setenv(`_R_CHECK_ASCII_DATA_` = "FALSE")
+
+#--------------------------------------------
 # Produzir a documentação dos objetos.
 
 document()
