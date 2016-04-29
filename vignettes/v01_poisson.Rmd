@@ -26,7 +26,6 @@ ls("package:MRDCr")
 
 library(lattice)
 
-data(soja)
 str(soja)
 
 xtabs(~umid + K, data = soja[-75, ])
@@ -108,11 +107,6 @@ xyplot(fit ~ K | umid, data = pred,
 
 #-----------------------------------------------------------------------
 # Comparações múltiplas.
-
-urls <-
-    paste0("https://raw.githubusercontent.com/walmes/wzRfun/master/R/",
-           c("apc.R"))
-sapply(urls, source)
 
 L <- by(X, INDICES = pred$umid, FUN = as.matrix)
 names(L) <- levels(soja$umid)
