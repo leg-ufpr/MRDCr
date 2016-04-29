@@ -33,7 +33,8 @@ Imports:
     lattice,
     latticeExtra,
     doBy,
-    multcomp
+    multcomp,
+    bbmle
 Suggests:
     MASS,
     car,
