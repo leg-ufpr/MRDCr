@@ -215,6 +215,9 @@ source("_setup.R")
 
 \subsection{Modelo COM-Poisson}
 
+<<compoisson, child = "compoisson.Rnw">>=
+@
+
 \subsection{Modelo Gamma-Count}
 
 \section{Modelos para Excesso de Zeros}
