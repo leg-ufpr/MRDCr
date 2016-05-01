@@ -1,3 +1,4 @@
+## General
 README.html
 .Rhistory
 vignettes/*.html
@@ -6,3 +7,35 @@ vignettes/*.html
 !vignettes/_MathJax.html
 inst/doc/*.Rmd
 playground.R
+
+## Rnw output files
+**/cache/*
+**/figure/*
+*.nav
+*.snm
+*.tex
+
+## Core latex/pdflatex auxiliary files:
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+## Intermediate documents:
+*.dvi
+*-converted-to.*
+## Build tool auxiliary files:
+*.fdb_latexmk
+*.synctex
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+
+## Emacs
+.#*
