@@ -1,0 +1,232 @@
+
+\begin{frame}[allowframebreaks]{Distribuiçao COM-Poisson}
+
+\begin{itemize}
+    \item Nome COM-Poisson, advém de seus autores {\bf CO}nway e
+    {\bf M}axwell (também é chamada de distribuição
+    Conway-Maxwell-Poisson).
+    \item Proposta em um contexto de filas \cite{Conway1962},
+    essa distribuição generaliza a Poisson com a adição de um parâmetro.
+\end{itemize}
+
+\begin{block}{Razão de probabilidades consecutivas}
+
+\begin{multicols}{2}
+    \begin{itemize}
+        \item {\bf Distribuição Poisson}\\
+        $$\frac{P(Y = y-1)}{P(Y = y)} = \frac{y}{\lambda}$$
+        \item {\bf Distribuição COM-Poisson}\\
+        $$\frac{P(Y = y-1)}{P(Y = y)} = \frac{y^\nu}{\lambda}$$
+    \end{itemize}
+\end{multicols}
+\end{block}
+
+\framebreak
+
+\begin{block}{Densidade de probabilidade}
+\begin{center}
+\begin{equation*} 
+    \Pr(Y = y \mid \lambda, \nu) = \frac{\lambda^y}{(y!)^\nu 
+    Z(\lambda, \nu)}, \quad \textrm{em que }\, Z(\lambda, \nu) = 
+    \sum_{j=0}^\infty \frac{\lambda^j}{(j!)^\nu} \textrm{; e}\quad
+    \lambda > 0, \, \nu \geq 0
+\end{equation*}
+\end{center}
+\end{block}
+
+\begin{columns}[t,onlytextwidth]
+
+\column{.48\textwidth}
+\begin{block}{Propriedades}
+\begin{itemize}
+    \itemsep7.5pt\parskip0pt\parsep0pt
+    \item $\frac{P(Y = y - 1)}{P(Y = y)} = \frac{y^\nu}{\lambda}$
+    \item $E(Y) \approx \lambda ^ \frac{1}{\nu} - \frac{\nu - 1}{2\nu}$
+    \item $V(Y) \approx \frac{1}{\nu}E(Y)$
+    \end{itemize}
+\end{block}
+
+\column{.48\textwidth}
+\begin{block}{Casos particulares}
+\begin{itemize}
+	\item Distribuição Poisson, quando $\nu = 1$
+	\item Distribuição Bernoulli, quando $\nu \rightarrow \infty$
+	\item Distribuição Geométrica, quando $\nu = 0,\ \lambda < 1$
+\end{itemize}
+\end{block}
+
+\end{columns}
+
+\framebreak
+
+<<>>=
+
+library(latticeExtra)
+library(grid)
+library(compoisson)
+
+cols <- c(4, 1)
+## Parametros da distribuição
+lambdas <- c(1.36, 8, 915); nus <- c(0.4, 1, 2.5)
+medias <- mapply(com.mean, lambda = lambdas, nu = nus)
+variancias <- mapply(com.var, lambda = lambdas, nu = nus)
+
+## Calculando as probabilidades
+y <- 0:30; yy <- rep(y, 3)
+py.com <- py.pois <- NULL
+for(i in 1:3) py.com <- c(py.com, dcom(y, lambdas[i], nus[i]))
+for(i in 1:3) py.pois <- c(py.pois, dpois(y, medias[i]))
+
+## Criando categorias para split da lattice
+caso <- rep(c("1", "2", "3"), each = length(y))
+fl <- expression(lambda == 1.36~","~nu == 0.4,
+                 lambda == 8~","~nu == 1,
+                 lambda == 915~","~nu == 2.5)
+
+xyplot(py.com ~ c(yy - 0.14) | caso, type = c("h", "g"),
+       lwd = 2.5, xlab = "y", ylab = expression(P(Y == y)),
+       col = cols[2], ylim = c(-0.040, 0.25), xlim = extendrange(y),
+       key = list(
+           columns = 2,
+           lines = list(lty=1, col = c(cols[1], cols[2]), lwd = 3),
+           text = list(c("Poisson", "COM-Poisson"))),
+       layout = c(NA, 1),
+       between = list(x = 0.2, y = 0.3),
+       strip = strip.custom(factor.levels = fl)) + 
+    as.layer(xyplot(py.pois ~ c(yy + 0.14) | caso, 
+                    lwd = 2.5, col = cols[1],
+                    type = "h"))
+for(i in 1:3){
+  trellis.focus("panel", i, 1, highlight=FALSE)
+  grid.text(label = sprintf("E[Y]:  %.1f\nV[Y]:  %.1f",
+                            medias[i], variancias[i]),
+            x = .62, y = 0.02, 
+            default.units = "npc",
+            gp = gpar(col = cols[2]),
+            just = c("left", "bottom"))
+  grid.text(label = sprintf("E[Y]:  %.1f\nV[Y]:  %.1f",
+                            medias[i], medias[i]),
+            x = .08, y = 0.02, 
+            default.units = "npc",
+            gp = gpar(col = cols[1]),
+            just = c("left", "bottom"))
+}
+trellis.unfocus()
+
+@
+
+\end{frame}
+
+\begin{frame}{Casos Particulares}
+
+\begin{columns}[t]
+\begin{column}{.3\textwidth}
+  \vspace{1cm}
+    \begin{itemize}
+      \setbeamercovered{transparent=35}
+      \uncover<1>{\item Poisson $\nu = 1$}
+      \uncover<2>{\item Bernoulli $\nu \rightarrow \infty$}
+      \uncover<3>{\item Geométrica $\nu = 0,\, \lambda < 1$}
+    \end{itemize}
+  \vspace{1cm}
+\end{column}
+
+\begin{column}{.7\textwidth}
+  \vspace{0.5cm}
+  \only<1>{
+  \vspace{-1.1cm}
+  
+<<fig.height=5, fig.width=7>>=
+
+##-------------------------------------------
+## Poisson
+rm(list = ls())
+y <- 0:10
+py <- dcom(y, 5, 1)
+xyplot(py ~ y, type = c("h", "g"),
+       lwd = 4, xlab = "y", ylab = "",
+       main = expression(~"COM-Poisson"~(~lambda==5~","~nu==1)))
+
+@
+}
+  \only<2>{
+  \vspace{-1.1cm}
+<<fig.height=5, fig.width=7>>=
+
+##-------------------------------------------
+## Bernoulli
+rm(list = ls())
+y <- 0:2
+py <- dcom(y, 3, 20)
+xyplot(py ~ y, type = c("h", "g"),
+       lwd = 4, xlab = "y", ylab = "",
+       main = expression(~"COM-Poisson"~(~lambda==3~","~nu==20)))
+
+@
+}
+  \only<3>{
+    \vspace{-1.1cm}
+<<fig.height=5, fig.width=7>>=
+
+##-------------------------------------------
+## Geometrica
+rm(list = ls())
+y <- 0:6
+py <- dcom(y, 0.5, 0)
+xyplot(py ~ y, type = c("h", "g"),
+       lwd = 4, xlab = "y", ylab = "",
+       main = expression(~"COM-Poisson"~(~lambda==0.5~","~nu==0)))
+@
+}
+  \end{column}
+\end{columns}
+
+\end{frame}
+
+\begin{frame}{Modelo de Regressão COM-Poisson}
+
+\begin{itemize}
+    \item Incorporando covariáveis em $\lambda$ da forma 
+    $\lambda_i = \exp(X_i \beta)$, em que $X_i$ é o vetor de covariáveis do 
+    i-ésimo indivíduo e $\beta$ o vetor de parâmetros.
+\end{itemize}
+
+\begin{columns}[t,onlytextwidth]
+\column{.38\textwidth}
+
+\begin{block}{Função de verossimilhança}
+    \begin{align*}
+        L(\lambda, \nu ; \underline{y}) &= \prod_i^n \left (
+        \frac{\lambda_i^{y_i}}{(y_i !)^\nu} Z(\lambda_i, \nu)^{-1}
+        \right ) \\
+        &= \lambda_i^{\sum_i^n y_i}\prod_i^n 
+        \frac{Z(\lambda_i, \nu)^{-1}}{(y_i !)^\nu}\\
+    \end{align*}
+\end{block}
+
+\column{.58\textwidth}
+
+\begin{block}{Função de log-verossimilhança}
+    \begin{align*}
+        l(\lambda, \nu, \underline{y}) &= \log \left ( 
+        \lambda_i^{\sum_i^n y_i}\prod_i^n 
+        \frac{Z(\lambda_i, \nu)^{-1}}{(y_i !)^\nu} \right ) \\
+        &= \sum_i^n y_i \log(\lambda_i) - \nu \sum_i^n \log(y!) -
+        \sum_i^n \log(Z(\lambda_i, \nu))\\
+    \end{align*}
+\end{block}
+
+\end{columns}
+\end{frame}
+
+\begin{frame}{Estudos de caso}
+
+{\it Vignette} \href{run:../doc/v01_poisson.html}{\tt compoisson.html}
+\begin{description}
+    \item[\tt capdesfo]: número de capulhos sob efeito de desfolha (sub)
+    \item[\tt capmosca]: número de capulhos sob exposição à mosca branca (sub)
+    \item[\tt ninfas]: número de ninfas de mosca branca em plantas de soja (super)
+\end{description}
+
+\end{frame}
+
