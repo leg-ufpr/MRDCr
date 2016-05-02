@@ -88,7 +88,7 @@ convergencez <- function(model, tol = 1e-4, incremento = 10,
 #' @export
 
 llcmp <- function(params, y, X, offset = NULL,
-                  sumto = ceiling(max(y)^1.2)){
+                  sumto = ceiling(max(y)^1.5)){
     ##-------------------------------------------
     betas <- params[-1]
     phi <- params[1]
@@ -98,13 +98,43 @@ llcmp <- function(params, y, X, offset = NULL,
     Xb <- X %*% betas + offset
     ##-------------------------------------------
     ## Obtendo a constante normatizadora Z.
-    i <- 1:sumto
+    i <- 0:sumto
     zs <- sapply(Xb, function(loglambda)
         sum(exp(i * loglambda - nu * lfactorial(i))))
-    Z <- sum(log(zs + 1))
+    Z <- sum(log(zs))
     ##-------------------------------------------
     ll <- sum(y * Xb - nu * lfactorial(y)) - Z
     return(-ll)
+}
+
+#' @title Probabilidades do Modelo Conway-Maxwell-Poisson
+#' @description Calcula as probabilidades conforme modelo COM-Poisson
+#' @param y Valor da contagem
+#' @param loglambda Logaritmo neperiano do parâmetro \eqn{\lambda} da
+#'     distribuição
+#' @param phi Valor do parâmetro \eqn{\phi}, definido como
+#'     \eqn{\log(\nu)} na distribuição de probabilidades COM-Poisson
+#' @param sumto Número de incrementos a serem considerados para a soma
+#'     da constante normalizadora Z.
+#' @author Eduardo E. R. Junior, \email{edujrrib@gmail.com}
+#' @examples 
+#' dpois(5, 5)
+#' dcmp(5, log(5), 0, sumto = 20)
+#' 
+#' x <- 0:30
+#' px1 <- dpois(x, 15)
+#' px2 <- dcmp(x, log(915), log(2.5), sumto = 50)
+#' px3 <- dcmp(x, log(2.2), log(0.3), sumto = 50)
+#' 
+#' plot(y = px2, x = x, type = "h", lwd = 2)
+#' lines(y = px1, x = x - 0.2, type = "h", lwd = 2, col = 4)
+#' lines(y = px3, x = x + 0.2, type = "h", lwd = 2, col = 2)
+#' @export
+
+dcmp <- function(y, loglambda, phi, sumto) {
+    sapply(y, function(yi) {
+        exp(-llcmp(c(phi, loglambda), y = yi, X = 1, sumto = sumto))
+    })
 }
 
 #' @title Ajuste do Modelo Conway-Maxwell-Poisson
@@ -141,7 +171,7 @@ cmp <- function(formula, data, start = NULL, sumto = NULL, ...) {
     y <- model.response(frame)
     X <- model.matrix(terms, frame)
     off <- model.offset(frame)
-    if (is.null(sumto)) sumto <- ceiling(max(y)^1.2)
+    if (is.null(sumto)) sumto <- ceiling(max(y)^1.5)
     ##-------------------------------------------
     ## Define os chutes iniciais
     if (is.null(start)) {
@@ -150,9 +180,10 @@ cmp <- function(formula, data, start = NULL, sumto = NULL, ...) {
     }
     ##-------------------------------------------
     ## Nomeia os parâmetros da função para métodos bbmle
-    parnames(llcmp) <- names(start)
+    bbmle::parnames(llcmp) <- names(start)
     model <- bbmle::mle2(llcmp, start = start,
-                         data = list(y = y, X = X, sumto = sumto),
-                         vecpar = TRUE)
+                         data = list(y = y, X = X, offset = off,
+                                     sumto = sumto),
+                         vecpar = TRUE, ...)
     return(model)
 }

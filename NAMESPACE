@@ -3,6 +3,7 @@
 export(apc)
 export(cmp)
 export(convergencez)
+export(dcmp)
 export(llcmp)
 export(panel.beeswarm)
 export(panel.cbH)
