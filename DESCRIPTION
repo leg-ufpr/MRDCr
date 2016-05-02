@@ -44,6 +44,7 @@ Suggests:
     reshape2,
     knitr,
     rmarkdown,
-    shiny
+    shiny,
+    corrplot
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
