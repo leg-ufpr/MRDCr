@@ -8,8 +8,9 @@ vignettes/*.html
 inst/doc/*.Rmd
 playground.R
 
-## Rnw output files
-**/cache/*
+## Rnw/Rmd output files
+**/*_cache/*
+**/*_files/*
 **/figure/*
 *.nav
 *.snm
