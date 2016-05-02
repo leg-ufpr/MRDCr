@@ -236,7 +236,7 @@ plot(m4P)
 
 ```
 
-```{r, echo = TRUE}
+```{r, cache = TRUE}
 
 ##-------------------------------------------
 ## Testando a nulidade do parâmetro phi
@@ -371,18 +371,223 @@ update(xy, type = c("p", "g")) +
 
 ```
 
-
 # Capulhos de algodão sob exposição à mosca-branca #
+
+```{r}
+
+data(capmosca)
+str(capmosca)
+## help(capmosca)
+
+```
+
+Experimento conduzido sob delineamento inteiramente casualizado na
+Universidade Federal da Grande Dourados, cujo objetivo foi avaliar os
+impactos da exposição de plantas de algodão à alta infestação da praga
+mosca-branca. No experimento avaliou-se duas plantas por vaso, nesta
+análise tomaremos como unidade amostral o vaso e o interesse será
+somente na variável número de capulhos produzidos.
+
+```{r}
+
+capmosca <- aggregate(ncap ~ vaso + dexp, data = capmosca, FUN = sum)
+str(capmosca)
+
+```
+
+Assim as variáveis consideradas são definidas como:
+
+* `dexp`: Dias de exposição à alta infestação de mosca-branca;
+* `ncap`: Número de capulhos de algodão produzidos ao final do
+  experimento.
 
 ## Análise Exploratória ##
 
+```{r}
+
+## Experimento balanceado
+xtabs(~dexp, data = capmosca)
+
+(xy <- xyplot(ncap ~ dexp,
+              data = capmosca,
+              xlab = "Dias de infestação",
+              ylab = "Número de capulhos produzidos",
+              type = c("p", "g", "smooth"),
+              panel = panel.beeswarm,
+              r = 0.05))
+
+## Avaliando preliminarmente suposição de equidispersão
+(mv <- aggregate(ncap ~ dexp, data = capmosca,
+                 FUN = function(x) c(mean = mean(x), var = var(x))))
+
+```
+
 ## Ajuste dos modelos ##
+
+```{r}
+
+## Preditores considerados
+f1 <- ncap ~ 1
+f2 <- ncap ~ dexp
+f3 <- ncap ~ dexp + I(dexp^2)
+
+## Ajustando os modelos Poisson
+m1P <- glm(f1, data = capmosca, family = poisson)
+m2P <- glm(f2, data = capmosca, family = poisson)
+m3P <- glm(f3, data = capmosca, family = poisson)
+
+## Ajustando os modelos COM-Poisson
+m1C <- cmp(f1, data = capmosca)
+m2C <- cmp(f2, data = capmosca)
+m3C <- cmp(f3, data = capmosca)
+
+```
 
 ## Comparação dos ajustes ##
 
+```{r}
+
+## Verossimilhancas dos modelos ajustados
+cbind("Poisson" = sapply(list(m1P, m2P, m3P), logLik),
+      "COM-Poisson" = sapply(list(m1C, m2C, m3C), logLik))
+
+## Teste de razão de verossimilhanças
+anova(m1P, m2P, m3P, test = "Chisq")
+anova(m1C, m2C, m3C)
+
+```
+
+```{r}
+
+## Estimativas dos parâmetros
+summary(m3P)
+summary(m3C)
+
+```
+
 ## Avaliando modelo proposto ##
 
+```{r}
+
+## Um dos problemas computacionais do modelo COM-Poisson é a obtenção da
+## constante de normalização Z. Assim uma visualização pós ajuste para
+## verificar se o ajuste proporcionou uma densidade válida se faz
+## necessária
+convergencez(m3C)
+
+```
+
+```{r}
+
+## Dado que o modelo COM-Poisson leva as mesmas estimativas pontuais que
+## o modelo Poisson a análise de diagnóstico padrão pode ser utilizada
+par(mfrow = c(2, 2))
+plot(m3P)
+
+```
+
+```{r, cache = TRUE}
+
+##-------------------------------------------
+## Testando a nulidade do parâmetro phi
+
+## Usando o ajuste Poisson
+trv <- 2 * (logLik(m3C) - logLik(m3P))
+attributes(trv) <- NULL
+round(c(trv, pchisq(trv, 1, lower = FALSE)), digits = 5)
+
+## Reajustando o COM-Poisson para phi = 0 (ou equivalente nu = 1)
+m3Cfixed <- cmp(f3, data = capmosca, fixed = list("phi" = 0))
+anova(m3C, m3Cfixed)
+
+## Via perfil de log-verossimilhança
+perf <- profile(m3C, which = 1)
+confint(perf)
+plot(perf)
+
+```
+
+```{r}
+
+##-------------------------------------------
+## Verificando a matriz ve variâncias e covariâncias
+Vcov <- vcov(m3C)
+Corr <- cov2cor(Vcov)
+
+library(corrplot)
+corrplot.mixed(Corr, lower = "number", upper = "ellipse",
+               diag = "l", tl.pos = "lt", tl.col = "black",
+               tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
+
+```
+
 ## Predição ##
+
+```{r}
+
+## Predição pontual/intervalar
+pred <- with(capmosca,
+             expand.grid(
+                 dexp = seq(min(dexp), max(dexp), l = 50)
+             ))
+qn <- qnorm(0.975) * c(fit = 0, lwr = -1, upr = 1)
+
+##-------------------------------------------
+## Considerando a Poisson
+aux <- predict(m3P, newdata = pred, se.fit = TRUE)
+aux <- with(aux, exp(fit + outer(se.fit, qn, FUN = "*")))
+aux <- data.frame(modelo = "Poisson", aux)
+predP <- cbind(pred, aux)
+
+##-------------------------------------------
+## Considerando a COM-Poisson
+f3; f3[[2]] <- NULL; f3
+X <- model.matrix(f3, data = pred)
+
+## Obtendo os parâmetros da distribuição (lambdas e phi)
+betas <- coef(m3C)[-1]
+phi <- coef(m3C)[1]
+loglambdas <- X %*% betas
+
+## Obtendo os erros padrão das estimativas
+##   Obs.: Deve-se usar a matriz de variâncias e covariâncias
+##   condicional, pois os parâmetros de locação (betas) e dispersão
+##   (phi) não são ortogonais.
+Vc <- Vcov[-1, -1] - Vcov[-1, 1] %*% solve(Vcov[1, 1]) %*% Vcov[1, -1]
+U <- chol(Vc)
+se <- sqrt(apply(X %*% t(U), MARGIN = 1, FUN = function(x) {
+    sum(x^2)
+}))
+
+aux <- c(loglambdas) + outer(se, qn, FUN = "*")
+aux <- apply(aux, MARGIN = 2,
+             FUN = function(col) {
+                 sapply(col, FUN = function(p) {
+                     y <- 0:30; py <- dcmp(y, p, phi, sumto = 50)
+                     sum(y*py)
+                 })
+             })
+aux <- data.frame(modelo = "COM-Poisson", aux)
+predC <- cbind(pred, aux)
+
+##-------------------------------------------
+## Visualizando os valores preditos intervalares pelos dois modelos
+da <- rbind(predP, predC)
+
+update(xy, type = c("p", "g")) +
+    as.layer(xyplot(fit ~ dexp,
+                    groups = modelo,
+                    data = da,
+                    type = "l",
+                    ly = da$lwr,
+                    uy = da$upr,
+                    cty = "bands",
+                    alpha = 0.3,
+                    prepanel = prepanel.cbH,
+                    panel.groups = panel.cbH,
+                    panel = panel.superpose))
+
+```
 
 # Ocorrência de mosca-branca em variedades de soja #
 
