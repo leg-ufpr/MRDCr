@@ -85,6 +85,7 @@ convergencez <- function(model, tol = 1e-4, incremento = 10,
 #'     Conway-Maxwell-Poisson com os parâmetros e dados informados.
 #' @author Eduardo E. R. Junior, \email{edujrrib@gmail.com}
 #' @seealso \code{\link[bbmle]{mle2}}
+#' @export
 
 llcmp <- function(params, y, X, offset = NULL,
                   sumto = ceiling(max(y)^1.2)){
