@@ -37,12 +37,16 @@
 #'
 #' @references Suekane, R., Degrande, P. E., de Lima Junior, I. S., de
 #'     Queiroz, M. V. B. M., & Rigoni, E. R. (2013). Danos da
-#'     Mosca-Branca Bemisia Tabaci e distribuição vertical das ninfas em
-#'     cultivares de soja em casa de vegetação. Arquivos do Instituto
-#'     Biológico, 80(2), 151-158.
+#'     Mosca-Branca \emph{Bemisia Tabaci} e distribuição vertical das
+#'     ninfas em cultivares de soja em casa de vegetação. Arquivos do
+#'     Instituto Biológico, 80(2), 151-158.
+#'     \href{http://200.129.209.183/arquivos/arquivos/78/MESTRADO-DOUTORADO-AGRONOMIA/Dissertação Renato Suekane.pdf}{Dissertação de Renato Suekane.}
 #' @examples
+#'
 #' data(ninfas)
 #' str(ninfas)
+#'
+#' xtabs(~data + cult, data = ninfas)
 #'
 #' library(lattice)
 #'
@@ -63,4 +67,3 @@
 #'        as.table = TRUE,
 #'        layout = c(NA, 2))
 NULL
-
