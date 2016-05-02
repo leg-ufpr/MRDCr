@@ -32,7 +32,7 @@
 #' \item{\code{nerep}}{Contagem do número de estruturas reprodutivas da
 #'     planta.}
 #'
-#' \item{\code{ncapu}}{Contagem do número de capulhos produzidos.}
+#' \item{\code{ncap}}{Contagem do número de capulhos produzidos.}
 #'
 #' \item{\code{nnos}}{Contagem do número de nós da planta.}
 #'
@@ -45,14 +45,14 @@
 #' library(lattice)
 #'
 #' # Número de capulhos produzidos por vaso
-#' da <- aggregate(ncapu ~ vaso + dexp, data = capmosca, FUN = sum)
-#' xyplot(ncapu ~ dexp,
+#' da <- aggregate(ncap ~ vaso + dexp, data = capmosca, FUN = sum)
+#' xyplot(ncap ~ dexp,
 #'        data = da,
 #'        jitter.x = TRUE,
 #'        type = c("p", "g", "smooth"))
 #'
 #' # Número de capulhos produzidos por planta
-#' xyplot(ncapu ~ dexp, groups = planta,
+#' xyplot(ncap ~ dexp, groups = planta,
 #'        data = capmosca,
 #'        jitter.x = TRUE,
 #'        type = c("p", "g", "smooth"))
