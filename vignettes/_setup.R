@@ -1,7 +1,7 @@
 library(knitr)
 opts_chunk$set(cache = FALSE,
                tidy = FALSE,
-               fig.width = 6,
+               fig.width = 8,
                fig.height = 6,
                fig.align = "center",
                dpi = 100,

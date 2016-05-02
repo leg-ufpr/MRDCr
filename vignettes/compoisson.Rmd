@@ -1,0 +1,397 @@
+---
+title: "Análise de Contagens com o Modelo COM-Poisson"
+author: >
+  Walmes M. Zeviani,
+  Eduardo E. Ribeiro Jr &
+  Cesar A. Taconeli
+vignette: >
+  %\VignetteIndexEntry{Análise de Contagens com o Modelo COM-Poisson}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+source("_setup.R")
+```
+
+```{r}
+
+library(MRDCr)
+
+```
+
+# Funções para ajuste dos modelos #
+
+## Log-verossimilhança ##
+
+Implentando a função de log-verossimilhança do modelo COM-Poisson,
+definida como:
+
+$$
+\sum_i^n y_i \log(\lambda_i) - \nu \sum_i^n \log(y_i!) -
+    \sum_i^n \log(Z(\lambda_i, \nu))
+$$
+
+em que $Z(\lambda_i, \nu) = \sum_{j=0}^\infty \lambda_i^j (j!)^{-\nu}$ e
+$\lambda_i = \exp(X_i\beta)$
+
+```{r}
+
+llcmp
+
+```
+
+**Detalhes computacionais**
+
+* Reparametrização do parâmetro $\nu$ para $\phi = \exp(\nu)$. Assim o
+  espaçõ paramétrico do modelo são os reais $\Re^n$.
+
+* Inclusão do termo _offset_. Somado diretamente ao preditor $X_i \beta$,
+  pois $X_i \beta$ representa o parâmetro $\lambda$ de locação, da
+  distribuição COM-Poisson.
+  
+* Truncamento da série infinita $Z(\lambda_i)$. `sumto` é tomado como
+  argumento da função, que por padrão assume
+  $\max(\underline{y})^{1.2}$.
+
+* Para o cálculo de $Z(\lambda_i)$ faz-se, minimizando problemas de
+  _overflow_
+$$
+\sum_{j=0}^\infty \lambda_i^j (j!)^{-\nu} = 
+\sum_{j=0}^\infty \exp \left ( \log \left(
+    \lambda_i^j (j!)^{-\nu} \right ) \right ) = 
+\sum_{j=0}^\infty \exp(i \log(\lambda_i) - \nu \log(i!))
+$$
+
+## Ajuste geral ##
+
+_Framework_ implementado em R que utiliza a forma de escrita de
+preditores no estilo de fórmulas, similar as funções `lm`, `glm`. 
+
+```{r}
+
+cmp
+
+```
+
+Um exemplo de como são construídas as matrizes, definidos os chutes
+iniciais e ajustados os modelos na função:
+
+```{r}
+
+set.seed(2016)
+x <- rep(1:3, 2)
+t <- rnorm(6, 5)
+y <- rpois(6, lambda = x*t)
+(da <- data.frame(x, t, y))
+
+## Definindo o prditor do modelo
+formula <- y ~ x + I(x^2) + offset(log(t))
+
+##-------------------------------------------
+## O framework
+
+## Constrói as matrizes para ajuste do modelo
+frame <- model.frame(formula, data = da)
+(X <- model.matrix(formula, data = da))
+(y <- model.response(frame))
+(o <- model.offset(frame))
+
+## Utiliza como valores iniciais as estimativas dos parametros de um
+## modelo GLM-Poisson
+m0 <- glm.fit(x = X, y = y, offset = o, family = poisson())
+start <- c(phi = 0, m0$coefficients)
+
+## Otimiza a função de log-verossimilhança via bbmle
+library(bbmle)
+parnames(llcmp) <- names(start)
+mle2(llcmp, start = start,
+     data = list(y = y, X = X, offset = o, sumto = 50),
+     vecpar = TRUE)
+
+```
+
+# Capulhos de algodão sob efeito de desfolha #
+
+```{r}
+
+data(capdesfo)
+str(capdesfo)
+## help(capdesfo)
+
+```
+
+Experimento conduzido sob delineamento inteiramente casualizado em casa
+de vegetação onde avaliou-se o número de capulhos produzidos por plantas
+de algodão submetidas à níveis de desfolha artificial de remoção foliar
+em combinação com o estágio fenológico no qual a desfolha foi aplicada.
+
+* `est`: Estágio fenológico com cinco níveis (vegetativo, botão floral,
+florecimento, maça, capulho);
+* `des`: Nível de desfolha artificial de remoção foliar (0, 25, 50, 75,
+  100\%);
+* `ncap`: Número de capulhos de algodão produzidos ao final da ciclo
+  cultura.
+
+## Análise Exploratória ##
+
+```{r}
+
+## Experimento balanceado
+xtabs(~est + des, data = capdesfo)
+
+library(lattice)
+library(latticeExtra)
+
+(xy <- xyplot(ncap ~ des | est,
+             data = capdesfo,
+             xlab = "Nível de desfolha artificial",
+             ylab = "Número de capulhos produzidos",
+             type = c("p", "g", "smooth"),
+             panel = panel.beeswarm,
+             r = 0.05))
+
+## Avaliando preliminarmente suposição de equidispersão
+(mv <- aggregate(ncap ~ est + des, data = capdesfo,
+                 FUN = function(x) c(mean = mean(x), var = var(x))))
+
+xlim <- ylim <- extendrange(c(mv$ncap), f = 0.05)
+xyplot(ncap[, "var"] ~ ncap[, "mean"],
+       data = mv,
+       xlim = xlim,
+       ylim = ylim,
+       ylab = "Variância Amostral",
+       xlab = "Média Amostral",
+       panel = function(x, y) {
+           panel.xyplot(x, y, type = c("p", "r"), grid = TRUE)
+           panel.abline(a = 0, b = 1, lty = 2)
+       })
+
+```
+
+## Ajuste dos modelos ##
+
+```{r}
+
+## Preditores considerados
+f1 <- ncap ~ 1
+f2 <- ncap ~ des + I(des^2)
+f3 <- ncap ~ est:des + I(des^2)
+f4 <- ncap ~ est:(des + I(des^2))
+
+## Ajustando os modelos Poisson
+m1P <- glm(f1, data = capdesfo, family = poisson)
+m2P <- glm(f2, data = capdesfo, family = poisson)
+m3P <- glm(f3, data = capdesfo, family = poisson)
+m4P <- glm(f4, data = capdesfo, family = poisson)
+
+## Ajustando os modelos COM-Poisson
+m1C <- cmp(f1, data = capdesfo)
+m2C <- cmp(f2, data = capdesfo)
+m3C <- cmp(f3, data = capdesfo)
+m4C <- cmp(f4, data = capdesfo)
+
+```
+
+## Comparação dos ajustes ##
+
+```{r}
+
+## Verossimilhancas dos modelos ajustados
+cbind("Poisson" = sapply(list(m1P, m2P, m3P, m4P), logLik),
+      "COM-Poisson" = sapply(list(m1C, m2C, m3C, m4C), logLik))
+
+## Teste de razão de verossimilhanças
+anova(m1P, m2P, m3P, m4P, test = "Chisq")
+anova(m1C, m2C, m3C, m4C)
+
+```
+
+```{r}
+
+## Estimativas dos parâmetros
+summary(m4P)
+summary(m4C)
+
+```
+
+## Avaliando modelo proposto ##
+
+```{r}
+
+## Um dos problemas computacionais do modelo COM-Poisson é a obtenção da
+## constante de normalização Z. Assim uma visualização pós ajuste para
+## verificar se o ajuste proporcionou uma densidade válida se faz
+## necessária
+convergencez(m4C)
+
+```
+
+```{r}
+
+## Dado que o modelo COM-Poisson leva as mesmas estimativas pontuais que
+## o modelo Poisson a análise de diagnóstico padrão pode ser utilizada
+par(mfrow = c(2, 2))
+plot(m4P)
+
+```
+
+```{r, echo = TRUE}
+
+##-------------------------------------------
+## Testando a nulidade do parâmetro phi
+
+## Usando o ajuste Poisson
+trv <- 2 * (logLik(m4C) - logLik(m4P))
+attributes(trv) <- NULL
+round(c(trv, pchisq(trv, 1, lower = FALSE)), digits = 5)
+
+## Reajustando o COM-Poisson para phi = 0 (ou equivalente nu = 1)
+m4Cfixed <- cmp(f4, data = capdesfo, fixed = list("phi" = 0))
+anova(m4C, m4Cfixed)
+
+## Via perfil de log-verossimilhança
+perf <- profile(m4C, which = 1)
+confint(perf)
+plot(perf)
+
+```
+
+```{r}
+
+##-------------------------------------------
+## Verificando a matriz ve variâncias e covariâncias
+Vcov <- vcov(m4C)
+Corr <- cov2cor(Vcov)
+
+library(corrplot)
+corrplot.mixed(Corr, lower = "number", upper = "ellipse",
+               diag = "l", tl.pos = "lt", tl.col = "black",
+               tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
+
+```
+
+## Predição ##
+
+```{r}
+
+## Predição pontual
+pred <- with(capdesfo,
+             expand.grid(
+                 est = levels(est),
+                 des = seq(min(des), max(des), l = 20)
+             ))
+
+##-------------------------------------------
+## Considerando a Poisson
+mediasP <- exp(predict(m4P, newdata = pred))
+aux <- data.frame(modelo = "Poisson", fit = mediasP)
+predP <- cbind(pred, aux)
+
+##-------------------------------------------
+## Considerando a COM-Poisson
+f4; f4[[2]] <- NULL; f4
+X <- model.matrix(f4, data = pred)
+
+## Obtendo os parâmetros da distribuição (lambdas e phi)
+betas <- coef(m4C)[-1]
+phi <- coef(m4C)[1]
+loglambdas <- X %*% betas
+
+## Aplicando a "inversa da função de ligação", ou seja, obtendo as
+## contagens médias
+mediasC <- sapply(loglambdas, FUN = function(p) {
+    y <- 0:50; py <- dcmp(y, p, phi, sumto = 100)
+    sum(y*py)
+})
+aux <- data.frame(modelo = "COM-Poisson", fit = mediasC)
+predC <- cbind(pred, aux)
+
+##-------------------------------------------
+## Visualizando os valores preditos pelos dois modelos
+da <- rbind(predP, predC)
+
+update(xy, type = c("p", "g")) +
+    as.layer(xyplot(fit ~ des | est,
+                    groups = modelo,
+                    data = da, type = "l"))
+
+```
+
+```{r}
+
+## Predição intervalar
+qn <- qnorm(0.975) * c(lwr = -1, upr = 1)
+
+##-------------------------------------------
+## Considerando a Poisson
+aux <- predict(m4P, newdata = pred, se.fit = TRUE)
+aux <- with(aux, exp(fit + outer(se.fit, qn, FUN = "*")))
+predP <- cbind(predP, aux)
+
+##-------------------------------------------
+## Considerando a COM-Poisson
+
+## Obtendo os erros padrão das estimativas
+##   Obs.: Deve-se usar a matriz de variâncias e covariâncias
+##   condicional, pois os parâmetros de locação (betas) e dispersão
+##   (phi) não são ortogonais.
+Vc <- Vcov[-1, -1] - Vcov[-1, 1] %*% solve(Vcov[1, 1]) %*% Vcov[1, -1]
+U <- chol(Vc)
+se <- sqrt(apply(X %*% t(U), MARGIN = 1, FUN = function(x) {
+    sum(x^2)
+}))
+
+aux <- c(loglambdas) + outer(se, qn, FUN = "*")
+aux <- apply(aux, MARGIN = 2,
+             FUN = function(col) {
+                 sapply(col, FUN = function(p) {
+                     y <- 0:50; py <- dcmp(y, p, phi, sumto = 100)
+                     sum(y*py)
+                 })
+             })
+predC <- cbind(predC, aux)
+
+##-------------------------------------------
+## Visualizando os valores preditos intervalares pelos dois modelos
+da <- rbind(predP, predC)
+
+update(xy, type = c("p", "g")) +
+    as.layer(xyplot(fit ~ des | est,
+                    groups = modelo,
+                    data = da,
+                    type = "l",
+                    ly = da$lwr,
+                    uy = da$upr,
+                    cty = "bands",
+                    alpha = 0.3,
+                    prepanel = prepanel.cbH,
+                    panel.groups = panel.cbH,
+                    panel = panel.superpose))
+
+```
+
+
+# Capulhos de algodão sob exposição à mosca-branca #
+
+## Análise Exploratória ##
+
+## Ajuste dos modelos ##
+
+## Comparação dos ajustes ##
+
+## Avaliando modelo proposto ##
+
+## Predição ##
+
+# Ocorrência de mosca-branca em variedades de soja #
+
+## Análise Exploratória ##
+
+## Ajuste dos modelos ##
+
+## Comparação dos ajustes ##
+
+## Avaliando modelo proposto ##
+
+## Predição ##
