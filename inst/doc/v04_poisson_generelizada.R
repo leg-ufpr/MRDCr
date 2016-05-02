@@ -1,0 +1,749 @@
+## ----setup, include=FALSE-----------------------------------------
+source("_setup.R")
+
+## -----------------------------------------------------------------
+# Função densidade na parametrização original.
+dpg0 <- function(y, theta, gamma, m = 4) {
+    if (gamma < 0) {
+        m <- max(c(m, floor(-theta/gamma)))
+        if (gamma < max(c(-1, -theta/m))) {
+            m <- 0
+        } else {
+            m <- as.integer(y <= m)
+        }
+    } else {
+        m <- 1
+    }
+    z <- theta + gamma * y
+    k <- exp(lfactorial(y))
+    fy <- m * theta * z^(y - 1) * exp(-z)/k
+    return(fy)
+}
+
+# Caso Poisson (gamma == 0).
+y <- 0:30
+theta <- 10
+gamma <- 0
+
+fy <- dpg0(y = y, theta = theta, gamma = gamma)
+plot(fy ~ y, type = "h")
+lines(y + 0.3, dpois(y, lambda = theta), type = "h", col = 2)
+
+## ---- eval=FALSE--------------------------------------------------
+#  library(rpanel)
+#  
+#  react <- function(panel){
+#      with(panel,
+#      {
+#          m <- THETA/(1 - GAMMA)
+#          s <- sqrt(THETA/(1 - GAMMA)^3)
+#          from <- floor(max(c(0, m - 5 * s)))
+#          to <- ceiling(max(c(YMAX, m + 5 * s)))
+#          y <- from:to
+#          py <- dpg0(y = y, theta = THETA, gamma = GAMMA)
+#          if (POIS) {
+#              pz <- dpois(y, lambda = m)
+#          } else {
+#              pz <- 0
+#          }
+#          if (any(!is.finite(py))) {
+#              plot(x = NULL, y = NULL,
+#                   xlim = c(0, 1), ylim = c(0, 1),
+#                   axes = FALSE, ann = FALSE)
+#              text(x = 0.5, y = 0.5, labels = "Valores não finitos")
+#          } else {
+#              plot(py ~ y, type = "h",
+#                   ylim = c(0, max(c(py, pz))),
+#                   xlab = expression(y),
+#                   ylab = expression(f(y)))
+#              mtext(side = 3,
+#                    text = substitute(sum(f(y)) == s,
+#                                      list(s = round(sum(py), 5))))
+#              if (EX) {
+#                  abline(v = m, col = 2)
+#              }
+#              if (POIS) {
+#                  lines(y + 0.3, pz, type = "h", col = 3)
+#              }
+#          }
+#      })
+#      panel
+#  }
+#  
+#  panel <- rp.control(title = "Poisson Generalizada",
+#                      size = c(300, 100), YMAX = 30, m = 4)
+#  rp.slider(panel = panel, action = react,
+#            variable = THETA, title = "theta",
+#            from = 0.1, to = 30,
+#            initval = 5, resolution = 0.1,
+#            showvalue = TRUE)
+#  rp.slider(panel = panel, action = react,
+#            variable = GAMMA, title = "gamma",
+#            from = -1, to = 0.99,
+#            initval = 0, resolution = 0.01,
+#            showvalue = TRUE)
+#  rp.checkbox(panel = panel,
+#              variable = EX, action = react, title = "E(Y)",
+#              labels = "Mostrar o valor esperado?")
+#  rp.checkbox(panel = panel,
+#              variable = POIS, action = react, title = "Poisson",
+#              labels = "Adicionar a distribução Poisson?")
+#  rp.do(panel = panel, action = react)
+
+## -----------------------------------------------------------------
+#-----------------------------------------------------------------------
+# Gráfico do espaço paramétrico de theta x gamma.
+
+library(latticeExtra)
+
+y <- 0:50
+fun <- Vectorize(vectorize.args = c("theta", "gamma"),
+                 FUN = function(theta, gamma) {
+                     sum(dpg0(y = y, theta = theta, gamma = gamma))
+                 })
+
+grid <- list(theta = seq(0.1, 10, by = 0.1),
+             gamma = seq(-0.98, 0.98, by = 0.02))
+grid$sum <- with(grid, outer(theta, gamma, fun))
+grid <- with(grid,
+             cbind(expand.grid(theta = theta, gamma = gamma),
+                   data.frame(sum = c(sum))))
+
+# levelplot(sum ~ theta + gamma, data = grid,
+#           col.regions = heat.colors) +
+#     layer(panel.abline(h = 0))
+
+levelplot(sum ~ theta + gamma,
+          data = subset(grid, round(sum, 3) == 1),
+          col.regions = heat.colors) +
+    layer(panel.abline(h = 0))
+
+subset(grid, round(sum, 3) != 1 & theta > 6 & gamma < 0)
+
+## ---- eval=FALSE--------------------------------------------------
+#  # Função densidade na parametrização de modelo de regressão.
+#  dpg1 <- function(y, lambda, alpha) {
+#      k <- exp(lfactorial(y))
+#      w <- 1 + alpha * y
+#      z <- 1 + alpha * lambda
+#      fy <- (lambda/z)^(y) * w^(y - 1) * exp(-lambda * (w/z))/k
+#      return(fy)
+#  }
+#  
+#  react <- function(panel){
+#      with(panel,
+#      {
+#          m <- LAMBDA
+#          s <- sqrt(LAMBDA) * (1 + ALPHA * LAMBDA)
+#          from <- floor(max(c(0, m - 5 * s)))
+#          to <- ceiling(max(c(YMAX, m + 5 * s)))
+#          y <- from:to
+#          py <- dpg1(y = y, lambda = LAMBDA, alpha = ALPHA)
+#          if (POIS) {
+#              pz <- dpois(y, lambda = m)
+#          } else {
+#              pz <- 0
+#          }
+#          if (any(!is.finite(py))) {
+#              plot(x = NULL, y = NULL,
+#                   xlim = c(0, 1), ylim = c(0, 1),
+#                   axes = FALSE, ann = FALSE)
+#              text(x = 0.5, y = 0.5, labels = "Valores não finitos")
+#          } else {
+#              plot(py ~ y, type = "h",
+#                   ylim = c(0, max(c(py, pz))),
+#                   xlab = expression(y),
+#                   ylab = expression(f(y)))
+#              mtext(side = 3,
+#                    text = substitute(sum(f(y)) == s,
+#                                      list(s = round(sum(py), 5))))
+#              if (EX) {
+#                  abline(v = m, col = 2)
+#              }
+#              if (POIS) {
+#                  lines(y + 0.3, pz, type = "h", col = 3)
+#              }
+#          }
+#      })
+#      panel
+#  }
+#  
+#  panel <- rp.control(title = "Poisson Generalizada",
+#                      size = c(300, 100), YMAX = 30)
+#  rp.slider(panel = panel, action = react,
+#            variable = LAMBDA, title = "lambda",
+#            from = 0.1, to = 30,
+#            initval = 5, resolution = 0.1,
+#            showvalue = TRUE)
+#  rp.slider(panel = panel, action = react,
+#            variable = ALPHA, title = "alpha",
+#            from = -0.2, to = 0.4,
+#            initval = 0, resolution = 0.01,
+#            showvalue = TRUE)
+#  rp.checkbox(panel = panel,
+#              variable = EX, action = react, title = "E(Y)",
+#              labels = "Mostrar o valor esperado?")
+#  rp.checkbox(panel = panel,
+#              variable = POIS, action = react, title = "Poisson",
+#              labels = "Adicionar a distribução Poisson?")
+#  rp.do(panel = panel, action = react)
+
+## -----------------------------------------------------------------
+library(bbmle)
+library(corrplot)
+
+# Função de log-Verossimilhança da Poisson Generalizada na
+# parametrização de modelo de regressão.
+PG_ll <- function(theta, y, X, offset = NULL) {
+    # theta: vetor de parâmetros;
+    #   theta[1]: parâmetro de dispersão (alpha);
+    #   theta[-1]: parâmetro de locação (lambda);
+    # y: variável resposta (contagem);
+    # X: matriz do modelo linear;
+    # offset: tamanho do domínio onde y foi medido;
+    #----------------------------------------
+    if (is.null(offset)) {
+        offset <- 1L
+    }
+    lambda <- offset * exp(X %*% theta[-1])
+    alpha <- theta[1]
+    w <- 1 + alpha * y
+    z <- 1 + alpha * lambda
+    fy <- y * (log(lambda) - log(z)) +
+        (y - 1) * log(w) -
+        lambda * (w/z) -
+        lfactorial(y)
+    # Negativo da log-likelihood.
+    -sum(fy)
+}
+
+#-----------------------------------------------------------------------
+# Gerando uma amostra aleatória da Poisson.
+
+# Offset = 2, lambda = 3.
+y <- rpois(100, lambda = 2 * 3)
+
+L <- list(y = y,
+          offset = rep(2, length(y)),
+          X = cbind(rep(1, length(y))))
+
+start <- c(alpha = 0, lambda = 1)
+parnames(PG_ll) <- names(start)
+
+# Como \alpha foi fixado em 1, essa ll corresponde à Poisson.
+n0 <- mle2(minuslogl = PG_ll,
+           start = start, data = L,
+           fixed = list(alpha = 0), vecpar = TRUE)
+
+# Para conferir.
+c(coef(n0)["lambda"],
+  coef(glm(y ~ offset(log(L$offset)), family = poisson)))
+
+# Estimando o \alpha.
+n1 <- mle2(PG_ll, start = start, data = L, vecpar = TRUE)
+coef(n1)
+
+# Perfil de verossimilhança dos parâmetros.
+plot(profile(n1))
+
+# Covariância.
+V <- cov2cor(vcov(n1))
+corrplot.mixed(V, upper = "ellipse", col = "gray50")
+dev.off()
+
+## -----------------------------------------------------------------
+library(lattice)
+
+data(soja, package = "MRDCr")
+str(soja)
+
+# A observação 74 é um outlier.
+soja <- soja[-74, ]
+
+xyplot(nvag ~ K | umid, data = soja, layout = c(NA, 1),
+       type = c("p", "smooth"),
+       strip = strip.custom(strip.names = TRUE, var.name = "Umidade"))
+
+soja <- transform(soja, K = factor(K))
+
+#-----------------------------------------------------------------------
+# Modelo Poisson.
+
+m0 <- glm(nvag ~ bloc + umid * K, data = soja, family = poisson)
+
+# Diagnóstico.
+par(mfrow = c(2, 2))
+plot(m0); layout(1)
+
+# Medidas de decisão.
+anova(m0, test = "Chisq")
+summary(m0)
+
+#-----------------------------------------------------------------------
+# Modelo Poisson Generalizado.
+
+L <- with(soja, list(y = nvag, offset = 1, X = model.matrix(m0)))
+
+# Usa as estimativas do Poisson como valore iniciais.
+start <- c(alpha = 0, coef(m0))
+parnames(PG_ll) <- names(start)
+
+# Com alpha fixo em 0 corresponde à Poisson.
+m2 <- mle2(PG_ll, start = start, data = L,
+           fixed = list(alpha = 0), vecpar = TRUE)
+
+# Mesma medida de ajuste e estimativas.
+c(logLik(m2), logLik(m0))
+cbind(coef(m2)[-1], coef(m0))
+
+# Poisson Generalizada.
+m3 <- mle2(PG_ll, start = start, data = L, vecpar = TRUE)
+
+# Teste para nulinidade do parâmetro de dispersão (H_0: alpha == 0).
+anova(m3, m2)
+
+# est_stderr <- function(tb) {
+#     sprintf("%s (%0.4f)",
+#             formatC(tb[, 1], flag = " ", digits = 4, format = "f"),
+#             tb[, 2])
+# }
+#
+# L <- list("PoissonGLM" = rbind(NA, summary(m0)$coef),
+#           "PoissonML*" = rbind(NA, summary(m2)@coef),
+#           "PGeneraliz" = summary(m3)@coef)
+#
+# as.data.frame(sapply(L, est_stderr))
+
+cbind("PoissonGLM" = c(NA, coef(m0)),
+      "PoissonML" = coef(m2),
+      "PGeneraliz" = coef(m3))
+
+# Perfil para o parâmetro de dispersão.
+plot(profile(m3, which = "alpha"))
+abline(v = 0, lty = 2)
+
+V <- cov2cor(vcov(m3))
+corrplot.mixed(V, upper = "ellipse", col = "gray50")
+dev.off()
+
+library(plyr)
+
+# Tamanho das covariâncias com \alpha.
+each(sum, mean, max)(abs(V[1, -1]))
+
+# Teste de Wald para a interação.
+a <- c(0, attr(model.matrix(m0), "assign"))
+ai <- a == max(a)
+L <- t(replicate(sum(ai), rbind(coef(m3) * 0), simplify = "matrix"))
+L[, ai] <- diag(sum(ai))
+
+# Cáclculo da estatística Chi-quadrado.
+# t(L %*% coef(m3)) %*%
+#     solve(L %*% vcov(m3) %*% t(L)) %*%
+#     (L %*% coef(m3))
+crossprod(L %*% coef(m3),
+          solve(L %*% vcov(m3) %*% t(L),
+                L %*% coef(m3)))
+
+library(car)
+# Teste de Wald para interação (poderia ser LRT, claro).
+# É necessário um objeto glm.
+linearHypothesis(model = m0,
+                 hypothesis.matrix = L,
+                 vcov. = vcov(m3),
+                 coef. = coef(m3))
+
+#-----------------------------------------------------------------------
+# Predição com bandas de confiança.
+
+library(doBy)
+library(multcomp)
+
+X <- LSmatrix(m0, effect = c("umid", "K"))
+
+pred <- attr(X, "grid")
+pred <- transform(pred,
+                  K = as.integer(K),
+                  umid = factor(umid))
+pred <- list(pois = pred, pgen = pred)
+
+# Quantil normal.
+qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
+
+# Preditos pela Poisson.
+# aux <- predict(m0, newdata = pred$pois, se.fit = TRUE)
+# aux <- exp(aux$fit + outer(aux$se.fit, qn, FUN = "*"))
+# pred$pois <- cbind(pred$pois, aux)
+aux <- confint(glht(m0, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$pois <- cbind(pred$pois, exp(aux))
+str(pred$pois)
+
+# Matrix de covariância completa e sem o alpha (marginal).
+V <- vcov(m3)
+V <- V[-1, -1]
+
+U <- chol(V)
+aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
+                  FUN = function(x) { sum(x^2) }))
+
+pred$pgen$eta <- c(X %*% coef(m3)[-1])
+pred$pgen <- cbind(pred$pgen,
+                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
+                         FUN = function(x) {
+                             exp(pred$pgen$eta + x)
+                         }))
+str(pred$pgen)
+
+pred <- ldply(pred, .id = "modelo")
+pred <- arrange(pred, umid, K, modelo)
+str(pred)
+
+key <- list(type = "o", divide = 1,
+            lines = list(pch = 1:nlevels(pred$modelo),
+                         lty = 1, col = 1),
+            text = list(c("Poisson", "Poisson Generelizada")))
+
+xyplot(fit ~ K | umid, data = pred,
+       layout = c(NA, 1), as.table = TRUE,
+       xlim = extendrange(range(pred$K), f = 0.1),
+       key = key, pch = pred$modelo,
+       ly = pred$lwr, uy = pred$upr, cty = "bars", length = 0,
+       prepanel = prepanel.cbH,
+       desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
+       panel = panel.cbH)
+
+## -----------------------------------------------------------------
+#-----------------------------------------------------------------------
+# Número de capulhos em função do nível de desfolha artificial e fase
+# fenológica do algodoeiro.
+
+data(capdesfo, package = "MRDCr")
+str(capdesfo)
+
+p1 <- xyplot(ncap ~ des | est, data = capdesfo,
+             col = 1, type = c("p", "smooth"), col.line = "gray50",
+             layout = c(2, 3), as.table = TRUE,
+             xlim = extendrange(c(0:1), f = 0.15),
+             xlab = "Nível de desfolhas artificial",
+             ylab = "Número de capulho produzidos",
+             spread = 0.035, panel = panel.beeswarm)
+p1
+
+#-----------------------------------------------------------------------
+# Modelo Poisson.
+
+m0 <- glm(ncap ~ est * (des + I(des^2)),
+          data = capdesfo, family = poisson)
+
+par(mfrow = c(2, 2))
+plot(m0); layout(1)
+
+anova(m0, test = "Chisq")
+summary(m0)
+
+#-----------------------------------------------------------------------
+# Modelo Poisson Generalizada.
+
+L <- with(capdesfo, list(y = ncap, offset = 1, X = model.matrix(m0)))
+
+start <- c(alpha = log(1), coef(m0))
+parnames(PG_ll) <- names(start)
+
+# Modelo Poisson também.
+m2 <- mle2(PG_ll, start = start, data = L,
+           fixed = list(alpha = 0), vecpar = TRUE)
+
+c(logLik(m2), logLik(m0))
+
+# Modelo Poisson Generalizado.
+m3 <- mle2(PG_ll, start = start, data = L, vecpar = TRUE)
+logLik(m3)
+
+anova(m3, m2)
+
+summary(m3)
+
+plot(profile(m3, which = "alpha"))
+
+cbind("PoissonGLM" = c(NA, coef(m0)),
+      "PoissonML" = coef(m2),
+      "PGeneraliz" = coef(m3))
+
+V <- cov2cor(vcov(m3))
+corrplot.mixed(V, upper = "ellipse", col = "gray50")
+dev.off()
+
+# Tamanho das covariâncias com \alpha.
+each(sum, mean, max)(abs(V[1, -1]))
+
+# Teste de Wald para a interação.
+a <- c(0, attr(model.matrix(m0), "assign"))
+ai <- a == max(a)
+L <- t(replicate(sum(ai), rbind(coef(m3) * 0), simplify = "matrix"))
+L[, ai] <- diag(sum(ai))
+
+# Teste de Wald explicito.
+# t(L %*% coef(m3)) %*%
+#     solve(L %*% vcov(m3) %*% t(L)) %*%
+#     (L %*% coef(m3))
+crossprod(L %*% coef(m3),
+          solve(L %*% vcov(m3) %*% t(L),
+                L %*% coef(m3)))
+
+# Teste de Wald para interação (poderia ser LRT, claro).
+# É necessário um objeto glm, mas necesse caso ele não usado para nada.
+linearHypothesis(model = m0,
+                 hypothesis.matrix = L,
+                 vcov. = vcov(m3),
+                 coef. = coef(m3))
+
+#-----------------------------------------------------------------------
+# Predição com bandas de confiança.
+
+pred <- with(capdesfo, expand.grid(est = levels(est),
+                                   des = seq(0, 1, by = 0.025)))
+X <- model.matrix(formula(m0)[-2], data = pred)
+
+pred <- list(pois = pred, pgen = pred)
+
+# Quantil normal.
+qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
+
+# Preditos pela Poisson.
+aux <- confint(glht(m0, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$pois <- cbind(pred$pois, exp(aux))
+str(pred$pois)
+
+# Matrix de covariância completa e sem o alpha.
+V <- vcov(m3)
+V <- V[-1,-1]
+
+U <- chol(V)
+aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
+                  FUN = function(x) { sum(x^2) }))
+
+pred$pgen$eta <- c(X %*% coef(m3)[-1])
+pred$pgen <- cbind(pred$pgen,
+                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
+                         FUN = function(x) {
+                             exp(pred$pgen$eta + x)
+                         }))
+str(pred$pgen)
+
+pred <- ldply(pred, .id = "modelo")
+pred <- arrange(pred, est, des, modelo)
+str(pred)
+
+key <- list(lines = list(
+                lty = 1,
+                col = trellis.par.get("superpose.line")$col[1:2]),
+            text = list(
+                c("Poisson", "Poisson Generalizada")))
+
+p2 <- xyplot(fit ~ des | est, data = pred, groups = modelo,
+             layout = c(NA, 1), as.table = TRUE,
+             xlim = extendrange(range(pred$des), f = 0.1),
+             type = "l", key = key,
+             ly = pred$lwr, uy = pred$upr, cty = "bands", alpha = 0.5,
+             prepanel = prepanel.cbH,
+             panel.groups = panel.cbH,
+             panel = panel.superpose)
+# p2
+
+## ---- fig.width=7, fig.height=3.5---------------------------------
+update(p1, type = "p", layout = c(NA, 1),
+       key = key, spread = 0.07) +
+    as.layer(p2, under = TRUE)
+
+## -----------------------------------------------------------------
+data(ninfas, package = "MRDCr")
+str(ninfas)
+
+# xyplot(ntot ~ dias | cult, data = ninfas,
+#        type = c("p", "spline"),
+#        grid = TRUE, as.table = TRUE, layout = c(NA, 2),
+#        xlab = "Dias", ylab = "Número total de ninfas")
+
+# Somente as cultivares que contém BRS na identificação
+ninfas <- droplevels(subset(ninfas, grepl("BRS", x = cult)))
+
+xyplot(ntot ~ dias | cult, data = ninfas,
+       type = c("p", "spline"),
+       grid = TRUE, as.table = TRUE, layout = c(NA, 2),
+       xlab = "Dias", ylab = "Número total de ninfas")
+
+ninfas$dias <- scale(ninfas$dias)
+
+#-----------------------------------------------------------------------
+# Modelo Poisson.
+
+m0 <- glm(ntot ~ bloco + cult * (dias + I(dias^2)),
+          data = ninfas, family = poisson)
+
+par(mfrow = c(2, 2))
+plot(m0); layout(1)
+
+anova(m0, test = "Chisq")
+anova(m0, test = "Chisq",
+      dispersion = sum(residuals(m0, type = "pearson")^2)/
+          df.residual(m0))
+summary(m0)
+
+m0 <- glm(ntot ~ bloco + cult + dias + I(dias^2),
+          data = ninfas, family = poisson)
+anova(m0, test = "Chisq",
+      dispersion = sum(residuals(m0, type = "pearson")^2)/
+          df.residual(m0))
+summary(m0)
+
+#-----------------------------------------------------------------------
+# Modelo Poisson Generalizada.
+
+L <- with(ninfas, list(y = ntot, offset = 1, X = model.matrix(m0)))
+
+start <- c(alpha = 1, coef(m0))
+parnames(PG_ll) <- names(start)
+
+# Modelo Poisson também.
+m2 <- mle2(PG_ll, start = start, data = L,
+           fixed = list(alpha = 0), vecpar = TRUE)
+
+c(logLik(m2), logLik(m0))
+
+# Modelo Poisson Generalizado.
+m3 <- mle2(PG_ll, start = start, data = L, vecpar = TRUE)
+logLik(m3)
+
+anova(m3, m2)
+
+summary(m3)
+
+plot(profile(m3, which = "alpha"))
+
+cbind("PoissonGLM" = c(NA, coef(m0)),
+      "PoissonML" = coef(m2),
+      "PGeneraliz" = coef(m3))
+
+V <- cov2cor(vcov(m3))
+corrplot.mixed(V, upper = "ellipse", col = "gray50")
+dev.off()
+
+# Tamanho das covariâncias com \alpha.
+each(sum, mean, max)(abs(V[1, -1]))
+
+# Teste de Wald para a interação.
+a <- c(0, attr(model.matrix(m0), "assign"))
+ai <- a == max(a)
+L <- t(replicate(sum(ai), rbind(coef(m3) * 0), simplify = "matrix"))
+L[, ai] <- diag(sum(ai))
+
+# Teste de Wald explicito.
+# t(L %*% coef(m3)) %*%
+#     solve(L %*% vcov(m3) %*% t(L)) %*%
+#     (L %*% coef(m3))
+crossprod(L %*% coef(m3),
+          solve(L %*% vcov(m3) %*% t(L),
+                L %*% coef(m3)))
+
+# Teste de Wald para interação (poderia ser LRT, claro).
+# É necessário um objeto glm, mas necesse caso ele não usado para nada.
+linearHypothesis(model = m0,
+                 hypothesis.matrix = L,
+                 vcov. = vcov(m3),
+                 coef. = coef(m3))
+
+#-----------------------------------------------------------------------
+# Predição com bandas de confiança.
+
+pred <- with(ninfas, expand.grid(bloco = factor(levels(bloco)[1],
+                                                levels = levels(bloco)),
+                                 cult = levels(cult),
+                                 dias = seq(min(dias),
+                                            max(dias),
+                                            length.out = 30)))
+X <- model.matrix(formula(m0)[-2], data = pred)
+
+bl <- attr(X, "assign") == 1
+X[, bl] <- X[, bl] * 0 + 1/(sum(bl) + 1)
+head(X)
+
+pred <- list(pois = pred, pgen = pred)
+
+# Quantil normal.
+qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
+
+# Preditos pela Poisson.
+aux <- confint(glht(m0, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$pois <- cbind(pred$pois, exp(aux))
+str(pred$pois)
+
+# Matrix de covariância completa e sem o alpha.
+V <- vcov(m3)
+V <- V[-1,-1]
+
+U <- chol(V)
+aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
+                  FUN = function(x) { sum(x^2) }))
+
+pred$pgen$eta <- c(X %*% coef(m3)[-1])
+pred$pgen <- cbind(pred$pgen,
+                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
+                         FUN = function(x) {
+                             exp(pred$pgen$eta + x)
+                         }))
+str(pred$pgen)
+
+pred <- ldply(pred, .id = "modelo")
+pred <- arrange(pred, cult, dias, modelo)
+str(pred)
+
+key <- list(lines = list(
+                lty = 1,
+                col = trellis.par.get("superpose.line")$col[1:2]),
+            text = list(
+                c("Poisson", "Poisson Generalizada")))
+
+xyplot(ntot ~ dias | cult, data = ninfas,
+       grid = TRUE, as.table = TRUE, layout = c(NA, 2),
+       xlab = "Dias", ylab = "Número total de ninfas",
+       key = key) +
+    as.layer(xyplot(fit ~ dias | cult, data = pred,
+                    groups = modelo, type = "l",
+                    ly = pred$lwr, uy = pred$upr,
+                    cty = "bands", alpha = 0.25,
+                    prepanel = prepanel.cbH,
+                    panel.groups = panel.cbH,
+                    panel = panel.superpose), under = TRUE)
+
+## ---- eval=FALSE--------------------------------------------------
+#  #-----------------------------------------------------------------------
+#  
+#  # # http://finzi.psych.upenn.edu/library/VGAM/html/genpoisson.html
+#  # library(VGAM)
+#  #
+#  # formula(m0)
+#  # m1 <- vglm(formula(m0), data = cap, family = genpoisson, trace = TRUE)
+#  # coef(m1, matrix = TRUE)
+#  # summary(m1)
+#  #
+#  # logLik(m2)
+#  
+
+## ----eval=FALSE---------------------------------------------------
+#  library(rpanel)
+#  library(lattice)
+#  library(latticeExtra)
+#  library(bbmle)
+#  library(corrplot)
+#  library(plyr)
+#  library(car)
+#  library(doBy)
+#  library(multcomp)
+#  devtools::load_all("~/repos/MRDCr")
+
