@@ -645,10 +645,19 @@ xyplot(ntot ~ dias | cult, data = ninfas,
 
 ninfas$dias <- scale(ninfas$dias)
 
+# IMPORTANT: Foi usado um offset de 100 por problemas de
+# over/underflow. O problema não é com a Poisson mas com a Poisson
+# Generalizada. Todas as análises consideram um offset de 100, portanto,
+# permanecem comparáveis e igualmente interpretáveis.
+
+ninfas <- transform(ninfas,
+                    off = 100,
+                    aval = factor(dias))
+
 #-----------------------------------------------------------------------
 # Modelo Poisson.
 
-m0 <- glm(ntot ~ bloco + cult * (dias + I(dias^2)),
+m0 <- glm(ntot ~ offset(log(off)) + bloco + cult * aval,
           data = ninfas, family = poisson)
 
 par(mfrow = c(2, 2))
@@ -660,7 +669,7 @@ anova(m0, test = "Chisq",
           df.residual(m0))
 summary(m0)
 
-m0 <- glm(ntot ~ bloco + cult + dias + I(dias^2),
+m0 <- glm(ntot ~ offset(log(off)) + bloco + cult + aval,
           data = ninfas, family = poisson)
 anova(m0, test = "Chisq",
       dispersion = sum(residuals(m0, type = "pearson")^2)/
@@ -670,9 +679,9 @@ summary(m0)
 #-----------------------------------------------------------------------
 # Modelo Poisson Generalizada.
 
-L <- with(ninfas, list(y = ntot, offset = 1, X = model.matrix(m0)))
+L <- with(ninfas, list(y = ntot, offset = off, X = model.matrix(m0)))
 
-start <- c(alpha = 1, coef(m0))
+start <- c(alpha = 0, coef(m0))
 parnames(PG_ll) <- names(start)
 
 # Modelo Poisson também.
@@ -726,12 +735,12 @@ linearHypothesis(model = m0,
 #-----------------------------------------------------------------------
 # Predição com bandas de confiança.
 
-pred <- with(ninfas, expand.grid(bloco = factor(levels(bloco)[1],
+pred <- with(ninfas, expand.grid(off = 100,
+                                 bloco = factor(levels(bloco)[1],
                                                 levels = levels(bloco)),
                                  cult = levels(cult),
-                                 dias = seq(min(dias),
-                                            max(dias),
-                                            length.out = 30)))
+                                 aval = levels(aval),
+                                 KEEP.OUT.ATTRS = FALSE))
 X <- model.matrix(formula(m0)[-2], data = pred)
 
 bl <- attr(X, "assign") == 1
@@ -747,7 +756,7 @@ qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
 aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
 colnames(aux)[1] <- "fit"
-pred$pois <- cbind(pred$pois, exp(aux))
+pred$pois <- cbind(pred$pois, sweep(exp(aux), 1, pred$pois$off, "*"))
 str(pred$pois)
 
 # Matrix de covariância completa e sem o alpha.
@@ -762,12 +771,12 @@ pred$pgen$eta <- c(X %*% coef(m3)[-1])
 pred$pgen <- cbind(pred$pgen,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
                          FUN = function(x) {
-                             exp(pred$pgen$eta + x)
+                             pred$pgen$off * exp(pred$pgen$eta + x)
                          }))
 str(pred$pgen)
 
 pred <- ldply(pred, .id = "modelo")
-pred <- arrange(pred, cult, dias, modelo)
+pred <- arrange(pred, cult, aval, modelo)
 str(pred)
 
 key <- list(lines = list(
@@ -776,14 +785,16 @@ key <- list(lines = list(
             text = list(
                 c("Poisson", "Poisson Generalizada")))
 
-xyplot(ntot ~ dias | cult, data = ninfas,
+xyplot(ntot ~ aval | cult, data = ninfas,
        grid = TRUE, as.table = TRUE, layout = c(NA, 2),
        xlab = "Dias", ylab = "Número total de ninfas",
        key = key) +
-    as.layer(xyplot(fit ~ dias | cult, data = pred,
-                    groups = modelo, type = "l",
+    as.layer(xyplot(fit ~ aval | cult, data = pred,
+                    groups = modelo, pch = 19, type = "o",
                     ly = pred$lwr, uy = pred$upr,
-                    cty = "bands", alpha = 0.25,
+                    cty = "bars", length = 0.05,
+                    desloc = 0.2 * scale(as.integer(pred$modelo),
+                                         scale = FALSE),
                     prepanel = prepanel.cbH,
                     panel.groups = panel.cbH,
                     panel = panel.superpose), under = TRUE)
@@ -806,7 +817,7 @@ xyplot(ntot ~ dias | cult, data = ninfas,
 
 ```
 
-```{r,eval=FALSE}
+```{r, include=FALSE, eval=FALSE}
 library(rpanel)
 library(lattice)
 library(latticeExtra)
