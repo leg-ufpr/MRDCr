@@ -589,14 +589,244 @@ update(xy, type = c("p", "g")) +
 
 ```
 
-# Ocorrência de mosca-branca em variedades de soja #
+# Ocorrência de ninfas de mosca-branca em variedades de soja #
+
+```{r}
+
+data(ninfas)
+str(ninfas)
+## help(ninfas)
+
+```
+
+Experimento conduzido em casa de vegetação sob o delineamento de blocos
+casualizados. No experimento foram avaliadas plantas de diferentes
+cultivares de soja contabilizando o número de ninfas de mosca-branca nos
+folíolos dos terços superior, médio e inferior das plantas. As
+avaliações ocorreram em 6 datas dentre os 38 dias do estudo.
+
+Nesta análise serão consideradas somente as cultivares com prefixo
+\code{BRS}, sendo o número total de ninfas de mosca-branca nos folíolos
+a variável de interesse.
+
+```{r}
+
+## Somente as cultivares que contém BRS na identificação
+ninfas <- droplevels(subset(ninfas, grepl("BRS", x = cult)))
+
+## Categorizando a variável dias em aval
+ninfas$aval <- factor(ninfas$dias)
+
+str(ninfas)
+
+```
+
+Assim as variáveis consideradas são definidas como:
+
 
 ## Análise Exploratória ##
 
+```{r}
+
+## Experimento balanceado
+xtabs(~aval + cult, data = ninfas)
+
+(xy <- xyplot(ntot ~ aval | cult,
+              data = ninfas,
+              type = c("p", "g", "smooth"),
+              jitter.x = TRUE))
+
+## Avaliando preliminarmente suposição de equidispersão
+(mv <- aggregate(ntot ~ data + cult, data = ninfas,
+                 FUN = function(x) c(mean = mean(x), var = var(x))))
+
+xlim <- ylim <- extendrange(c(mv$ntot), f = 0.05)
+xyplot(ntot[, "var"] ~ ntot[, "mean"],
+       data = mv,
+       xlim = xlim,
+       ylim = ylim,
+       ylab = "Variância Amostral",
+       xlab = "Média Amostral",
+       panel = function(x, y) {
+           panel.xyplot(x, y, type = c("p", "r"), grid = TRUE)
+           panel.abline(a = 0, b = 1, lty = 2)
+       })
+
+```
+
 ## Ajuste dos modelos ##
+
+```{r, cache = TRUE}
+
+## Preditores considerados
+f1 <- ntot ~ bloco + cult + aval
+f2 <- ntot ~ bloco + cult * aval
+
+## Ajustando os modelos Poisson
+m1P <- glm(f1, data = ninfas, family = poisson)
+m2P <- glm(f2, data = ninfas, family = poisson)
+
+## Ajustando os modelos COM-Poisson
+m1C <- cmp(f1, data = ninfas, sumto = 600)
+m2C <- cmp(f2, data = ninfas, sumto = 600)
+
+```
 
 ## Comparação dos ajustes ##
 
+```{r}
+
+## Verossimilhancas dos modelos ajustados
+cbind("Poisson" = sapply(list(m1P, m2P), logLik),
+      "COM-Poisson" = sapply(list(m1C, m2C), logLik))
+
+## Teste de razão de verossimilhanças
+anova(m1P, m2P, test = "Chisq")
+anova(m1C, m2C)
+
+```
+
+```{r}
+
+## Estimativas dos parâmetros
+summary(m1P)
+summary(m1C)
+
+```
+
 ## Avaliando modelo proposto ##
 
+```{r}
+
+## Um dos problemas computacionais do modelo COM-Poisson é a obtenção da
+## constante de normalização Z. Assim uma visualização pós ajuste para
+## verificar se o ajuste proporcionou uma densidade válida se faz
+## necessária
+convergencez(m1C, incremento = 100, maxit = 10)
+
+```
+
+```{r}
+
+## Dado que o modelo COM-Poisson leva as mesmas estimativas pontuais que
+## o modelo Poisson a análise de diagnóstico padrão pode ser utilizada
+par(mfrow = c(2, 2))
+plot(m1P)
+
+```
+
+```{r, cache = TRUE}
+
+##-------------------------------------------
+## Testando a nulidade do parâmetro phi
+
+## Usando o ajuste Poisson
+trv <- 2 * (logLik(m1C) - logLik(m1P))
+attributes(trv) <- NULL
+round(c(trv, pchisq(trv, 1, lower = FALSE)), digits = 5)
+
+## Reajustando o COM-Poisson para phi = 0 (ou equivalente nu = 1)
+m1Cfixed <- cmp(f1, data = ninfas, fixed = list("phi" = 0))
+anova(m1C, m1Cfixed)
+
+## Via perfil de log-verossimilhança
+perf <- profile(m1C, which = 1)
+confint(perf)
+plot(perf)
+
+```
+
+```{r}
+
+##-------------------------------------------
+## Verificando a matriz ve variâncias e covariâncias
+Vcov <- vcov(m1C)
+Corr <- cov2cor(Vcov)
+
+library(corrplot)
+corrplot.mixed(Corr, lower = "number", upper = "ellipse",
+               diag = "l", tl.pos = "lt", tl.col = "black",
+               tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
+
+```
+
 ## Predição ##
+
+```{r}
+
+## Predição pontual/intervalar
+pred <- with(ninfas,
+             expand.grid(
+                 bloco = factor(levels(bloco)[1],
+                                levels = levels(bloco)),
+                 cult = levels(cult),
+                 aval = levels(aval)
+             ))
+qn <- qnorm(0.975) * c(fit = 0, lwr = -1, upr = 1)
+
+f1; f1[[2]] <- NULL; f1
+X <- model.matrix(f1, data = pred)
+
+## Como não temos interesse na interpretação dos efeitos de blocos
+## tomaremos a média desses efeitos para predição
+
+bl <- attr(X, "assign") == 1
+X[, bl] <- X[, bl] * 0 + 1/(sum(bl) + 1)
+head(X)
+
+library(multcomp)
+
+##-------------------------------------------
+## Considerando a Poisson
+aux <- exp(confint(glht(m1P, linfct = X),
+               calpha = univariate_calpha())$confint)
+colnames(aux) <- c("fit", "lwr", "upr")
+aux <- data.frame(modelo = "Poisson", aux)
+predP <- cbind(pred, aux)
+
+##-------------------------------------------
+## Considerando a COM-Poisson
+
+## Obtendo os parâmetros da distribuição (lambdas e phi)
+betas <- coef(m1C)[-1]
+phi <- coef(m1C)[1]
+loglambdas <- X %*% betas
+
+## Obtendo os erros padrão das estimativas
+##   Obs.: Deve-se usar a matriz de variâncias e covariâncias
+##   condicional, pois os parâmetros de locação (betas) e dispersão
+##   (phi) não são ortogonais.
+Vc <- Vcov[-1, -1] - Vcov[-1, 1] %*% solve(Vcov[1, 1]) %*% Vcov[1, -1]
+U <- chol(Vc)
+se <- sqrt(apply(X %*% t(U), MARGIN = 1, FUN = function(x) {
+    sum(x^2)
+}))
+
+aux <- c(loglambdas) + outer(se, qn, FUN = "*")
+aux <- apply(aux, MARGIN = 2,
+             FUN = function(col) {
+                 sapply(col, FUN = function(p) {
+                     y <- 0:400; py <- dcmp(y, p, phi, sumto = 600)
+                     sum(y*py)
+                 })
+             })
+aux <- data.frame(modelo = "COM-Poisson", aux)
+predC <- cbind(pred, aux)
+
+##-------------------------------------------
+## Visualizando os valores preditos intervalares pelos dois modelos
+da <- rbind(predP, predC)
+da <- da[order(da$cult, da$aval, da$modelo), ]
+
+source(paste0("https://gitlab.c3sl.ufpr.br/leg/legTools/raw/",
+              "issue%2315/R/panel.segplot.by.R"))
+
+update(xy, type = c("p", "g"), alpha = 0.5) +
+    as.layer(segplot(
+        aval ~ lwr + upr | cult, centers = fit,
+        data = da, 
+        horizontal = FALSE, draw = FALSE, lwd = 2, grid = TRUE,
+        panel = panel.segplot.by, groups = modelo, f = 0.1,
+        pch = 1:nlevels(pred$modelo)+2, as.table = TRUE))
+
+```
