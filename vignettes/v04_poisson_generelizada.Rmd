@@ -245,7 +245,7 @@ library(corrplot)
 
 # Função de log-Verossimilhança da Poisson Generalizada na
 # parametrização de modelo de regressão.
-PG_ll <- function(theta, y, X, offset = NULL) {
+llpg <- function(theta, y, X, offset = NULL) {
     # theta: vetor de parâmetros;
     #   theta[1]: parâmetro de dispersão (alpha);
     #   theta[-1]: parâmetro de locação (lambda);
@@ -279,10 +279,10 @@ L <- list(y = y,
           X = cbind(rep(1, length(y))))
 
 start <- c(alpha = 0, lambda = 1)
-parnames(PG_ll) <- names(start)
+parnames(llpg) <- names(start)
 
 # Como \alpha foi fixado em 1, essa ll corresponde à Poisson.
-n0 <- mle2(minuslogl = PG_ll,
+n0 <- mle2(minuslogl = llpg,
            start = start, data = L,
            fixed = list(alpha = 0), vecpar = TRUE)
 
@@ -291,7 +291,7 @@ c(coef(n0)["lambda"],
   coef(glm(y ~ offset(log(L$offset)), family = poisson)))
 
 # Estimando o \alpha.
-n1 <- mle2(PG_ll, start = start, data = L, vecpar = TRUE)
+n1 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
 coef(n1)
 
 # Perfil de verossimilhança dos parâmetros.
@@ -346,10 +346,10 @@ L <- with(soja, list(y = nvag, offset = 1, X = model.matrix(m0)))
 
 # Usa as estimativas do Poisson como valore iniciais.
 start <- c(alpha = 0, coef(m0))
-parnames(PG_ll) <- names(start)
+parnames(llpg) <- names(start)
 
 # Com alpha fixo em 0 corresponde à Poisson.
-m2 <- mle2(PG_ll, start = start, data = L,
+m2 <- mle2(llpg, start = start, data = L,
            fixed = list(alpha = 0), vecpar = TRUE)
 
 # Mesma medida de ajuste e estimativas.
@@ -357,7 +357,7 @@ c(logLik(m2), logLik(m0))
 cbind(coef(m2)[-1], coef(m0))
 
 # Poisson Generalizada.
-m3 <- mle2(PG_ll, start = start, data = L, vecpar = TRUE)
+m3 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
 
 # Teste para nulinidade do parâmetro de dispersão (H_0: alpha == 0).
 anova(m3, m2)
@@ -512,16 +512,16 @@ summary(m0)
 L <- with(capdesfo, list(y = ncap, offset = 1, X = model.matrix(m0)))
 
 start <- c(alpha = log(1), coef(m0))
-parnames(PG_ll) <- names(start)
+parnames(llpg) <- names(start)
 
 # Modelo Poisson também.
-m2 <- mle2(PG_ll, start = start, data = L,
+m2 <- mle2(llpg, start = start, data = L,
            fixed = list(alpha = 0), vecpar = TRUE)
 
 c(logLik(m2), logLik(m0))
 
 # Modelo Poisson Generalizado.
-m3 <- mle2(PG_ll, start = start, data = L, vecpar = TRUE)
+m3 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
 logLik(m3)
 
 anova(m3, m2)
@@ -682,16 +682,16 @@ summary(m0)
 L <- with(ninfas, list(y = ntot, offset = off, X = model.matrix(m0)))
 
 start <- c(alpha = 0, coef(m0))
-parnames(PG_ll) <- names(start)
+parnames(llpg) <- names(start)
 
 # Modelo Poisson também.
-m2 <- mle2(PG_ll, start = start, data = L,
+m2 <- mle2(llpg, start = start, data = L,
            fixed = list(alpha = 0), vecpar = TRUE)
 
 c(logLik(m2), logLik(m0))
 
 # Modelo Poisson Generalizado.
-m3 <- mle2(PG_ll, start = start, data = L, vecpar = TRUE)
+m3 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
 logLik(m3)
 
 anova(m3, m2)
