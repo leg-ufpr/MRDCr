@@ -54,8 +54,9 @@ dpg0 <- function(y, theta, gamma, m = 4) {
         m <- 1
     }
     z <- theta + gamma * y
-    k <- exp(lfactorial(y))
-    fy <- m * theta * z^(y - 1) * exp(-z)/k
+    k <- lfactorial(y)
+    # fy <- m * theta * z^(y - 1) * exp(-z)/exp(k)
+    fy <- m * exp(log(theta) + (y - 1) * log(z) - z - k)
     return(fy)
 }
 
@@ -171,11 +172,13 @@ subset(grid, round(sum, 3) != 1 & theta > 6 & gamma < 0)
 ```{r, eval=FALSE}
 # Função densidade na parametrização de modelo de regressão.
 dpg1 <- function(y, lambda, alpha) {
-    k <- exp(lfactorial(y))
+    k <- lfactorial(y)
     w <- 1 + alpha * y
     z <- 1 + alpha * lambda
-    fy <- (lambda/z)^(y) * w^(y - 1) * exp(-lambda * (w/z))/k
-    return(fy)
+    # fy <- (lambda/z)^(y) * w^(y - 1) * exp(-lambda * (w/z))/exp(k)
+    fy <- y * (log(lambda) - log(z)) +
+        (y - 1) * log(w) - lambda * (w/z) - k
+    return(exp(fy))
 }
 
 react <- function(panel){
