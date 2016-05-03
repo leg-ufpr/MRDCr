@@ -134,37 +134,6 @@ rp.checkbox(panel = panel,
 rp.do(panel = panel, action = react)
 ```
 
-## O espaço paramétrico de $\theta$ e $\gamma$ ##
-
-```{r}
-#-----------------------------------------------------------------------
-# Gráfico do espaço paramétrico de theta x gamma.
-
-library(latticeExtra)
-
-y <- 0:200
-fun <- Vectorize(vectorize.args = c("theta", "gamma"),
-                 FUN = function(theta, gamma) {
-                     sum(dpg0(y = y, theta = theta, gamma = gamma))
-                 })
-
-grid <- list(theta = seq(0.5, 50, by = 0.5),
-             gamma = seq(-0.98, 0.98, by = 0.02))
-grid$sum <- with(grid, outer(theta, gamma, fun))
-grid <- with(grid,
-             cbind(expand.grid(theta = theta, gamma = gamma),
-                   data.frame(sum = c(sum))))
-
-# levelplot(sum ~ theta + gamma, data = grid,
-#           col.regions = gray.colors) +
-#     layer(panel.abline(h = 0))
-
-levelplot(sum ~ theta + gamma,
-          data = subset(grid, round(sum, 3) == 1),
-          col.regions = gray.colors) +
-    layer(panel.abline(a = 0, b = -1/200))
-```
-
 ## Modelo de Regressão com a Distribuição Poisson Generalizada ##
 
 ```{r, eval=FALSE}
@@ -173,10 +142,12 @@ dpg1 <- function(y, lambda, alpha) {
     k <- lfactorial(y)
     w <- 1 + alpha * y
     z <- 1 + alpha * lambda
+    m <- alpha > pmax(-1/y, -1/lambda)
     # fy <- (lambda/z)^(y) * w^(y - 1) * exp(-lambda * (w/z))/exp(k)
     fy <- y * (log(lambda) - log(z)) +
         (y - 1) * log(w) - lambda * (w/z) - k
-    return(exp(fy))
+    fy[!m] <- 0
+    return(m * exp(fy))
 }
 
 react <- function(panel){
@@ -236,6 +207,58 @@ rp.checkbox(panel = panel,
             variable = POIS, action = react, title = "Poisson",
             labels = "Adicionar a distribução Poisson?")
 rp.do(panel = panel, action = react)
+```
+
+## O espaço paramétrico ##
+
+```{r}
+#-----------------------------------------------------------------------
+# Gráfico do espaço paramétrico de theta x gamma.
+
+# debug(dpg1)
+# dpg1(y = 0:10, lambda = 1, alpha = 0)
+# dpg1(y = 0:10, lambda = 1, alpha = -0.1)
+# undebug(dpg1)
+
+library(latticeExtra)
+
+y <- 0:200
+fun <- Vectorize(vectorize.args = c("theta", "gamma"),
+                 FUN = function(theta, gamma) {
+                     sum(dpg0(y = y, theta = theta, gamma = gamma))
+                 })
+
+grid <- list(theta = seq(0.5, 50, by = 0.5),
+             gamma = seq(-0.98, 0.98, by = 0.02))
+grid$sum <- with(grid, outer(theta, gamma, fun))
+grid <- with(grid,
+             cbind(expand.grid(theta = theta, gamma = gamma),
+                   data.frame(sum = c(sum))))
+
+levelplot(sum ~ theta + gamma,
+          data = subset(grid, round(sum, 3) == 1),
+          col.regions = gray.colors) +
+    layer(panel.abline(a = 0, b = -1/200))
+
+fun <- Vectorize(vectorize.args = c("lambda", "alpha"),
+                 FUN = function(lambda, alpha) {
+                     sum(dpg1(y = y, lambda = lambda, alpha = alpha))
+                 })
+
+dpg1(y = 0:10, lambda = 5, alpha = -0)
+dpois(0:10,  lambda = 5)
+
+grid <- list(lambda = seq(0.2, 50, by = 0.2),
+             alpha = seq(-0.98, 0.98, by = 0.02))
+grid$sum <- with(grid, outer(lambda, alpha, fun))
+
+grid <- with(grid,
+             cbind(expand.grid(lambda = lambda, alpha = alpha),
+                   data.frame(sum = c(sum))))
+
+levelplot(sum ~ lambda + alpha,
+          data = subset(grid, round(sum, 3) == 1),
+          col.regions = gray.colors)
 ```
 
 ## Verossimilhança e Estimação ##
