@@ -245,8 +245,8 @@ fun <- Vectorize(vectorize.args = c("lambda", "alpha"),
                      sum(dpg1(y = y, lambda = lambda, alpha = alpha))
                  })
 
-dpg1(y = 0:10, lambda = 5, alpha = -0)
-dpois(0:10,  lambda = 5)
+# dpg1(y = 0:10, lambda = 5, alpha = -0)
+# dpois(0:10,  lambda = 5)
 
 grid <- list(lambda = seq(0.2, 50, by = 0.2),
              alpha = seq(-0.98, 0.98, by = 0.02))
@@ -486,6 +486,139 @@ xyplot(fit ~ K | umid, data = pred,
        panel = panel.cbH)
 ```
 
+## Número de Grãos Produzidas em Soja ##
+
+Análise do número de grãos por pacela do experimento com soja.
+
+```{r}
+#-----------------------------------------------------------------------
+
+xyplot(ngra ~ K | umid, data = soja, layout = c(NA, 1),
+       type = c("p", "smooth"),
+       strip = strip.custom(strip.names = TRUE, var.name = "Umidade"))
+
+#-----------------------------------------------------------------------
+# Modelo Poisson.
+
+m0 <- glm(ngra ~ bloc + umid * K, data = soja, family = poisson)
+
+# Diagnóstico.
+par(mfrow = c(2, 2))
+plot(m0); layout(1)
+
+# Medidas de decisão.
+anova(m0, test = "Chisq")
+summary(m0)
+
+#-----------------------------------------------------------------------
+# Modelo Poisson Generalizado.
+
+L <- with(soja, list(y = ngra, offset = 1, X = model.matrix(m0)))
+
+# Usa as estimativas do Poisson como valore iniciais.
+start <- c(alpha = 0, coef(m0))
+parnames(llpg) <- names(start)
+
+# Com alpha fixo em 0 corresponde à Poisson.
+m2 <- mle2(llpg, start = start, data = L,
+           fixed = list(alpha = 0), vecpar = TRUE)
+
+# Mesma medida de ajuste e estimativas.
+c(logLik(m2), logLik(m0))
+
+# Poisson Generalizada.
+m3 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
+
+# Teste para nulinidade do parâmetro de dispersão (H_0: alpha == 0).
+anova(m3, m2)
+
+cbind("PoissonGLM" = c(NA, coef(m0)),
+      "PoissonML" = coef(m2),
+      "PGeneraliz" = coef(m3))
+
+# Perfil para o parâmetro de dispersão.
+plot(profile(m3, which = "alpha"))
+abline(v = 0, lty = 2)
+
+V <- cov2cor(vcov(m3))
+corrplot.mixed(V, upper = "ellipse", col = "gray50")
+dev.off()
+
+# Tamanho das covariâncias com \alpha.
+each(sum, mean, max)(abs(V[1, -1]))
+
+# Teste de Wald para a interação.
+a <- c(0, attr(model.matrix(m0), "assign"))
+ai <- a == max(a)
+L <- t(replicate(sum(ai), rbind(coef(m3) * 0), simplify = "matrix"))
+L[, ai] <- diag(sum(ai))
+
+# Cáclculo da estatística Chi-quadrado.
+crossprod(L %*% coef(m3),
+          solve(L %*% vcov(m3) %*% t(L),
+                L %*% coef(m3)))
+
+linearHypothesis(model = m0,
+                 hypothesis.matrix = L,
+                 vcov. = vcov(m3),
+                 coef. = coef(m3))
+
+#-----------------------------------------------------------------------
+# Predição com bandas de confiança.
+
+X <- LSmatrix(m0, effect = c("umid", "K"))
+
+pred <- attr(X, "grid")
+pred <- transform(pred,
+                  K = as.integer(K),
+                  umid = factor(umid))
+pred <- list(pois = pred, pgen = pred)
+
+# Quantil normal.
+qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
+
+# Preditos pela Poisson.
+aux <- confint(glht(m0, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$pois <- cbind(pred$pois, exp(aux))
+str(pred$pois)
+
+# Matrix de covariância completa e sem o alpha (marginal).
+V <- vcov(m3)
+V <- V[-1, -1]
+
+U <- chol(V)
+aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
+                  FUN = function(x) { sum(x^2) }))
+
+pred$pgen$eta <- c(X %*% coef(m3)[-1])
+pred$pgen <- cbind(pred$pgen,
+                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
+                         FUN = function(x) {
+                             exp(pred$pgen$eta + x)
+                         }))
+str(pred$pgen)
+
+pred <- ldply(pred, .id = "modelo")
+pred <- arrange(pred, umid, K, modelo)
+str(pred)
+
+key <- list(type = "o", divide = 1,
+            lines = list(pch = 1:nlevels(pred$modelo),
+                         lty = 1, col = 1),
+            text = list(c("Poisson", "Poisson Generelizada")))
+
+xyplot(fit ~ K | umid, data = pred,
+       layout = c(NA, 1), as.table = TRUE,
+       xlim = extendrange(range(pred$K), f = 0.1),
+       key = key, pch = pred$modelo,
+       ly = pred$lwr, uy = pred$upr, cty = "bars", length = 0,
+       prepanel = prepanel.cbH,
+       desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
+       panel = panel.cbH)
+```
+
 ## Número de Capulhos Produzidos em Algodão ##
 
 ```{r}
@@ -559,9 +692,6 @@ L <- t(replicate(sum(ai), rbind(coef(m3) * 0), simplify = "matrix"))
 L[, ai] <- diag(sum(ai))
 
 # Teste de Wald explicito.
-# t(L %*% coef(m3)) %*%
-#     solve(L %*% vcov(m3) %*% t(L)) %*%
-#     (L %*% coef(m3))
 crossprod(L %*% coef(m3),
           solve(L %*% vcov(m3) %*% t(L),
                 L %*% coef(m3)))
@@ -635,7 +765,7 @@ update(p1, type = "p", layout = c(NA, 1),
     as.layer(p2, under = TRUE)
 ```
 
-## Mosca Branca
+## Mosca Branca ##
 
 ```{r}
 data(ninfas, package = "MRDCr")
@@ -653,8 +783,6 @@ xyplot(ntot ~ dias | cult, data = ninfas,
        type = c("p", "spline"),
        grid = TRUE, as.table = TRUE, layout = c(NA, 2),
        xlab = "Dias", ylab = "Número total de ninfas")
-
-ninfas$dias <- scale(ninfas$dias)
 
 # IMPORTANT: Foi usado um offset de 100 por problemas de
 # over/underflow. O problema não é com a Poisson mas com a Poisson
@@ -729,9 +857,6 @@ L <- t(replicate(sum(ai), rbind(coef(m3) * 0), simplify = "matrix"))
 L[, ai] <- diag(sum(ai))
 
 # Teste de Wald explicito.
-# t(L %*% coef(m3)) %*%
-#     solve(L %*% vcov(m3) %*% t(L)) %*%
-#     (L %*% coef(m3))
 crossprod(L %*% coef(m3),
           solve(L %*% vcov(m3) %*% t(L),
                 L %*% coef(m3)))
@@ -777,7 +902,6 @@ V <- V[-1,-1]
 U <- chol(V)
 aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
                   FUN = function(x) { sum(x^2) }))
-
 pred$pgen$eta <- c(X %*% coef(m3)[-1])
 pred$pgen <- cbind(pred$pgen,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
@@ -809,6 +933,34 @@ xyplot(ntot ~ aval | cult, data = ninfas,
                     prepanel = prepanel.cbH,
                     panel.groups = panel.cbH,
                     panel = panel.superpose), under = TRUE)
+
+#-----------------------------------------------------------------------
+
+fun <- Vectorize(vectorize.args = c("lambda", "alpha"),
+                 FUN = function(lambda, alpha) {
+                     sum(dpg1(y = y, lambda = lambda, alpha = alpha))
+                 })
+
+# dpg1(y = 0:10, lambda = 5, alpha = -0)
+# dpois(0:10,  lambda = 5)
+
+head(sort(subset(pred, modelo = "pois")$fit, decreasing = TRUE))
+coef(m3)["alpha"]
+
+y <- 0:400
+grid <- list(lambda = seq(10, 200, by = 2),
+             alpha = seq(-0.05, 0.1, by = 0.001))
+grid$sum <- with(grid, outer(lambda, alpha, fun))
+
+grid <- with(grid,
+             cbind(expand.grid(lambda = lambda, alpha = alpha),
+                   data.frame(sum = c(sum))))
+
+levelplot(sum ~ lambda + alpha,
+          data = subset(grid, round(sum, 3) == 1),
+          col.regions = gray.colors) +
+    layer(panel.abline(h = 0.05))
+
 ```
 
 ## Pacote VGAM ##
