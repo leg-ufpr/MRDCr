@@ -142,13 +142,13 @@ rp.do(panel = panel, action = react)
 
 library(latticeExtra)
 
-y <- 0:50
+y <- 0:200
 fun <- Vectorize(vectorize.args = c("theta", "gamma"),
                  FUN = function(theta, gamma) {
                      sum(dpg0(y = y, theta = theta, gamma = gamma))
                  })
 
-grid <- list(theta = seq(0.1, 10, by = 0.1),
+grid <- list(theta = seq(0.5, 50, by = 0.5),
              gamma = seq(-0.98, 0.98, by = 0.02))
 grid$sum <- with(grid, outer(theta, gamma, fun))
 grid <- with(grid,
@@ -156,15 +156,13 @@ grid <- with(grid,
                    data.frame(sum = c(sum))))
 
 # levelplot(sum ~ theta + gamma, data = grid,
-#           col.regions = heat.colors) +
+#           col.regions = gray.colors) +
 #     layer(panel.abline(h = 0))
 
 levelplot(sum ~ theta + gamma,
           data = subset(grid, round(sum, 3) == 1),
-          col.regions = heat.colors) +
-    layer(panel.abline(h = 0))
-
-subset(grid, round(sum, 3) != 1 & theta > 6 & gamma < 0)
+          col.regions = gray.colors) +
+    layer(panel.abline(a = 0, b = -1/200))
 ```
 
 ## Modelo de Regressão com a Distribuição Poisson Generalizada ##
@@ -365,18 +363,6 @@ m3 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
 # Teste para nulinidade do parâmetro de dispersão (H_0: alpha == 0).
 anova(m3, m2)
 
-# est_stderr <- function(tb) {
-#     sprintf("%s (%0.4f)",
-#             formatC(tb[, 1], flag = " ", digits = 4, format = "f"),
-#             tb[, 2])
-# }
-#
-# L <- list("PoissonGLM" = rbind(NA, summary(m0)$coef),
-#           "PoissonML*" = rbind(NA, summary(m2)@coef),
-#           "PGeneraliz" = summary(m3)@coef)
-#
-# as.data.frame(sapply(L, est_stderr))
-
 cbind("PoissonGLM" = c(NA, coef(m0)),
       "PoissonML" = coef(m2),
       "PGeneraliz" = coef(m3))
@@ -450,7 +436,6 @@ V <- V[-1, -1]
 U <- chol(V)
 aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
                   FUN = function(x) { sum(x^2) }))
-
 pred$pgen$eta <- c(X %*% coef(m3)[-1])
 pred$pgen <- cbind(pred$pgen,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
