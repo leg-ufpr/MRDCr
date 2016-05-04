@@ -484,6 +484,8 @@ xyplot(fit ~ K | umid, data = pred,
        layout = c(NA, 1), as.table = TRUE,
        xlim = extendrange(range(pred$K), f = 0.1),
        key = key, pch = pred$modelo,
+       xlab = expression("Dose de potássion"~(mg~dm^{-3})),
+       ylab = "Número de vagens por parcela",
        ly = pred$lwr, uy = pred$upr, cty = "bars", length = 0,
        prepanel = prepanel.cbH,
        desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
@@ -617,10 +619,97 @@ xyplot(fit ~ K | umid, data = pred,
        layout = c(NA, 1), as.table = TRUE,
        xlim = extendrange(range(pred$K), f = 0.1),
        key = key, pch = pred$modelo,
+       xlab = expression("Dose de potássion"~(mg~dm^{-3})),
+       ylab = "Número de grãos por parcela",
        ly = pred$lwr, uy = pred$upr, cty = "bars", length = 0,
        prepanel = prepanel.cbH,
        desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
+```
+
+## Número de Grãos por Vagem ##
+
+```{r}
+#-----------------------------------------------------------------------
+# Número de grãos por vagem.
+
+xyplot(ngra/nvag ~ K | umid, data = soja, layout = c(NA, 1),
+       type = c("p", "smooth"),
+       strip = strip.custom(strip.names = TRUE, var.name = "Umidade"))
+
+#-----------------------------------------------------------------------
+# Modelo Poisson.
+
+m0 <- glm(ngra ~ offset(log(nvag)) + bloc + umid * K,
+          data = soja, family = poisson)
+
+# Diagnóstico.
+par(mfrow = c(2, 2))
+plot(m0); layout(1)
+
+# Medidas de decisão.
+anova(m0, test = "Chisq")
+summary(m0)
+
+#-----------------------------------------------------------------------
+# Modelo Poisson Generalizado.
+
+L <- with(soja, list(y = ngra, offset = nvag, X = model.matrix(m0)))
+
+# Já que na verossimilhaça (1 + alpha * y) > -1, então o menor valor
+# possível para gamma para ter uma log-verossimilhança avaliável é
+-1/max(soja$ngra)
+
+# Mesmo com esse lower bound, o valor chute para alpha foi definido por
+# tentativa erro. O valor -0.003 dá Error e o valor -0.002 na hora de
+# perfilhar encontra um mínimo melhor. Então, por tentativa erro
+# chegou-se no -0.0026.
+start <- c(alpha = -0.0026, coef(m0))
+parnames(llpg) <- names(start)
+
+# Com alpha fixo em 0 corresponde à Poisson.
+m2 <- mle2(llpg, start = start, data = L,
+           fixed = list(alpha = 0), vecpar = TRUE)
+
+# Mesma medida de ajuste e estimativas.
+c(logLik(m2), logLik(m0))
+
+# Poisson Generalizada.
+m3 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
+
+# Teste para nulinidade do parâmetro de dispersão (H_0: alpha == 0).
+anova(m3, m2)
+
+cbind("PoissonGLM" = c(NA, coef(m0)),
+      "PoissonML" = coef(m2),
+      "PGeneraliz" = coef(m3))
+
+# Perfil para o parâmetro de dispersão.
+plot(profile(m3, which = "alpha"))
+abline(v = 0, lty = 2)
+
+V <- cov2cor(vcov(m3))
+corrplot.mixed(V, upper = "ellipse", col = "gray50")
+dev.off()
+
+# Tamanho das covariâncias com \alpha.
+each(sum, mean, max)(abs(V[1, -1]))
+
+# Teste de Wald para a interação.
+a <- c(0, attr(model.matrix(m0), "assign"))
+ai <- a == max(a)
+L <- t(replicate(sum(ai), rbind(coef(m3) * 0), simplify = "matrix"))
+L[, ai] <- diag(sum(ai))
+
+# Cáclculo da estatística Chi-quadrado.
+crossprod(L %*% coef(m3),
+          solve(L %*% vcov(m3) %*% t(L),
+                L %*% coef(m3)))
+
+linearHypothesis(model = m0,
+                 hypothesis.matrix = L,
+                 vcov. = vcov(m3),
+                 coef. = coef(m3))
 ```
 
 ## Número de Capulhos Produzidos em Algodão ##
