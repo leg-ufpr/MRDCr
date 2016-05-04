@@ -103,35 +103,31 @@ react <- function(panel){
         } else {
             pz <- 0
         }
-        if (any(!is.finite(py))) {
-            plot(x = NULL, y = NULL,
-                 xlim = c(0, 1), ylim = c(0, 1),
-                 axes = FALSE, ann = FALSE)
-            text(x = 0.5, y = 0.5, labels = "Valores não finitos")
-        } else {
-            plot(py ~ y, type = "h",
-                 ylim = c(0, max(c(py, pz))),
-                 xlab = expression(y),
-                 ylab = expression(f(y)))
-            mtext(side = 3,
-                  text = substitute(sum(f(y)) == s,
-                                    list(s = round(sum(py), 5))))
-            if (EX) {
-                abline(v = m, col = 2)
-            }
-            if (POIS) {
-                lines(y + 0.3, pz, type = "h", col = 3)
-            }
+        # Colocar 0 para valores não finitos (-Inf, Inf e NaN) para
+        # fazer gráfico.
+        py[!is.finite(py)] <- 0
+        plot(py ~ y, type = "h",
+             ylim = c(0, max(c(py, pz))),
+             xlab = expression(y),
+             ylab = expression(f(y)))
+        mtext(side = 3,
+              text = substitute(sum(f(y)) == s,
+                                list(s = round(sum(py), 5))))
+        if (EX) {
+            abline(v = m, col = 2)
+        }
+        if (POIS) {
+            lines(y + 0.3, pz, type = "h", col = 3)
         }
     })
     panel
 }
 
 panel <- rp.control(title = "Poisson Generalizada",
-                    size = c(300, 100), YMAX = 30, m = 4)
+                    size = c(300, 100), YMAX = 150, m = 4)
 rp.slider(panel = panel, action = react,
           variable = THETA, title = "theta",
-          from = 0.1, to = 30,
+          from = 0.1, to = 100,
           initval = 5, resolution = 0.1,
           showvalue = TRUE)
 rp.slider(panel = panel, action = react,
@@ -178,40 +174,34 @@ react <- function(panel){
         } else {
             pz <- 0
         }
-        if (any(!is.finite(py))) {
-            plot(x = NULL, y = NULL,
-                 xlim = c(0, 1), ylim = c(0, 1),
-                 axes = FALSE, ann = FALSE)
-            text(x = 0.5, y = 0.5, labels = "Valores não finitos")
-        } else {
-            plot(py ~ y, type = "h",
-                 ylim = c(0, max(c(py, pz))),
+        py[!is.finite(py)] <- 0
+        plot(py ~ y, type = "h",
+             ylim = c(0, max(c(py, pz))),
                  xlab = expression(y),
-                 ylab = expression(f(y)))
-            mtext(side = 3,
-                  text = substitute(sum(f(y)) == s,
-                                    list(s = round(sum(py), 5))))
-            if (EX) {
-                abline(v = m, col = 2)
-            }
-            if (POIS) {
-                lines(y + 0.3, pz, type = "h", col = 3)
-            }
+             ylab = expression(f(y)))
+        mtext(side = 3,
+              text = substitute(sum(f(y)) == s,
+                                list(s = round(sum(py), 5))))
+        if (EX) {
+            abline(v = m, col = 2)
+        }
+        if (POIS) {
+            lines(y + 0.3, pz, type = "h", col = 3)
         }
     })
     panel
 }
 
 panel <- rp.control(title = "Poisson Generalizada",
-                    size = c(300, 100), YMAX = 30)
+                    size = c(300, 100), YMAX = 150)
 rp.slider(panel = panel, action = react,
           variable = LAMBDA, title = "lambda",
-          from = 0.1, to = 30,
+          from = 0.1, to = 100,
           initval = 5, resolution = 0.1,
           showvalue = TRUE)
 rp.slider(panel = panel, action = react,
           variable = ALPHA, title = "alpha",
-          from = -0.2, to = 0.4,
+          from = -0.1, to = 0.4,
           initval = 0, resolution = 0.01,
           showvalue = TRUE)
 rp.checkbox(panel = panel,
