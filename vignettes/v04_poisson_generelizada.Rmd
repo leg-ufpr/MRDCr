@@ -14,6 +14,20 @@ vignette: >
 source("_setup.R")
 ```
 
+```{r, message=FALSE, error=FALSE, warning=FALSE}
+# Definições da sessão.
+# devtools::load_all("../")
+library(lattice)
+library(latticeExtra)
+library(rpanel)
+library(bbmle)
+library(corrplot)
+library(plyr)
+library(car)
+library(doBy)
+library(multcomp)
+```
+
 ## Função Densidade ##
 
 Se uma variável aleatória $Y$ tem distribuição de probabilidades Poisson
@@ -978,17 +992,4 @@ levelplot(sum ~ lambda + alpha,
 #
 # logLik(m2)
 
-```
-
-```{r, include=FALSE, eval=FALSE}
-library(rpanel)
-library(lattice)
-library(latticeExtra)
-library(bbmle)
-library(corrplot)
-library(plyr)
-library(car)
-library(doBy)
-library(multcomp)
-devtools::load_all("~/repos/MRDCr")
 ```
