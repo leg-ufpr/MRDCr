@@ -81,14 +81,13 @@ gamma <- 0
 
 fy <- dpg0(y = y, theta = theta, gamma = gamma)
 plot(fy ~ y, type = "h")
-lines(y + 0.3, dpois(y, lambda = theta), type = "h", col = 2)
+lines(y + 0.3, dpois(y, lambda = theta), type = "h", col = 2,
+      xlab = "y", ylab = "f(y)")
 ```
 
 ## Recursos interativos  com o `rpanel` ##
 
 ```{r, eval=FALSE}
-library(rpanel)
-
 react <- function(panel){
     with(panel,
     {
@@ -213,7 +212,7 @@ rp.checkbox(panel = panel,
 rp.do(panel = panel, action = react)
 ```
 
-## O espaço paramétrico ##
+## O Espaço Paramétrico ##
 
 ```{r}
 #-----------------------------------------------------------------------
@@ -224,16 +223,18 @@ rp.do(panel = panel, action = react)
 # dpg1(y = 0:10, lambda = 1, alpha = -0.1)
 # undebug(dpg1)
 
-library(latticeExtra)
-
-y <- 0:200
 fun <- Vectorize(vectorize.args = c("theta", "gamma"),
                  FUN = function(theta, gamma) {
                      sum(dpg0(y = y, theta = theta, gamma = gamma))
                  })
 
-grid <- list(theta = seq(0.5, 50, by = 0.5),
-             gamma = seq(-0.98, 0.98, by = 0.02))
+grid <- list(theta = seq(1, 50, by = 1),
+             gamma = seq(-0.5, 1, by = 0.05))
+str(grid)
+
+y <- 0:500
+my <- max(y)
+
 grid$sum <- with(grid, outer(theta, gamma, fun))
 grid <- with(grid,
              cbind(expand.grid(theta = theta, gamma = gamma),
@@ -242,15 +243,15 @@ grid <- with(grid,
 levelplot(sum ~ theta + gamma,
           data = subset(grid, round(sum, 3) == 1),
           col.regions = gray.colors) +
-    layer(panel.abline(a = 0, b = -1/200))
+    layer(panel.abline(a = 0, b = -1/my)) +
+    layer(panel.abline(h = 0, lty = 2))
+
+#-----------------------------------------------------------------------
 
 fun <- Vectorize(vectorize.args = c("lambda", "alpha"),
                  FUN = function(lambda, alpha) {
                      sum(dpg1(y = y, lambda = lambda, alpha = alpha))
                  })
-
-# dpg1(y = 0:10, lambda = 5, alpha = -0)
-# dpois(0:10,  lambda = 5)
 
 grid <- list(lambda = seq(0.2, 50, by = 0.2),
              alpha = seq(-0.98, 0.98, by = 0.02))
@@ -262,15 +263,16 @@ grid <- with(grid,
 
 levelplot(sum ~ lambda + alpha,
           data = subset(grid, round(sum, 3) == 1),
-          col.regions = gray.colors)
+          col.regions = gray.colors) +
+    layer(panel.abline(h = 0, lty = 2)) +
+    layer(panel.curve(-1/x))
+
+# Já que lambda * alpha > -1, então alpha = -1/lambda dá a fronteira.
 ```
 
 ## Verossimilhança e Estimação ##
 
 ```{r}
-library(bbmle)
-library(corrplot)
-
 # Função de log-Verossimilhança da Poisson Generalizada na
 # parametrização de modelo de regressão.
 llpg <- function(theta, y, X, offset = NULL) {
@@ -402,8 +404,6 @@ V <- cov2cor(vcov(m3))
 corrplot.mixed(V, upper = "ellipse", col = "gray50")
 dev.off()
 
-library(plyr)
-
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -421,7 +421,6 @@ crossprod(L %*% coef(m3),
           solve(L %*% vcov(m3) %*% t(L),
                 L %*% coef(m3)))
 
-library(car)
 # Teste de Wald para interação (poderia ser LRT, claro).
 # É necessário um objeto glm.
 linearHypothesis(model = m0,
@@ -431,9 +430,6 @@ linearHypothesis(model = m0,
 
 #-----------------------------------------------------------------------
 # Predição com bandas de confiança.
-
-library(doBy)
-library(multcomp)
 
 X <- LSmatrix(m0, effect = c("umid", "K"))
 
@@ -469,11 +465,9 @@ pred$pgen <- cbind(pred$pgen,
                          FUN = function(x) {
                              exp(pred$pgen$eta + x)
                          }))
-str(pred$pgen)
 
 pred <- ldply(pred, .id = "modelo")
 pred <- arrange(pred, umid, K, modelo)
-str(pred)
 
 key <- list(type = "o", divide = 1,
             lines = list(pch = 1:nlevels(pred$modelo),
@@ -597,14 +591,12 @@ V <- V[-1, -1]
 U <- chol(V)
 aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
                   FUN = function(x) { sum(x^2) }))
-
 pred$pgen$eta <- c(X %*% coef(m3)[-1])
 pred$pgen <- cbind(pred$pgen,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
                          FUN = function(x) {
                              exp(pred$pgen$eta + x)
                          }))
-str(pred$pgen)
 
 pred <- ldply(pred, .id = "modelo")
 pred <- arrange(pred, umid, K, modelo)
@@ -818,11 +810,9 @@ str(pred$pois)
 # Matrix de covariância completa e sem o alpha.
 V <- vcov(m3)
 V <- V[-1,-1]
-
 U <- chol(V)
 aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
                   FUN = function(x) { sum(x^2) }))
-
 pred$pgen$eta <- c(X %*% coef(m3)[-1])
 pred$pgen <- cbind(pred$pgen,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
