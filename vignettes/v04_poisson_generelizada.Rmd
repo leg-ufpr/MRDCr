@@ -854,54 +854,35 @@ update(p1, type = "p", layout = c(NA, 1),
 data(ninfas, package = "MRDCr")
 str(ninfas)
 
-# xyplot(ntot ~ dias | cult, data = ninfas,
-#        type = c("p", "spline"),
-#        grid = TRUE, as.table = TRUE, layout = c(NA, 2),
-#        xlab = "Dias", ylab = "Número total de ninfas")
-
 # Somente as cultivares que contém BRS na identificação
-ninfas <- droplevels(subset(ninfas, grepl("BRS", x = cult)))
+ninfas <- droplevels(subset(ninfas,
+                            grepl("BRS.*RR", x = cult) & dias <= 22))
+ninfas$y <- ninfas$ntot
+str(ninfas)
 
-xyplot(ntot ~ dias | cult, data = ninfas,
+xyplot(y ~ dias | cult, data = ninfas,
        type = c("p", "spline"),
        grid = TRUE, as.table = TRUE, layout = c(NA, 2),
        xlab = "Dias", ylab = "Número total de ninfas")
 
-# IMPORTANT: Foi usado um offset de 100 por problemas de
-# over/underflow. O problema não é com a Poisson mas com a Poisson
-# Generalizada. Todas as análises consideram um offset de 100, portanto,
-# permanecem comparáveis e igualmente interpretáveis.
-
-ninfas <- transform(ninfas,
-                    off = 100,
-                    aval = factor(dias))
+ninfas <- transform(ninfas, aval = factor(dias))
 
 #-----------------------------------------------------------------------
 # Modelo Poisson.
 
-m0 <- glm(ntot ~ offset(log(off)) + bloco + cult * aval,
+m0 <- glm(y ~ bloco + cult + aval,
           data = ninfas, family = poisson)
 
 par(mfrow = c(2, 2))
 plot(m0); layout(1)
 
 anova(m0, test = "Chisq")
-anova(m0, test = "Chisq",
-      dispersion = sum(residuals(m0, type = "pearson")^2)/
-          df.residual(m0))
-summary(m0)
-
-m0 <- glm(ntot ~ offset(log(off)) + bloco + cult + aval,
-          data = ninfas, family = poisson)
-anova(m0, test = "Chisq",
-      dispersion = sum(residuals(m0, type = "pearson")^2)/
-          df.residual(m0))
 summary(m0)
 
 #-----------------------------------------------------------------------
 # Modelo Poisson Generalizada.
 
-L <- with(ninfas, list(y = ntot, offset = off, X = model.matrix(m0)))
+L <- with(ninfas, list(y = y, offset = 1, X = model.matrix(m0)))
 
 start <- c(alpha = 0, coef(m0))
 parnames(llpg) <- names(start)
@@ -954,8 +935,7 @@ linearHypothesis(model = m0,
 #-----------------------------------------------------------------------
 # Predição com bandas de confiança.
 
-pred <- with(ninfas, expand.grid(off = 100,
-                                 bloco = factor(levels(bloco)[1],
+pred <- with(ninfas, expand.grid(bloco = factor(levels(bloco)[1],
                                                 levels = levels(bloco)),
                                  cult = levels(cult),
                                  aval = levels(aval),
@@ -975,13 +955,12 @@ qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
 aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
 colnames(aux)[1] <- "fit"
-pred$pois <- cbind(pred$pois, sweep(exp(aux), 1, pred$pois$off, "*"))
+pred$pois <- cbind(pred$pois, exp(aux))
 str(pred$pois)
 
 # Matrix de covariância completa e sem o alpha.
 V <- vcov(m3)
-V <- V[-1,-1]
-
+V <- V[-1, -1]
 U <- chol(V)
 aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
                   FUN = function(x) { sum(x^2) }))
@@ -989,7 +968,7 @@ pred$pgen$eta <- c(X %*% coef(m3)[-1])
 pred$pgen <- cbind(pred$pgen,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
                          FUN = function(x) {
-                             pred$pgen$off * exp(pred$pgen$eta + x)
+                              exp(pred$pgen$eta + x)
                          }))
 str(pred$pgen)
 
@@ -1003,7 +982,7 @@ key <- list(lines = list(
             text = list(
                 c("Poisson", "Poisson Generalizada")))
 
-xyplot(ntot ~ aval | cult, data = ninfas,
+xyplot(y ~ aval | cult, data = ninfas,
        grid = TRUE, as.table = TRUE, layout = c(NA, 2),
        xlab = "Dias", ylab = "Número total de ninfas",
        key = key) +
@@ -1035,6 +1014,13 @@ grid <- list(lambda = seq(10, 200, by = 2),
              alpha = seq(-0.05, 0.1, by = 0.001))
 grid$sum <- with(grid, outer(lambda, alpha, fun))
 
+funcur
+
+y <- 0:800
+py <- dpg1(y = y, lambda = 190, alpha = 0.05)
+plot(py ~ y, type = "h")
+abline(v = 190)
+
 grid <- with(grid,
              cbind(expand.grid(lambda = lambda, alpha = alpha),
                    data.frame(sum = c(sum))))
@@ -1043,6 +1029,52 @@ levelplot(sum ~ lambda + alpha,
           data = subset(grid, round(sum, 3) == 1),
           col.regions = gray.colors) +
     layer(panel.abline(h = 0.05))
+
+```
+
+```{r}
+funcur <- function(lambda, alpha, n = 10) {
+    m <- lambda
+    s <- sqrt(lambda) * (1 + alpha * lambda)
+    sy <- seq(max(c(0, m - 4 * s)),
+              ceiling(m + 4 * s),
+              length.out = n)
+    sy <- round(sy, 0)
+    fy <- dpg1(y = sy, lambda = lambda, alpha = alpha)
+    fy <- 0.8 * fy/max(fy)
+    return(cbind(lambda = lambda, alpha = alpha, y = sy, fy = fy))
+}
+
+den <- subset(pred, modelo == "pgen")
+
+L <- lapply(den$fit, FUN = funcur, alpha = 0.05, n = 50)
+for (i in seq_along(L)) {
+    L[[i]] <- cbind(den[i, ], L[[i]])
+    # L[[i]]$fy <- 0.75 * L[[i]]$fy/max(L[[i]]$fy)
+}
+
+L <- do.call(rbind, L)
+
+xyplot(y ~ aval | cult, data = L,
+       py = L$fy, type = "l", groups = aval, col = 1,
+       panel = function(x, y, subscripts, py, ...) {
+           panel.xyplot(x = as.integer(x) + py[subscripts],
+                        y = y,
+                        subscripts = subscripts, ...)
+       }) +
+    as.layer(xyplot(ntot ~ aval | cult, data = ninfas)) +
+    as.layer(xyplot(fit ~ aval | cult, data = pred,
+                    groups = modelo, pch = 19, type = "o",
+                    ly = pred$lwr, uy = pred$upr,
+                    cty = "bars", length = 0.05,
+                    desloc = 0.2 * scale(as.integer(pred$modelo),
+                                         scale = FALSE),
+                    prepanel = prepanel.cbH,
+                    panel.groups = panel.cbH,
+                    panel = panel.superpose), under = TRUE)
+
+
+# Teria que estimar uma variância para cada avaliação.
 
 ```
 
