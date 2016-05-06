@@ -56,7 +56,7 @@ $$
 
 ```{r}
 # Função densidade na parametrização original.
-dpg0 <- function(y, theta, gamma, m = 4) {
+dpgnz0 <- function(y, theta, gamma, m = 4) {
     if (gamma < 0) {
         m <- max(c(m, floor(-theta/gamma)))
         if (gamma < max(c(-1, -theta/m))) {
@@ -79,10 +79,9 @@ y <- 0:30
 theta <- 10
 gamma <- 0
 
-fy <- dpg0(y = y, theta = theta, gamma = gamma)
-plot(fy ~ y, type = "h")
-lines(y + 0.3, dpois(y, lambda = theta), type = "h", col = 2,
-      xlab = "y", ylab = "f(y)")
+fy <- dpgnz0(y = y, theta = theta, gamma = gamma)
+plot(fy ~ y, type = "h", xlab = "y", ylab = "f(y)")
+lines(y + 0.3, dpois(y, lambda = theta), type = "h", col = 2)
 ```
 
 ## Recursos interativos  com o `rpanel` ##
@@ -96,7 +95,7 @@ react <- function(panel){
         from <- floor(max(c(0, m - 5 * s)))
         to <- ceiling(max(c(YMAX, m + 5 * s)))
         y <- from:to
-        py <- dpg0(y = y, theta = THETA, gamma = GAMMA)
+        py <- dpgnz0(y = y, theta = THETA, gamma = GAMMA)
         if (POIS) {
             pz <- dpois(y, lambda = m)
         } else {
@@ -147,17 +146,7 @@ rp.do(panel = panel, action = react)
 
 ```{r, eval=FALSE}
 # Função densidade na parametrização de modelo de regressão.
-dpg1 <- function(y, lambda, alpha) {
-    k <- lfactorial(y)
-    w <- 1 + alpha * y
-    z <- 1 + alpha * lambda
-    m <- alpha > pmax(-1/y, -1/lambda)
-    # fy <- (lambda/z)^(y) * w^(y - 1) * exp(-lambda * (w/z))/exp(k)
-    fy <- y * (log(lambda) - log(z)) +
-        (y - 1) * log(w) - lambda * (w/z) - k
-    fy[!m] <- 0
-    return(m * exp(fy))
-}
+MRDCr::dpgnz
 
 react <- function(panel){
     with(panel,
@@ -167,7 +156,7 @@ react <- function(panel){
         from <- floor(max(c(0, m - 5 * s)))
         to <- ceiling(max(c(YMAX, m + 5 * s)))
         y <- from:to
-        py <- dpg1(y = y, lambda = LAMBDA, alpha = ALPHA)
+        py <- dpgnz(y = y, lambda = LAMBDA, alpha = ALPHA)
         if (POIS) {
             pz <- dpois(y, lambda = m)
         } else {
@@ -218,14 +207,9 @@ rp.do(panel = panel, action = react)
 #-----------------------------------------------------------------------
 # Gráfico do espaço paramétrico de theta x gamma.
 
-# debug(dpg1)
-# dpg1(y = 0:10, lambda = 1, alpha = 0)
-# dpg1(y = 0:10, lambda = 1, alpha = -0.1)
-# undebug(dpg1)
-
 fun <- Vectorize(vectorize.args = c("theta", "gamma"),
                  FUN = function(theta, gamma) {
-                     sum(dpg0(y = y, theta = theta, gamma = gamma))
+                     sum(dpgnz0(y = y, theta = theta, gamma = gamma))
                  })
 
 grid <- list(theta = seq(1, 50, by = 1),
@@ -250,7 +234,7 @@ levelplot(sum ~ theta + gamma,
 
 fun <- Vectorize(vectorize.args = c("lambda", "alpha"),
                  FUN = function(lambda, alpha) {
-                     sum(dpg1(y = y, lambda = lambda, alpha = alpha))
+                     sum(dpgnz(y = y, lambda = lambda, alpha = alpha))
                  })
 
 grid <- list(lambda = seq(0.2, 50, by = 0.2),
@@ -275,28 +259,7 @@ levelplot(sum ~ lambda + alpha,
 ```{r}
 # Função de log-Verossimilhança da Poisson Generalizada na
 # parametrização de modelo de regressão.
-llpg <- function(theta, y, X, offset = NULL) {
-    # theta: vetor de parâmetros;
-    #   theta[1]: parâmetro de dispersão (alpha);
-    #   theta[-1]: parâmetro de locação (lambda);
-    # y: variável resposta (contagem);
-    # X: matriz do modelo linear;
-    # offset: tamanho do domínio onde y foi medido;
-    #----------------------------------------
-    if (is.null(offset)) {
-        offset <- 1L
-    }
-    lambda <- offset * exp(X %*% theta[-1])
-    alpha <- theta[1]
-    w <- 1 + alpha * y
-    z <- 1 + alpha * lambda
-    fy <- y * (log(lambda) - log(z)) +
-        (y - 1) * log(w) -
-        lambda * (w/z) -
-        lfactorial(y)
-    # Negativo da log-likelihood.
-    -sum(fy)
-}
+MRDCr::llpgnz
 
 #-----------------------------------------------------------------------
 # Gerando uma amostra aleatória da Poisson.
@@ -309,10 +272,10 @@ L <- list(y = y,
           X = cbind(rep(1, length(y))))
 
 start <- c(alpha = 0, lambda = 1)
-parnames(llpg) <- names(start)
+parnames(llpgnz) <- names(start)
 
 # Como \alpha foi fixado em 1, essa ll corresponde à Poisson.
-n0 <- mle2(minuslogl = llpg,
+n0 <- mle2(minuslogl = llpgnz,
            start = start, data = L,
            fixed = list(alpha = 0), vecpar = TRUE)
 
@@ -321,7 +284,7 @@ c(coef(n0)["lambda"],
   coef(glm(y ~ offset(log(L$offset)), family = poisson)))
 
 # Estimando o \alpha.
-n1 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
+n1 <- mle2(llpgnz, start = start, data = L, vecpar = TRUE)
 coef(n1)
 
 # Perfil de verossimilhança dos parâmetros.
@@ -342,8 +305,6 @@ nesse experimento foram o número de vagens viáveis (e não viáveis) e o
 número total de sementes por parcela.
 
 ```{r}
-library(lattice)
-
 data(soja, package = "MRDCr")
 str(soja)
 
@@ -376,10 +337,10 @@ L <- with(soja, list(y = nvag, offset = 1, X = model.matrix(m0)))
 
 # Usa as estimativas do Poisson como valore iniciais.
 start <- c(alpha = 0, coef(m0))
-parnames(llpg) <- names(start)
+parnames(llpgnz) <- names(start)
 
 # Com alpha fixo em 0 corresponde à Poisson.
-m2 <- mle2(llpg, start = start, data = L,
+m2 <- mle2(llpgnz, start = start, data = L,
            fixed = list(alpha = 0), vecpar = TRUE)
 
 # Mesma medida de ajuste e estimativas.
@@ -387,7 +348,7 @@ c(logLik(m2), logLik(m0))
 cbind(coef(m2)[-1], coef(m0))
 
 # Poisson Generalizada.
-m3 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
+m3 <- mle2(llpgnz, start = start, data = L, vecpar = TRUE)
 
 # Teste para nulinidade do parâmetro de dispersão (H_0: alpha == 0).
 anova(m3, m2)
@@ -517,17 +478,17 @@ L <- with(soja, list(y = ngra, offset = 1, X = model.matrix(m0)))
 
 # Usa as estimativas do Poisson como valore iniciais.
 start <- c(alpha = 0, coef(m0))
-parnames(llpg) <- names(start)
+parnames(llpgnz) <- names(start)
 
 # Com alpha fixo em 0 corresponde à Poisson.
-m2 <- mle2(llpg, start = start, data = L,
+m2 <- mle2(llpgnz, start = start, data = L,
            fixed = list(alpha = 0), vecpar = TRUE)
 
 # Mesma medida de ajuste e estimativas.
 c(logLik(m2), logLik(m0))
 
 # Poisson Generalizada.
-m3 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
+m3 <- mle2(llpgnz, start = start, data = L, vecpar = TRUE)
 
 # Teste para nulinidade do parâmetro de dispersão (H_0: alpha == 0).
 anova(m3, m2)
@@ -657,17 +618,17 @@ L <- with(soja, list(y = ngra, offset = nvag, X = model.matrix(m0)))
 # perfilhar encontra um mínimo melhor. Então, por tentativa erro
 # chegou-se no -0.0026.
 start <- c(alpha = -0.0026, coef(m0))
-parnames(llpg) <- names(start)
+parnames(llpgnz) <- names(start)
 
 # Com alpha fixo em 0 corresponde à Poisson.
-m2 <- mle2(llpg, start = start, data = L,
+m2 <- mle2(llpgnz, start = start, data = L,
            fixed = list(alpha = 0), vecpar = TRUE)
 
 # Mesma medida de ajuste e estimativas.
 c(logLik(m2), logLik(m0))
 
 # Poisson Generalizada.
-m3 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
+m3 <- mle2(llpgnz, start = start, data = L, vecpar = TRUE)
 
 # Teste para nulinidade do parâmetro de dispersão (H_0: alpha == 0).
 anova(m3, m2)
@@ -741,16 +702,16 @@ summary(m0)
 L <- with(capdesfo, list(y = ncap, offset = 1, X = model.matrix(m0)))
 
 start <- c(alpha = log(1), coef(m0))
-parnames(llpg) <- names(start)
+parnames(llpgnz) <- names(start)
 
 # Modelo Poisson também.
-m2 <- mle2(llpg, start = start, data = L,
+m2 <- mle2(llpgnz, start = start, data = L,
            fixed = list(alpha = 0), vecpar = TRUE)
 
 c(logLik(m2), logLik(m0))
 
 # Modelo Poisson Generalizado.
-m3 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
+m3 <- mle2(llpgnz, start = start, data = L, vecpar = TRUE)
 logLik(m3)
 
 anova(m3, m2)
@@ -848,249 +809,19 @@ update(p1, type = "p", layout = c(NA, 1),
     as.layer(p2, under = TRUE)
 ```
 
-## Mosca Branca ##
-
-```{r}
-data(ninfas, package = "MRDCr")
-str(ninfas)
-
-# Somente as cultivares que contém BRS na identificação
-ninfas <- droplevels(subset(ninfas,
-                            grepl("BRS.*RR", x = cult) & dias <= 22))
-ninfas$y <- ninfas$ntot
-str(ninfas)
-
-xyplot(y ~ dias | cult, data = ninfas,
-       type = c("p", "spline"),
-       grid = TRUE, as.table = TRUE, layout = c(NA, 2),
-       xlab = "Dias", ylab = "Número total de ninfas")
-
-ninfas <- transform(ninfas, aval = factor(dias))
-
-#-----------------------------------------------------------------------
-# Modelo Poisson.
-
-m0 <- glm(y ~ bloco + cult + aval,
-          data = ninfas, family = poisson)
-
-par(mfrow = c(2, 2))
-plot(m0); layout(1)
-
-anova(m0, test = "Chisq")
-summary(m0)
-
-#-----------------------------------------------------------------------
-# Modelo Poisson Generalizada.
-
-L <- with(ninfas, list(y = y, offset = 1, X = model.matrix(m0)))
-
-start <- c(alpha = 0, coef(m0))
-parnames(llpg) <- names(start)
-
-# Modelo Poisson também.
-m2 <- mle2(llpg, start = start, data = L,
-           fixed = list(alpha = 0), vecpar = TRUE)
-
-c(logLik(m2), logLik(m0))
-
-# Modelo Poisson Generalizado.
-m3 <- mle2(llpg, start = start, data = L, vecpar = TRUE)
-logLik(m3)
-
-anova(m3, m2)
-
-summary(m3)
-
-plot(profile(m3, which = "alpha"))
-
-cbind("PoissonGLM" = c(NA, coef(m0)),
-      "PoissonML" = coef(m2),
-      "PGeneraliz" = coef(m3))
-
-V <- cov2cor(vcov(m3))
-corrplot.mixed(V, upper = "ellipse", col = "gray50")
-dev.off()
-
-# Tamanho das covariâncias com \alpha.
-each(sum, mean, max)(abs(V[1, -1]))
-
-# Teste de Wald para a interação.
-a <- c(0, attr(model.matrix(m0), "assign"))
-ai <- a == max(a)
-L <- t(replicate(sum(ai), rbind(coef(m3) * 0), simplify = "matrix"))
-L[, ai] <- diag(sum(ai))
-
-# Teste de Wald explicito.
-crossprod(L %*% coef(m3),
-          solve(L %*% vcov(m3) %*% t(L),
-                L %*% coef(m3)))
-
-# Teste de Wald para interação (poderia ser LRT, claro).
-# É necessário um objeto glm, mas necesse caso ele não usado para nada.
-linearHypothesis(model = m0,
-                 hypothesis.matrix = L,
-                 vcov. = vcov(m3),
-                 coef. = coef(m3))
-
-#-----------------------------------------------------------------------
-# Predição com bandas de confiança.
-
-pred <- with(ninfas, expand.grid(bloco = factor(levels(bloco)[1],
-                                                levels = levels(bloco)),
-                                 cult = levels(cult),
-                                 aval = levels(aval),
-                                 KEEP.OUT.ATTRS = FALSE))
-X <- model.matrix(formula(m0)[-2], data = pred)
-
-bl <- attr(X, "assign") == 1
-X[, bl] <- X[, bl] * 0 + 1/(sum(bl) + 1)
-head(X)
-
-pred <- list(pois = pred, pgen = pred)
-
-# Quantil normal.
-qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
-
-# Preditos pela Poisson.
-aux <- confint(glht(m0, linfct = X),
-               calpha = univariate_calpha())$confint
-colnames(aux)[1] <- "fit"
-pred$pois <- cbind(pred$pois, exp(aux))
-str(pred$pois)
-
-# Matrix de covariância completa e sem o alpha.
-V <- vcov(m3)
-V <- V[-1, -1]
-U <- chol(V)
-aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-                  FUN = function(x) { sum(x^2) }))
-pred$pgen$eta <- c(X %*% coef(m3)[-1])
-pred$pgen <- cbind(pred$pgen,
-                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-                         FUN = function(x) {
-                              exp(pred$pgen$eta + x)
-                         }))
-str(pred$pgen)
-
-pred <- ldply(pred, .id = "modelo")
-pred <- arrange(pred, cult, aval, modelo)
-str(pred)
-
-key <- list(lines = list(
-                lty = 1,
-                col = trellis.par.get("superpose.line")$col[1:2]),
-            text = list(
-                c("Poisson", "Poisson Generalizada")))
-
-xyplot(y ~ aval | cult, data = ninfas,
-       grid = TRUE, as.table = TRUE, layout = c(NA, 2),
-       xlab = "Dias", ylab = "Número total de ninfas",
-       key = key) +
-    as.layer(xyplot(fit ~ aval | cult, data = pred,
-                    groups = modelo, pch = 19, type = "o",
-                    ly = pred$lwr, uy = pred$upr,
-                    cty = "bars", length = 0.05,
-                    desloc = 0.2 * scale(as.integer(pred$modelo),
-                                         scale = FALSE),
-                    prepanel = prepanel.cbH,
-                    panel.groups = panel.cbH,
-                    panel = panel.superpose), under = TRUE)
-
-#-----------------------------------------------------------------------
-
-fun <- Vectorize(vectorize.args = c("lambda", "alpha"),
-                 FUN = function(lambda, alpha) {
-                     sum(dpg1(y = y, lambda = lambda, alpha = alpha))
-                 })
-
-# dpg1(y = 0:10, lambda = 5, alpha = -0)
-# dpois(0:10,  lambda = 5)
-
-head(sort(subset(pred, modelo = "pois")$fit, decreasing = TRUE))
-coef(m3)["alpha"]
-
-y <- 0:400
-grid <- list(lambda = seq(10, 200, by = 2),
-             alpha = seq(-0.05, 0.1, by = 0.001))
-grid$sum <- with(grid, outer(lambda, alpha, fun))
-
-funcur
-
-y <- 0:800
-py <- dpg1(y = y, lambda = 190, alpha = 0.05)
-plot(py ~ y, type = "h")
-abline(v = 190)
-
-grid <- with(grid,
-             cbind(expand.grid(lambda = lambda, alpha = alpha),
-                   data.frame(sum = c(sum))))
-
-levelplot(sum ~ lambda + alpha,
-          data = subset(grid, round(sum, 3) == 1),
-          col.regions = gray.colors) +
-    layer(panel.abline(h = 0.05))
-
-```
-
-```{r}
-funcur <- function(lambda, alpha, n = 10) {
-    m <- lambda
-    s <- sqrt(lambda) * (1 + alpha * lambda)
-    sy <- seq(max(c(0, m - 4 * s)),
-              ceiling(m + 4 * s),
-              length.out = n)
-    sy <- round(sy, 0)
-    fy <- dpg1(y = sy, lambda = lambda, alpha = alpha)
-    fy <- 0.8 * fy/max(fy)
-    return(cbind(lambda = lambda, alpha = alpha, y = sy, fy = fy))
-}
-
-den <- subset(pred, modelo == "pgen")
-
-L <- lapply(den$fit, FUN = funcur, alpha = 0.05, n = 50)
-for (i in seq_along(L)) {
-    L[[i]] <- cbind(den[i, ], L[[i]])
-    # L[[i]]$fy <- 0.75 * L[[i]]$fy/max(L[[i]]$fy)
-}
-
-L <- do.call(rbind, L)
-
-xyplot(y ~ aval | cult, data = L,
-       py = L$fy, type = "l", groups = aval, col = 1,
-       panel = function(x, y, subscripts, py, ...) {
-           panel.xyplot(x = as.integer(x) + py[subscripts],
-                        y = y,
-                        subscripts = subscripts, ...)
-       }) +
-    as.layer(xyplot(ntot ~ aval | cult, data = ninfas)) +
-    as.layer(xyplot(fit ~ aval | cult, data = pred,
-                    groups = modelo, pch = 19, type = "o",
-                    ly = pred$lwr, uy = pred$upr,
-                    cty = "bars", length = 0.05,
-                    desloc = 0.2 * scale(as.integer(pred$modelo),
-                                         scale = FALSE),
-                    prepanel = prepanel.cbH,
-                    panel.groups = panel.cbH,
-                    panel = panel.superpose), under = TRUE)
-
-
-# Teria que estimar uma variância para cada avaliação.
-
-```
-
 ## Pacote VGAM ##
 
 ```{r, eval=FALSE}
 #-----------------------------------------------------------------------
 
-# # http://finzi.psych.upenn.edu/library/VGAM/html/genpoisson.html
-# library(VGAM)
-#
-# formula(m0)
-# m1 <- vglm(formula(m0), data = cap, family = genpoisson, trace = TRUE)
-# coef(m1, matrix = TRUE)
-# summary(m1)
-#
-# logLik(m2)
+# http://finzi.psych.upenn.edu/library/VGAM/html/genpoisson.html
+library(VGAM)
+
+m1 <- vglm(ncap ~ est * (des + I(des^2)),
+           data = capdesfo, family = genpoisson, trace = TRUE)
+coef(m1, matrix = TRUE)
+summary(m1)
+
+logLik(m1)
 
 ```
