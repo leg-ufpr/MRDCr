@@ -8,7 +8,7 @@ opts_chunk$set(
     fig.width = 9,
     fig.height = 5,
     fig.align = "center",
-    out.width = "0.8\\textwidth",
+    out.width = "1\\textwidth",
     dev.args = list(family = "Palatino"))
 
 # Trellis graphical style.

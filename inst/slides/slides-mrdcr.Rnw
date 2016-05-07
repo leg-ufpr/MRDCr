@@ -200,33 +200,49 @@ source("_setup.R")
 \end{frame}
 
 \section{Introdução}
+\label{sec-introducao}
 
 \section{Modelos Lineares Generalizados}
+\label{sec-mlg}
 
 \section{Modelo de Regressão Poisson}
+\label{sec-poisson}
 
 \section{Modelo de Quase-Verossimilhança}
+\label{sec-quase-verossimilhanca}
 
 \section{Modelos Paramétricos Alternativos}
+\label{sec-modelos-parametricos}
 
-\subsection{Modelo Binomial Negativo}
+\subsection{Modelo Binomial Negativa}
+\label{sec-binomial-negativa}
 
-\subsection{Modelo Poisson-Generalizado}
+\subsection{Modelo Poisson-Generalizada}
+\label{sec-poisson-generalizada}
 
 \subsection{Modelo COM-Poisson}
+\label{sec-com-poisson}
 
 <<compoisson, child = "compoisson.Rnw">>=
 @
 
 \subsection{Modelo Gamma-Count}
+\label{sec-gamma-count}
 
 \section{Modelos para Excesso de Zeros}
+\label{sec-excesso-zeros}
+
+<<excesso_zeros, child = "excesso_zeros.Rnw">>=
+@
 
 \subsection{Modelos de Barreira (Hurdle)}
+\label{sec-hurdle}
 
 \subsection{Modelos de Mistura (Zero Inflated)}
+\label{sec-zeroinfl}
 
 \section{Modelos com Efeitos Aleatórios}
+\label{sec-efeito-aleatorio}
 
 \begin{frame}[allowframebreaks]{Referências}
 \small
