@@ -1,0 +1,134 @@
+
+
+
+
+\begin{frame}[allowframebreaks]{Excesso de Zeros}
+
+\begin{itemize}
+    \item Casos em que a proporção de valores nulos na amostra é superior
+    àquela estimada por um modelo de contagem. No caso Poisson
+    $e^{-\lambda}$
+    \item Geralmente contagens com um número excessivo de valores nulos
+    apresentam superdispersão (ocasionada pelo excesso de zeros).
+    \item Os modelos mais flexíveis abordados não capturam esse excesso de
+    zeros e não se ajustam adequadamente.
+\end{itemize}
+
+\framebreak
+
+
+<<fig.width=10, fig.height=4, out.width="1.0\\textwidth">>=
+
+library(MRDCr)
+
+set.seed(100)
+n <- 1000
+
+lambda <- 2; pi <- 0.9
+y <- sapply(rbinom(n, 1, pi), function(x) {
+    ifelse(x == 0, 0, rpois(1, lambda))
+})
+
+lambda <- 5; pi <- 0.85
+y2 <- sapply(rbinom(n, 1, pi), function(x) {
+    ifelse(x == 0, 0, rpois(1, lambda))
+})
+
+yu <- sort(unique(y))
+yu2 <- sort(unique(y2))
+
+## Probabilidades reais
+py_real <- c(prop.table(table(y)))
+py_real2 <- c(prop.table(table(y2)))
+
+## Probabilidades via Poisson
+m0 <- glm(y ~ 1, family = poisson)
+py_pois <- dpois(yu, exp(m0$coef))
+m02 <- glm(y2 ~ 1, family = poisson)
+py_pois2 <- dpois(yu2, exp(m02$coef))
+
+## Probabilidades via COM-Poisson
+m2 <- cmp(y ~ 1, data = data.frame(y = y), sumto = 40)
+py_dcmp <- dcmp(yu, loglambda = m2@coef[-1], phi = m2@coef[1], 
+                sumto = 40)
+m22 <- cmp(y ~ 1, data = data.frame(y = y2), sumto = 40)
+py_dcmp2 <- dcmp(yu2, loglambda = m22@coef[-1], phi = m22@coef[1], 
+                 sumto = 40)
+
+##----------------------------------------------------------------------
+cols <- c(trellis.par.get("dot.symbol")$col,
+          trellis.par.get("superpose.line")$col[2:3])
+key <- list(corner = c(0.95, 0.9),
+            lines = list(lty = 1, col = cols, lwd = 3),
+            text = list(c("Real", "Poisson", "COM-Poisson")))
+
+
+ylim <- extendrange(c(0, max(py_real, py_pois, py_dcmp)))
+esp <- 0.11
+xy1 <- xyplot(py_real ~ yu, type = "h", lwd = 3, grid = TRUE,
+              main = expression(mu[count] == 2~", "~pi["zero extra"] == 0.1),
+              xlab = "", ylab = expression(P(Y==y)),
+              ylim = ylim, key = key,
+              panel = function(x, y, ...) {
+                  panel.xyplot(x, y, ...)
+                  panel.lines(x = x - esp, y = py_pois, type = "h",
+                              col = cols[2], lwd = 3)
+                  panel.lines(x = x + esp, y = py_dcmp, type = "h",
+                              col = cols[3], lwd = 3)
+              })
+
+ylim <- extendrange(c(0, max(py_real2, py_pois2, py_dcmp2)))
+esp2 <- 0.15
+xy2 <- xyplot(py_real2 ~ yu2, type = "h", lwd = 3, grid = TRUE,
+              main = expression(mu[count] == 5~", "~pi["zero extra"] == 0.15),
+              xlab = "", ylab = "",
+              ylim = ylim, key = key,
+              panel = function(x, y, ...) {
+                  panel.xyplot(x, y, ...)
+                  panel.lines(x = x - esp2, y = py_pois2, type = "h",
+                              col = cols[2], lwd = 3)
+                  panel.lines(x = x + esp2, y = py_dcmp2, type = "h",
+                              col = cols[3], lwd = 3)
+              })
+
+print(xy1, split = c(1, 1, 2, 1), more = TRUE)
+print(xy2, split = c(2, 1, 2, 1), more = FALSE)
+      
+@
+
+\end{frame}
+
+\begin{frame}{Gerador de excesso de zeros}
+
+\begin{itemize}
+    \item Uma limitação das abordagens estudadas é que as contagens nulas
+    e não nulas são provenientes do mesmo processo gerador dos dados.
+    \item Para dados com excesso de zeros, é razoável a suposição da haver
+    mais de um processo gerador atuando na geração dos dados.
+    \item Assim a ocorrência de valores nulos podem ser caracterizada
+    como:
+    \begin{itemize}
+        \item {\bf zeros amostrais}: Ocorrem segundo um processo gerador
+        de contagens (e.g Processo Poisson)
+        \item {\bf zeros estruturais}: Ausência de determinada
+        característica da população.
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Modelando contagens com excesso de zeros}
+
+Como há dois processos que geram os valores da população, na modelagem
+deve-se considerar ambos. As principais abordagens nestes casos são via:
+
+\begin{itemize}
+    \item {\bf Modelos de barreira (\textit{Hurdle Models})}: que
+    desconsidera os zeros amostrais e modela os zeros estruturais e as
+    contagens positivas (seção \ref{sec-hurdle}); e
+    \item {\bf Modelos de mistura (\textit{Zero Inflated Models})}: que 
+    modela os zeros (estruturais e amostrais) em conjunto com as contagens
+    positivas (\ref{sec-zeroinfl}).
+\end{itemize}
+
+\end{frame}
