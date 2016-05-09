@@ -1,0 +1,226 @@
+
+\begin{frame}[allowframebreaks]{Modelo  \textit{Zero Inflated}}
+
+\begin{itemize}
+    \item Consideram uma mistura de modelos;
+    \item Os zeros agora são caracterizados em amostrais e estruturais;
+    \item Há contribuição para estimação da probabilidade em zero de duas
+    funções de probabilidade;
+    \item São chamados de modelos de mistura ou inflacionados de zero 
+    ($ZI$);
+    \item Esta abordagem ``mistura`` um modelo de contagem sem restrição
+    e um modelo censurado à direita no ponto $y = 1$.
+\end{itemize}
+
+\framebreak
+
+\begin{block}{Distribuição de probabilidades}
+\begin{equation*}
+    Pr(Y = y) =
+    \begin{dcases*}
+        f_z(0) + (1-f_z(0))f_c(Y=y) & \text{se } y = 0,\\
+            (1 - f_z(0)) f_c(Y = y) & \text{se } y = 1, 2, \dots
+    \end{dcases*}
+\end{equation*}
+\end{block}
+
+
+\begin{block}{Momentos da distribuição}
+\begin{columns}[t]
+\column{.38\textwidth}
+\begin{center}
+{\bf Média}
+\end{center}
+$$
+E(Y) = (1-f_z(0)E(Y^*)
+$$
+\column{.6\textwidth}
+\begin{center}
+{\bf Variância}
+\end{center}
+$$
+V(Y) = (1-f_z(0)E(Y^*)[ E({Y^*}^2) - (1- f_z(0)E^2(Y^*)]
+$$
+
+\end{columns}
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Modelos de mistura}
+
+\begin{columns}[c]
+\column{.4\textwidth}
+
+\begin{itemize}
+    \item $f_z$ é uma função de probabilidades degenerada no ponto $y=0$,
+    ou seja, tem toda massa no ponto 0.
+    \item $f_c$ é uma função de probabilidades tradicional.
+    \item Os modelos de mistura misturam $f_z$ e $f_c$ para descrever $Y$
+    \item Para a parte $f_c$ os dados ainda podem apresentar sub,
+    superdispersão ou excesso de valores em outro ponto.
+\end{itemize}
+
+\column{.6\textwidth}
+<<fig.height=3, fig.width=4.5, out.width="1\\textwidth">>=
+
+set.seed(2016)
+n <- 1000
+
+lambda <- 3; pi <- 0.9
+y <- sapply(rbinom(n, 1, pi), function(x) {
+    ifelse(x == 0, 0, rpois(1, lambda))
+})
+
+yu <- sort(unique(y))
+py_real <- c(prop.table(table(y)))
+m0 <- glm(y ~ 1, family = poisson)
+py_pois <- dpois(yu, exp(m0$coef))
+
+cols <- c(trellis.par.get("dot.symbol")$col,
+          trellis.par.get("superpose.line")$col[2])
+key <- list(corner = c(0.95, 0.9), 
+            lines = list(lty = 1, col = rev(cols), lwd = 3, size = 3),
+            text = list(expression(f[z], f[c])))
+
+ylim <- extendrange(c(0, max(py_real, py_pois)))
+xyplot(py_pois ~ yu, type = "h", lwd = 5, grid = TRUE,
+       xlab = "",
+       ylab = expression(P(Y==y)),
+       ylim = ylim, key = key,
+       scales = list(x = list(at = yu)),
+       panel = function(x, y, ...) {
+           panel.xyplot(x, y, ...)
+           panel.lines(x = x[1], y = py_real[1], type = "h",
+                       col = cols[2], lwd = 5)
+           panel.lines(x = x[1], y = py_pois[1], type = "h",
+                       col = cols[1], lwd = 5)
+       }
+)
+
+@
+
+\end{columns}
+
+\end{frame}
+
+\begin{frame}{Misturas comuns}
+
+Pode-se propor diferentes distribuições para $f_z$ e $f_c$. Uma
+escolha natural para $f_z$ é a Bernoulli e para $f_c$ a Poisson. Assim
+
+\begin{columns}[c]
+\column{.3\textwidth}
+\begin{align*}
+    &f_z \sim Bernoulli(\pi) \\
+    &f_c \sim Poisson(\lambda)
+\end{align*}
+
+\column{.1\textwidth}
+$$\Rightarrow$$
+
+\column{.6\textwidth}
+\begin{flalign*}
+    &P(Y = y) = \begin{dcases*}
+        (1 - \pi) + \pi e^{-\lambda} & \text{se } y = 0,\\
+        \pi \left ( \frac{e^{-\lambda} \lambda^y}{y!} \right ) &
+            \text{se } y = 1, 2, \dots
+    \end{dcases*}&
+\end{flalign*}
+\end{columns}
+
+\vspace{0.8cm}
+Embora essa escolha de modelo seja o que tem o maior suporte
+computacional, ressalta-se que outras distribuições podem ser escolhidas
+para ambas as partes $f_z$ e $f_c$.
+
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Modelos de regressão \textit{Zero Inflated}}
+
+\begin{itemize}
+    \item Incorporando covariáveis em $f_z$ e $f_c$ na forma $h(Z\gamma)$
+    e $g(X\beta)$, respectivamente.
+    \item As funções $h(.)$ e $g(.)$, são as funções de ligação escolhidas
+    conforme modelos $f_z$ e $f_c$.
+    \item O modelo de regressão {\it Hurdle} terá, portanto, os vetores de
+    parâmetros $\beta$, $\gamma$ e potencialmente $\phi$ (caso um modelo
+    com parâmetro de dispersão for considerado)
+    \item Como agora são modelos misturados a comparação entre $\beta$ e
+    $\gamma$ não tem a mesma interpretabilidade.
+    \item Para comparação de modelos tradicionais contra os modelos de
+    mistura, o teste de Vuong para modelos não aninhados pode ser
+    aplicado.
+\end{itemize}
+
+\framebreak
+
+\begin{columns}[t,onlytextwidth]
+\column{.45\textwidth}
+
+\begin{block}{Função de verossimilhança}
+    \begin{align*}
+        L(\underline{\theta}; &\underline{y}) = 
+        \prod_{i=1}^n \mathds{1} \left ( (1-f_{z_i}(0)) f_{c_i}(y_i)
+            \right ) \cdot \\
+        &\prod_{i=1}^n (1-\mathds{1}) \left ( f_{z_i}(0) + 
+        (1-f_{z_i}(0))f_{c_i}(0)
+        \right )
+    \end{align*}
+\end{block}
+
+\column{.52\textwidth}
+
+\begin{block}{Função de log-verossimilhança}
+    \begin{align*}
+        l(\underline{\theta}; &\underline{y}) = \sum_{i = 1}^n 
+        \mathds{1} \left ( \log( 1-f_{z_i}(0)) + \log(f_{c_i})
+        \right ) + \\
+        &\sum_{i = 1}^n (1-\mathds{1}) \left ( \log(f_{z_i}(0) + 
+        (1-f_{z_i}(0))f_{c_i}(0)) \right )
+    \end{align*}
+\end{block}
+\end{columns}
+
+\vspace{0.8cm}
+Sendo $\mathds{1}$ a função indicadora que assume o valor 1 se $y > 0$ e 
+0 se $y = 0$ e $\underline{\theta}$ o vetor de parâmetros do modelo (
+$\beta$, $\gamma$ e $\phi$, se houver).
+
+\end{frame}
+
+\begin{frame}[fragile, allowframebreaks]{Modelos \textit{Zero Inflated} no R}
+
+Usando o  {\tt pscl} (\textit{Political Science Computational Laboratory,
+Stanford University})
+
+<<eval=FALSE, echo=TRUE>>=
+
+library(pscl)
+zeroinfl(y ~ fc_preditor | fz_preditor, dist = "poisson", link = "logit")
+
+@
+
+Usando o {\tt VGAM} ({\it Vector Generalized Linear and Additive Models})
+
+<<eval=FALSE, echo=TRUE>>=
+
+library(VGAM)
+vglm(y ~ preditor, family = zapoisson)
+
+@
+
+
+\end{frame}
+
+\begin{frame}{Estudos de caso}
+
+{\it Vignette} \href{run:../doc/v07_zeroinfl.html}{\tt v07\_zeroinfl.html}
+\begin{description}
+    \item[\tt peixe]: número de peixes capturados por grupos em um parque
+    estadual
+    \item[\tt sinistros]: número de sinistros em uma seguradora de
+    automóveis
+\end{description}
+
+\end{frame}

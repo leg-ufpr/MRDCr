@@ -244,9 +244,11 @@ source("_setup.R")
 <<hurdle, child = "hurdle.Rnw">>=
 @
 
-
 \subsection{Modelos de Mistura (\protect\textit{Zero Inflated})}
 \label{sec-zeroinfl}
+
+<<zeroinfl, child = "zeroinfl.Rnw">>=
+@
 
 \section{Modelos com Efeitos Aleatórios}
 \label{sec-efeito-aleatorio}
