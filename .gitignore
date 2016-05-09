@@ -15,6 +15,7 @@ playground.R
 *.nav
 *.snm
 *.tex
+*.vrb
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
