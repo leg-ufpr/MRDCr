@@ -2,8 +2,11 @@
 
 \usepackage[brazil]{babel}
 \usepackage[utf8]{inputenc}
+\usepackage{lmodern}
 \usepackage{multicol}
 \usepackage{tikz}
+\usepackage{mathtools} %% Funcionalidades (como \dcases)
+\usepackage{dsfont}    %% Para \mathds{1} Indicadora
 
 %% ======================================================================
 %% Fontes
@@ -235,10 +238,14 @@ source("_setup.R")
 <<excesso_zeros, child = "excesso_zeros.Rnw">>=
 @
 
-\subsection{Modelos de Barreira (Hurdle)}
+\subsection{Modelos de Barreira \protect\textit{Hurdle}}
 \label{sec-hurdle}
 
-\subsection{Modelos de Mistura (Zero Inflated)}
+<<hurdle, child = "hurdle.Rnw">>=
+@
+
+
+\subsection{Modelos de Mistura (\protect\textit{Zero Inflated})}
 \label{sec-zeroinfl}
 
 \section{Modelos com Efeitos Aleatórios}
@@ -259,6 +266,11 @@ S., Boatwright, P. (2005). A useful distribution for fitting discrete
 data: Revival of the Conway-Maxwell-Poisson distribution. {\em Journal of
 the Royal Statistical Society. Series C: Applied Statistics}, 54(1),
 127–142.
+
+\bibitem{Zeiles2008} Zeileis, A., Kleiber, C., Jackman, S. (2008). 
+Regression Models for Count Data in R. {\em Journal of Statistical
+Software}, 27(8), 1 - 25. 
+\url{doi:http://dx.doi.org/10.18637/jss.v027.i08}
 
 \bibitem{Winkelmann2008} Winkelmann, R. (2008). {\em Econometric analysis
 of count data} (5th Ed.). Springer Science \& Business Media.
