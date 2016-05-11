@@ -29,6 +29,7 @@
 #'
 #' @seealso \code{\link[doBy]{LSmatrix}}.
 #' @import doBy multcomp
+#' @importFrom utils combn
 #' @examples
 #'
 #' X <- diag(3)
@@ -79,7 +80,7 @@ apc <- function(lfm, lev = NULL) {
             lev <- as.character(1:nlev)
         }
     }
-    cbn <- combn(x = seq_along(lev), m = 2)
+    cbn <- utils::combn(x = seq_along(lev), m = 2)
     M <- lfm[cbn[1, ], ] - lfm[cbn[2, ], ]
     if (is.vector(M)) {
         dim(M) <- c(1, length(M))
