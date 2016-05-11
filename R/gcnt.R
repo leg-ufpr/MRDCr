@@ -8,43 +8,42 @@
 #'
 #' \deqn{L(\lambda, \alpha; y) =
 #'   \left(\int_{0}^{T}
-#'     \frac{(\alpha\lambda)^{y\alpha}}{\Gamma(y\alpha)}\,
-#'     u^{y\alpha-1} \exp\{-\alpha\lambda u\}\, \text{d}u \right)
-#'  - \left(\int_{0}^{T}
-#'     \frac{(\alpha\lambda)^{y\alpha}}{\Gamma((y+1)\alpha)}\,
-#'     u^{(y+1)\alpha-1} \exp\{-\alpha\lambda u\}\, \text{d}u \right).
-#' }
+#'   \frac{(\alpha\lambda)^{y\alpha}}{\Gamma(y\alpha)}\,
+#'   u^{y\alpha-1} \exp\{-\alpha\lambda u\}\, \textrm{d}u \right)
+#'   - \left(\int_{0}^{T}
+#'   \frac{(\alpha\lambda)^{y\alpha}}{\Gamma((y+1)\alpha)}\,
+#'   u^{(y+1)\alpha-1} \exp\{-\alpha\lambda u\}\, \textrm{d}u \right).}
 #'
-#' Se \eqn{\tau \sim \text{Gamma}(\alpha, \alpha\lambda)}, então
+#' Se \eqn{\tau \sim \textrm{Gamma}(\alpha, \alpha\lambda)}, então
 #'     \eqn{E(\tau) = \frac{\alpha}{\alpha\lambda} = \frac{1}{\lambda}}
-#'     e \eqn{V{\tau} = \frac{1}{\alpha\lambda^2}}.
+#'     e \eqn{V(\tau) = \frac{1}{\alpha\lambda^2}}.
 #'
 #' Usando \eqn{G()} para representar o resultado de cada uma das
-#'     integrais entre parenteses da densidade da gamma, tem-se
+#'     integrais entre parenteses, que correponde a probabilidade
+#'     acumulada de uma variável aleatória gamma com parâmetros
+#'     \eqn{y\alpha} e \eqn{\alpha\lambda}, tem-se
 #'
 #' \deqn{L(\lambda, \alpha; y) =
 #'   G(T, y\alpha, \alpha\lambda)
-#'   - G(T, (y+1)\alpha, \alpha\lambda).
-#' }
+#'   - G(T, (y+1)\alpha, \alpha\lambda).}
 #'
 #' A função log-verossimilhança de uma observação é, portanto,
 #'
 #' \deqn{\ell(\lambda, \alpha; y) =
-#'     \ln \left[ G(T, \lambda, y\alpha) -
-#'       G(T, \lambda, (y+1)\alpha) \right ].
-#' }
+#'   \ln \left[ G(T, y\alpha, \alpha\lambda) -
+#'   G(T, (y+1)\alpha, \alpha\lambda) \right].}
 #'
 #' Para uma amostra aleatória independente, a função de
 #'     log-verossimilhança é
 #'
-#' \deqn{\ell(\lambda, \alpha; y) = \sum_{i=1}^{n}\ln \left[ G(T,
-#'     \lambda, y_i\alpha) - G(T, \lambda, (y_i+1)\alpha) \right ].
-#' }
+#' \deqn{\ell(\lambda, \alpha; y) =
+#'   \sum_{i=1}^{n} \ln \left[ G(T, y\alpha, \alpha\lambda) -
+#'   G(T, (y+1)\alpha, \alpha\lambda) \right].}
 #'
 #' Nestas expressões, \eqn{\alpha} é o parâmetro de dispersão da
 #'     variável aleatória \eqn{Y} sendo que se \eqn{\alpha = 1} então
-#'     \eqn{Y ~ \text{Poisson}}, se \eqn{\alpha < 1} então \eqn{V(Y) >
-#'     E(Y)} e \eqn{\alpha > 1} então \eqn{V(Y) < E(Y)}.
+#'     \eqn{Y \sim \textrm{Poisson}}, se \eqn{\alpha < 1} então
+#'     \eqn{V(Y) > E(Y)} e \eqn{\alpha > 1} então \eqn{V(Y) < E(Y)}.
 #'
 #' Como \eqn{\alpha} e \eqn{\lambda} devem ser positivos, usou-se a
 #'     função de ligação log para escrever a log-verossimilhança com
@@ -59,7 +58,7 @@
 #' @param X A matriz de delineamento correspondente ao modelo linear
 #'     ligado à média pela função de ligação log. A matriz do modelo
 #'     pode ser construída com a função
-#'     \code{link[stats]{model.matrix}}.
+#'     \code{\link[stats]{model.matrix}}.
 #' @param offset Um vetor, de mesmo comprimento de \code{y}, com valores
 #'     que correspondem aos offsets (ou exposição) para cada valor
 #'     observado. Se \code{NULL}, é usado 1 como offset.
@@ -81,12 +80,14 @@
 #' y <- rpois(100, lambda = exp(1))
 #' X <- cbind(0 * y + 1)
 #'
-#' grid <- expand.grid(alpha = seq(-0.5, 0.5, by = 0.01),
-#'                     lambda = seq(0.1, 2.1, by = 0.025))
+#' grid <- expand.grid(alpha = seq(-0.5, 0.5, by = 0.02),
+#'                     lambda = seq(0.1, 2.1, by = 0.05))
+#' str(grid)
 #'
 #' grid$ll <- apply(grid, MARGIN = 1,
 #'                  FUN = function(vec) {
-#'                      llgcnt(params = vec, y = y, X = X, offset = NULL)
+#'                      llgcnt(params = vec, y = y, X = X,
+#'                             offset = NULL)
 #'                  })
 #'
 #' library(latticeExtra)
@@ -94,6 +95,7 @@
 #' levelplot(ll ~ alpha + lambda, data = grid) +
 #'     layer(panel.abline(v = 0, h = 1, lty = 2))
 #'
+#' @importFrom stats pgamma
 llgcnt <- function(params, y, X, offset = NULL) {
     # params: vetor de parâmetros;
     #   params[1]: parâmetro de dispersão (alpha);
@@ -128,12 +130,13 @@ llgcnt <- function(params, y, X, offset = NULL) {
 #'
 #' \deqn{p(y,\lambda,\alpha) =
 #'   \left(\int_{0}^{1}
-#'     \frac{(\alpha\lambda)^{y\alpha}}{\Gamma(y\alpha)}\,
-#'     u^{y\alpha-1} \exp\{-\alpha\lambda u\}\, \text{d}u \right)
-#'  - \left(\int_{0}^{1}
-#'     \frac{(\alpha\lambda)^{y\alpha}}{\Gamma((y+1)\alpha)}\,
-#'     u^{(y+1)\alpha-1} \exp\{-\alpha\lambda u\}\, \text{d}u \right).
-#' }
+#'   \frac{(\alpha\lambda)^{y\alpha}}{\Gamma(y\alpha)}\,
+#'   u^{y\alpha-1}
+#'   \exp\{-\alpha\lambda u\}\, \textrm{d}u \right)
+#'   - \left(\int_{0}^{1}
+#'   \frac{(\alpha\lambda)^{y\alpha}}{\Gamma((y+1)\alpha)}\,
+#'   u^{(y+1)\alpha-1}
+#'   \exp\{-\alpha\lambda u\}\, \textrm{d}u \right),}
 #'
 #' em que \eqn{\lambda > 0} é a média da variável aleatória tempo entre
 #'     eventos e \eqn{\alpha > 0} é o parâmetro de dispersão.
@@ -170,6 +173,7 @@ llgcnt <- function(params, y, X, offset = NULL) {
 #'                GC(lambda == 15, alpha == 1.5)))
 #' })
 #'
+#' @importFrom stats pgamma
 dgcnt <- function(y, lambda, alpha) {
     p <- pgamma(q = 1,
                 shape = y * alpha,
@@ -232,6 +236,7 @@ dgcnt <- function(y, lambda, alpha) {
 #'
 #' plot(profile(n0, which = "alpha"))
 #'
+#' @importFrom stats glm.fit model.frame model.matrix model.offset model.response poisson
 gcnt <- function(formula, data, start = NULL, ...) {
     frame <- model.frame(formula, data)
     terms <- attr(frame, "terms")
