@@ -7,25 +7,25 @@
 #' @details A função de log-verossimilhança da Poisson Generalizada, na
 #'     parametrização de modelo de regressão é:
 #'
-#'     \deqn{ll(\lambda,\alpha,y) = y (\log(\lambda) - \log(1 +
-#'       \alpha\lambda)) + (y - 1) \log(1 + \alpha y) -
-#'       \lambda\left\(\frac{1 + \alpha y}{1 + \alpha\lambda}\right\) -
-#'       \log(y!).
-#'     }
+#' \deqn{\ell(\lambda,\alpha,y) =
+#'   y (\log(\lambda) - \log(1 + \alpha\lambda)) +
+#'   (y - 1) \log(1 + \alpha y) -
+#'   \lambda\left(\frac{1 + \alpha y}{1 + \alpha\lambda}\right) -
+#'   \log(y!), }
 #'
-#'     \eqn{\alpha} é o parâmetro de dispersão e \eqn{\lambda > 0} é a
-#'     média \eqn{E(Y) = \lambda} e \eqn{y = 0,1,ldots} é vetor
+#' em que \eqn{\alpha} é o parâmetro de dispersão e \eqn{\lambda > 0} é
+#'     a média \eqn{E(Y) = \lambda} e \eqn{y = 0,1,ldots} é vetor
 #'     observado da variável de contagem. Nessa parametrização,
 #'     \eqn{V(Y) = \lambda (1 + \alpha\lambda)^2}. A Poisson
-#'     Generalizada em a Poisson como caso particular quando $\alpha =
-#'     0$.
+#'     Generalizada em a Poisson como caso particular quando \eqn{\alpha
+#'     = 0}.
 #'
 #' Para o modelo de regressão, um preditor linear é ligado à média pela
 #'     função de ligação log, \eqn{\log(\lambda) = X\beta}, tal como é
 #'     para o modelo Poisson com link log.
 #'
 #' O espaço paramétrico de \eqn{\alpha} não limitado para o lado direito
-#'     do zero (\eqn{alpha} positivo) mas para o lado esquerdo
+#'     do zero (\eqn{\alpha} positivo) mas para o lado esquerdo
 #'     (\eqn{\alpha} negativo) o limite inferior é dependente do
 #'     parâmetro \eqn{\lambda} e dos valores observados de
 #'     \eqn{y}. Valores não finitos podem ser retornados durante a
@@ -41,7 +41,7 @@
 #' @param X A matriz de delineamento correspondente ao modelo linear
 #'     ligado à média pela função de ligação log. A matriz do modelo
 #'     pode ser construída com a função
-#'     \code{link[stats]{model.matrix}}.
+#'     \code{\link[stats]{model.matrix}}.
 #' @param offset Um vetor, de mesmo comprimento de \code{y}, com valores
 #'     que correspondem aos offsets (ou exposição) para cada valor
 #'     observado. Se \code{NULL}, é usado 1 como offset.
@@ -106,19 +106,18 @@ llpgnz <- function(params, y, X, offset = NULL) {
 #'     com distribuição Poisson Generalizada na parametrização
 #'     \eqn{\lambda-\alpha}:
 #'
-#' \deqn{
-#'     p(y,\lambda,\alpha) =
-#'     \left\(\frac{\lambda}{1+\alpha\lambda}\right\)^{y}
-#'     \,\frac{(1+\alpha y)^{y-1}}{y!}
-#'     \exp\left\{-\lambda\left(
-#'     \frac{1+\alpha y}{1+\alpha\lambda}\right)\right\},
+#' \deqn{p(y,\lambda,\alpha) =
+#'   \left(\frac{\lambda}{1+\alpha\lambda}\right)^{y}
+#'   \,\frac{(1+\alpha y)^{y-1}}{y!}
+#'   \exp\left\{-\lambda\left(
+#'   \frac{1+\alpha y}{1+\alpha\lambda}\right)\right\},
 #' }
 #'
 #' em que \eqn{\lambda > 0} é a média da variável aleatória e
 #'     \eqn{\alpha} é o parâmetro de dispersão, sendo que \eqn{V(Y) =
 #'     \lambda (1 + \alpha\lambda)^2}. O espaço paramétrico de
 #'     \eqn{\alpha} depende de \eqn{\lambda} e \eqn{y} pois
-#'     \eqn{1+\alpha\lambda > 0} e {1+\alpha y > 0}.
+#'     \eqn{1+\alpha\lambda > 0} e \eqn{1+\alpha y > 0}.
 #' @param y Valor da variável de contagem.
 #' @param lambda Valor do parâmetro \eqn{\lambda} que é a média da
 #'     distribuição .
@@ -215,6 +214,7 @@ dpgnz <- function(y, lambda, alpha) {
 #'
 #' plot(profile(n0, which = "alpha"))
 #'
+#' @importFrom stats glm.fit model.frame model.matrix model.offset model.response poisson
 pgnz <- function(formula, data, start = NULL, ...) {
     frame <- model.frame(formula, data)
     terms <- attr(frame, "terms")
