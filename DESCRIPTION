@@ -45,6 +45,7 @@ Suggests:
     reshape2,
     knitr,
     rmarkdown,
-    shiny
+    shiny,
+    rpanel
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
