@@ -38,3 +38,30 @@
 #' O nome das cultivares, a espécie do nematóide e outras informações
 #'     não foram dadas para preservar a originalidade da Pesquisa.
 #' @examples
+#'
+#' m0 <- glm(nema ~ offset(log(off)) + cult,
+#'           data = nematoide,
+#'           family = poisson)
+#'
+#' # Diagnóstico.
+#' par(mfrow = c(2, 2))
+#' plot(m0); layout(1)
+#'
+#' # Estimativas dos parâmetros.
+#' summary(m0)
+#'
+#' # Quadro de deviance.
+#' anova(m0, test = "Chisq")
+#'
+#' library(bbmle)
+#'
+#' # Poisson Generalizada.
+#' m1 <- pgnz(formula(m0), data = nematoide)
+#'
+#' # Diferença de deviance.
+#' 2 * diff(c(logLik(m0), logLik(m1)))
+#'
+#' # Estimativas dos parâmetros.
+#' summary(m1)
+#'
+NULL
