@@ -216,6 +216,11 @@ dpgnz <- function(y, lambda, alpha) {
 #'
 #' @importFrom stats glm.fit model.frame model.matrix model.offset model.response poisson
 pgnz <- function(formula, data, start = NULL, ...) {
+    if (!requireNamespace("bbmle", quietly = TRUE)){
+        stop(paste("`bbmle` \u00e9 necess\u00e1rio para",
+                   "essa fun\u00e7\u00e3o. Por favor, instale-o."),
+             call. = FALSE)
+    }
     frame <- model.frame(formula, data)
     terms <- attr(frame, "terms")
     y <- model.response(frame)
@@ -225,9 +230,10 @@ pgnz <- function(formula, data, start = NULL, ...) {
         m0 <- glm.fit(x = X, y = y, offset = off, family = poisson())
         start <- c("alpha" = 0, m0$coefficients)
     }
+    off <- if (is.null(off)) { NULL } else { exp(off) }
     bbmle::parnames(llpgnz) <- names(start)
     model <- bbmle::mle2(minuslogl = llpgnz, start = start,
-                         data = list(y = y, X = X, offset = exp(off)),
+                         data = list(y = y, X = X, offset = off),
                          vecpar = TRUE, ...)
     return(model)
 }
