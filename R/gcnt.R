@@ -249,7 +249,7 @@ gcnt <- function(formula, data, start = NULL, ...) {
     }
     bbmle::parnames(llgcnt) <- names(start)
     model <- bbmle::mle2(minuslogl = llgcnt, start = start,
-                         data = list(y = y, X = X, offset = off),
+                         data = list(y = y, X = X, offset = exp(off)),
                          vecpar = TRUE, ...)
     return(model)
 }

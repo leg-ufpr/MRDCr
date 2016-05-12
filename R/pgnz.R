@@ -227,7 +227,7 @@ pgnz <- function(formula, data, start = NULL, ...) {
     }
     bbmle::parnames(llpgnz) <- names(start)
     model <- bbmle::mle2(minuslogl = llpgnz, start = start,
-                         data = list(y = y, X = X, offset = off),
+                         data = list(y = y, X = X, offset = exp(off)),
                          vecpar = TRUE, ...)
     return(model)
 }
