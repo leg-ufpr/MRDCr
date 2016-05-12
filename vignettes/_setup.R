@@ -6,6 +6,7 @@ opts_chunk$set(cache = FALSE,
                fig.align = "center",
                dpi = 100,
                dev = "png",
+               warning = FALSE,
                dev.args = list(family = "Palatino"))
 options(width = 68)
 
