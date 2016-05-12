@@ -384,7 +384,9 @@ dev.off()
 
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
+```
 
+```{r}
 #-----------------------------------------------------------------------
 # Testes de hipótese.
 
@@ -534,7 +536,9 @@ dev.off()
 
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
+```
 
+```{r}
 # Teste de Wald para a interação.
 a <- c(0, attr(model.matrix(m0), "assign"))
 ai <- a == max(a)
@@ -691,7 +695,9 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
+```
 
+```{r}
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -853,7 +859,9 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
+```
 
+```{r}
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -940,7 +948,9 @@ update(p1, type = "p", layout = c(NA, 1),
 
 ## Número de Nematóides em Linhagens de Feijão
 
-```{r, eval=FALSE}
+```{r}
+#-----------------------------------------------------------------------
+
 data(nematoide, package = "MRDCr")
 str(nematoide)
 
@@ -1006,7 +1016,9 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
+```
 
+```{r}
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -1101,4 +1113,40 @@ xyplot(nema/off ~ cult, data = nematoide,
                desloc = 0.25 * scale(as.integer(pred$modelo),
                                     scale = FALSE),
                panel = panel.cbH))
+
+#-----------------------------------------------------------------------
+# Resíduos de Pearson.
+
+X <- model.matrix(m0)
+
+# # Resíduos de Pearson no Poisson.
+# with(nematoide,  {
+#     y <- nema
+#     # haty <- fitted(m0)
+#     haty <- nematoide$off * exp(X %*% coef(m0))
+#     sdy <- sqrt(haty)
+#     cbind((y - haty)/sdy,
+#           residuals(m0, type = "pearson"))
+# })
+
+# Resíduos de Pearson do Poisson Generalizado.
+rp <- with(nematoide,  {
+    y <- nema
+    alph <- coef(m3)["alpha"]
+    haty <- c(nematoide$off * exp(X %*% coef(m3)[-1]))
+    sdy <- sqrt(haty) * (1 + alph * haty)
+    (y - haty)/sdy
+})
+
+rp <- stack(data.frame(Pois = residuals(m0, type = "pearson"),
+                       PGen = rp))
+
+qqmath(~values | ind, data = rp,
+       xlab = "Quantis teóricos",
+       ylab = "Resíduos de Pearson",
+       panel = function(...) {
+           panel.qqmathline(...)
+           panel.qqmath(...)
+       })
+
 ```

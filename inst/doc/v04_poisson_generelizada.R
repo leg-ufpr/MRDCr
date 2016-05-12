@@ -322,6 +322,7 @@ dev.off()
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
+## -----------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Testes de hipótese.
 
@@ -467,6 +468,7 @@ dev.off()
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
+## -----------------------------------------------------------------
 # Teste de Wald para a interação.
 a <- c(0, attr(model.matrix(m0), "assign"))
 ai <- a == max(a)
@@ -621,6 +623,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
+## -----------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -771,6 +774,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
+## -----------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -853,165 +857,204 @@ update(p1, type = "p", layout = c(NA, 1),
        key = key, spread = 0.07) +
     as.layer(p2, under = TRUE)
 
-## ---- eval=FALSE--------------------------------------------------
-#  data(nematoide, package = "MRDCr")
-#  str(nematoide)
-#  
-#  # Número de nematóides por grama de raíz.
-#  plot(nema ~ off, data = nematoide)
-#  
-#  # Média do número de nematóides por grama de raíz.
-#  mv <- aggregate(cbind(y = nema/off) ~ cult, data = nematoide,
-#                  FUN = function(x) c(m = mean(x), v = var(x)))
-#  
-#  xyplot(y[, "v"] ~ y[, "m"], data = mv,
-#         xlab = "Média amostral",
-#         ylab = "Variância amostral") +
-#      layer(panel.abline(a = 0, b = 1, lty = 2))
-#  
-#  #-----------------------------------------------------------------------
-#  # Ajuste do Poisson.
-#  
-#  m0 <- glm(nema ~ offset(log(off)) + cult,
-#            data = nematoide,
-#            family = poisson)
-#  m1 <- update(m0, family = quasipoisson)
-#  
-#  # Diagnóstico.
-#  par(mfrow = c(2, 2))
-#  plot(m0); layout(1)
-#  
-#  # Estimativas dos parâmetros.
-#  summary(m1)
-#  
-#  # Quadro de deviance.
-#  # anova(m0, test = "Chisq")
-#  anova(m1, test = "F")
-#  
-#  #-----------------------------------------------------------------------
-#  # Ajuste da Poisson Generalizada.
-#  
-#  L <- with(nematoide,
-#            list(y = nema, offset = off, X = model.matrix(m0)))
-#  
-#  start <- c(alpha = log(1), coef(m0))
-#  parnames(llpgnz) <- names(start)
-#  
-#  # Modelo Poisson também.
-#  m2 <- mle2(llpgnz, start = start, data = L,
-#             fixed = list(alpha = 0), vecpar = TRUE)
-#  
-#  c(logLik(m2), logLik(m0))
-#  
-#  # Poisson Generalizada.
-#  m3 <- pgnz(formula(m0), data = nematoide)
-#  
-#  # Diferença de deviance.
-#  # 2 * diff(c(logLik(m0), logLik(m3)))
-#  anova(m3, m2)
-#  
-#  # Perfil de log-verossimilhança para o parâmetro de dispersão.
-#  plot(profile(m3, which = "alpha"))
-#  
-#  # Covariância.
-#  V <- cov2cor(vcov(m3))
-#  corrplot.mixed(V, lower = "number", upper = "ellipse",
-#                 diag = "l", tl.pos = "lt", tl.col = "black",
-#                 tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
-#  dev.off()
-#  
-#  # Tamanho das covariâncias com \alpha.
-#  each(sum, mean, max)(abs(V[1, -1]))
-#  
-#  # Gráfico das estimativas.
-#  pars <- data.frame(Pois = c(0, coef(m0)), PGen = coef(m3))
-#  xyplot(PGen ~ Pois, data = pars, aspect = "iso", grid = TRUE) +
-#      layer(panel.abline(a = 0, b = 1, lty = 2))
-#  
-#  #-----------------------------------------------------------------------
-#  
-#  X <- model.matrix(m0)
-#  
-#  # # Predito do número de nematóides observado (considera o offset).
-#  # with(nematoide, {
-#  #     cbind(y = nema,
-#  #           Pois = nematoide$off * exp(X %*% coef(m0)),
-#  #           PGen = nematoide$off * exp(X %*% coef(m1)[-1]))
-#  # })
-#  
-#  # Predito do número de nematóides por grama de raíz.
-#  pred <- with(nematoide, {
-#      data.frame(y = nema/off,
-#                 Pois = c(exp(X %*% coef(m0))),
-#                 PGen = c(exp(X %*% coef(m3)[-1])))
-#  })
-#  str(pred)
-#  
-#  splom(pred) + layer(panel.abline(a = 0, b = 1))
-#  
-#  # Correlação predito x observado.
-#  cor(pred)
-#  
-#  # Média das observações de das estimativas por cultivar.
-#  predm <- aggregate(as.matrix(pred) ~ cult, data = nematoide, FUN = mean)
-#  cor(predm[, -1])
-#  
-#  #-----------------------------------------------------------------------
-#  # Predição com intervalos de confiança.
-#  
-#  pred <- unique(subset(nematoide, select = cult))
-#  X <- model.matrix(~cult, data = pred)
-#  
-#  pred <- list(pois = pred, quasi = pred, pgen = pred)
-#  
-#  # Quantil normal.
-#  qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
-#  
-#  # Preditos pela Poisson.
-#  aux <- confint(glht(m0, linfct = X),
-#                 calpha = univariate_calpha())$confint
-#  colnames(aux)[1] <- "fit"
-#  pred$pois <- cbind(pred$pois, exp(aux))
-#  
-#  # Preditos pela Quasi-Poisson.
-#  aux <- confint(glht(m1, linfct = X),
-#                 calpha = univariate_calpha())$confint
-#  colnames(aux)[1] <- "fit"
-#  pred$quasi <- cbind(pred$quasi, exp(aux))
-#  
-#  # Preditos pela Poisson Generalizada.
-#  V <- vcov(m3)
-#  V <- V[-1, -1]
-#  U <- chol(V)
-#  aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-#                    FUN = function(x) { sum(x^2) }))
-#  pred$pgen$eta <- c(X %*% coef(m3)[-1])
-#  pred$pgen <- cbind(pred$pgen,
-#                     apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-#                           FUN = function(x) {
-#                               exp(pred$pgen$eta + x)
-#                           }))
-#  
-#  pred <- ldply(pred, .id = "modelo")
-#  pred <- arrange(pred, cult, modelo)
-#  
-#  key <- list(type = "o", divide = 1,
-#              lines = list(pch = 1:nlevels(pred$modelo),
-#                           lty = 1, col = 1),
-#              text = list(c("Poisson", "Quasi-Poisson",
-#                            "Poisson Generelizada")))
-#  
-#  xyplot(nema/off ~ cult, data = nematoide,
-#         key = key,
-#         xlab = "Cultivar de feijão",
-#         ylab = "Número de nematóides por grama de raíz") +
-#      as.layer(
-#          xyplot(fit ~ cult, data = pred,
-#                 pch = pred$modelo,
-#                 ly = pred$lwr, uy = pred$upr,
-#                 cty = "bars", length = 0,
-#                 prepanel = prepanel.cbH,
-#                 desloc = 0.25 * scale(as.integer(pred$modelo),
-#                                      scale = FALSE),
-#                 panel = panel.cbH))
+## -----------------------------------------------------------------
+#-----------------------------------------------------------------------
+
+data(nematoide, package = "MRDCr")
+str(nematoide)
+
+# Número de nematóides por grama de raíz.
+plot(nema ~ off, data = nematoide)
+
+# Média do número de nematóides por grama de raíz.
+mv <- aggregate(cbind(y = nema/off) ~ cult, data = nematoide,
+                FUN = function(x) c(m = mean(x), v = var(x)))
+
+xyplot(y[, "v"] ~ y[, "m"], data = mv,
+       xlab = "Média amostral",
+       ylab = "Variância amostral") +
+    layer(panel.abline(a = 0, b = 1, lty = 2))
+
+#-----------------------------------------------------------------------
+# Ajuste do Poisson.
+
+m0 <- glm(nema ~ offset(log(off)) + cult,
+          data = nematoide,
+          family = poisson)
+m1 <- update(m0, family = quasipoisson)
+
+# Diagnóstico.
+par(mfrow = c(2, 2))
+plot(m0); layout(1)
+
+# Estimativas dos parâmetros.
+summary(m1)
+
+# Quadro de deviance.
+# anova(m0, test = "Chisq")
+anova(m1, test = "F")
+
+#-----------------------------------------------------------------------
+# Ajuste da Poisson Generalizada.
+
+L <- with(nematoide,
+          list(y = nema, offset = off, X = model.matrix(m0)))
+
+start <- c(alpha = log(1), coef(m0))
+parnames(llpgnz) <- names(start)
+
+# Modelo Poisson também.
+m2 <- mle2(llpgnz, start = start, data = L,
+           fixed = list(alpha = 0), vecpar = TRUE)
+
+c(logLik(m2), logLik(m0))
+
+# Poisson Generalizada.
+m3 <- pgnz(formula(m0), data = nematoide)
+
+# Diferença de deviance.
+# 2 * diff(c(logLik(m0), logLik(m3)))
+anova(m3, m2)
+
+# Perfil de log-verossimilhança para o parâmetro de dispersão.
+plot(profile(m3, which = "alpha"))
+
+# Covariância.
+V <- cov2cor(vcov(m3))
+corrplot.mixed(V, lower = "number", upper = "ellipse",
+               diag = "l", tl.pos = "lt", tl.col = "black",
+               tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
+dev.off()
+
+## -----------------------------------------------------------------
+# Tamanho das covariâncias com \alpha.
+each(sum, mean, max)(abs(V[1, -1]))
+
+# Gráfico das estimativas.
+pars <- data.frame(Pois = c(0, coef(m0)), PGen = coef(m3))
+xyplot(PGen ~ Pois, data = pars, aspect = "iso", grid = TRUE) +
+    layer(panel.abline(a = 0, b = 1, lty = 2))
+
+#-----------------------------------------------------------------------
+
+X <- model.matrix(m0)
+
+# # Predito do número de nematóides observado (considera o offset).
+# with(nematoide, {
+#     cbind(y = nema,
+#           Pois = nematoide$off * exp(X %*% coef(m0)),
+#           PGen = nematoide$off * exp(X %*% coef(m1)[-1]))
+# })
+
+# Predito do número de nematóides por grama de raíz.
+pred <- with(nematoide, {
+    data.frame(y = nema/off,
+               Pois = c(exp(X %*% coef(m0))),
+               PGen = c(exp(X %*% coef(m3)[-1])))
+})
+str(pred)
+
+splom(pred) + layer(panel.abline(a = 0, b = 1))
+
+# Correlação predito x observado.
+cor(pred)
+
+# Média das observações de das estimativas por cultivar.
+predm <- aggregate(as.matrix(pred) ~ cult, data = nematoide, FUN = mean)
+cor(predm[, -1])
+
+#-----------------------------------------------------------------------
+# Predição com intervalos de confiança.
+
+pred <- unique(subset(nematoide, select = cult))
+X <- model.matrix(~cult, data = pred)
+
+pred <- list(pois = pred, quasi = pred, pgen = pred)
+
+# Quantil normal.
+qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
+
+# Preditos pela Poisson.
+aux <- confint(glht(m0, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$pois <- cbind(pred$pois, exp(aux))
+
+# Preditos pela Quasi-Poisson.
+aux <- confint(glht(m1, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$quasi <- cbind(pred$quasi, exp(aux))
+
+# Preditos pela Poisson Generalizada.
+V <- vcov(m3)
+V <- V[-1, -1]
+U <- chol(V)
+aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
+                  FUN = function(x) { sum(x^2) }))
+pred$pgen$eta <- c(X %*% coef(m3)[-1])
+pred$pgen <- cbind(pred$pgen,
+                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
+                         FUN = function(x) {
+                             exp(pred$pgen$eta + x)
+                         }))
+
+pred <- ldply(pred, .id = "modelo")
+pred <- arrange(pred, cult, modelo)
+
+key <- list(type = "o", divide = 1,
+            lines = list(pch = 1:nlevels(pred$modelo),
+                         lty = 1, col = 1),
+            text = list(c("Poisson", "Quasi-Poisson",
+                          "Poisson Generelizada")))
+
+xyplot(nema/off ~ cult, data = nematoide,
+       key = key,
+       xlab = "Cultivar de feijão",
+       ylab = "Número de nematóides por grama de raíz") +
+    as.layer(
+        xyplot(fit ~ cult, data = pred,
+               pch = pred$modelo,
+               ly = pred$lwr, uy = pred$upr,
+               cty = "bars", length = 0,
+               prepanel = prepanel.cbH,
+               desloc = 0.25 * scale(as.integer(pred$modelo),
+                                    scale = FALSE),
+               panel = panel.cbH))
+
+#-----------------------------------------------------------------------
+# Resíduos de Pearson.
+
+X <- model.matrix(m0)
+
+# # Resíduos de Pearson no Poisson.
+# with(nematoide,  {
+#     y <- nema
+#     # haty <- fitted(m0)
+#     haty <- nematoide$off * exp(X %*% coef(m0))
+#     sdy <- sqrt(haty)
+#     cbind((y - haty)/sdy,
+#           residuals(m0, type = "pearson"))
+# })
+
+# Resíduos de Pearson do Poisson Generalizado.
+rp <- with(nematoide,  {
+    y <- nema
+    alph <- coef(m3)["alpha"]
+    haty <- c(nematoide$off * exp(X %*% coef(m3)[-1]))
+    sdy <- sqrt(haty) * (1 + alph * haty)
+    (y - haty)/sdy
+})
+
+rp <- stack(data.frame(Pois = residuals(m0, type = "pearson"),
+                       PGen = rp))
+
+qqmath(~values | ind, data = rp,
+       xlab = "Quantis teóricos",
+       ylab = "Resíduos de Pearson",
+       panel = function(...) {
+           panel.qqmathline(...)
+           panel.qqmath(...)
+       })
+
 
