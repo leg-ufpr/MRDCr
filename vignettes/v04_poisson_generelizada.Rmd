@@ -26,6 +26,7 @@ library(plyr)
 library(car)
 library(doBy)
 library(multcomp)
+library(MRDCr)
 ```
 
 ## Função Densidade ##
@@ -715,15 +716,15 @@ linearHypothesis(model = m0,
 
 # Por causa do offset, não tem como usar a LSmatrix.
 pred <- unique(subset(soja, select = c("umid", "K")))
-str(pred)
-
-pred <- list(pois = pred, quasi = pred, pgen = pred)
 
 X <- model.matrix(formula(m0)[-2],
                   data = cbind(nvag = 1, bloc = soja$bloc[1], pred))
+
 i <- grep(x = colnames(X), pattern = "^bloc")
 X[, i] <- X[, i] * 0 + 1/(length(i) + 1)
 head(X)
+
+pred <- list(pois = pred, quasi = pred, pgen = pred)
 
 # Quantil normal.
 qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
@@ -939,7 +940,7 @@ update(p1, type = "p", layout = c(NA, 1),
 
 ## Número de Nematóides em Linhagens de Feijão
 
-```{r}
+```{r, eval=FALSE}
 data(nematoide, package = "MRDCr")
 str(nematoide)
 
@@ -1100,21 +1101,4 @@ xyplot(nema/off ~ cult, data = nematoide,
                desloc = 0.25 * scale(as.integer(pred$modelo),
                                     scale = FALSE),
                panel = panel.cbH))
-```
-
-## Pacote VGAM ##
-
-```{r, eval=FALSE}
-#-----------------------------------------------------------------------
-
-# http://finzi.psych.upenn.edu/library/VGAM/html/genpoisson.html
-library(VGAM)
-
-m1 <- vglm(ncap ~ est * (des + I(des^2)),
-           data = capdesfo, family = genpoisson, trace = TRUE)
-coef(m1, matrix = TRUE)
-summary(m1)
-
-logLik(m1)
-
 ```
