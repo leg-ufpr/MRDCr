@@ -5,7 +5,7 @@ author: >
   Eduardo E. Ribeiro Jr &
   Cesar A. Taconeli
 vignette: >
-  %\VignetteIndexEntry{"Análise de Contagens com Modelo Poisson Generalizado"}
+  %\VignetteIndexEntry{"Análise de Contagens com Modelo Gamma Count"}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -108,7 +108,6 @@ $$
 
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 # Definições da sessão.
-# devtools::load_all("../")
 library(lattice)
 library(latticeExtra)
 library(grid)
@@ -218,8 +217,10 @@ rp.do(panel = panel, action = react)
 ## Verossimilhança e Estimação ##
 
 ```{r}
+#-----------------------------------------------------------------------
 # Função de log-Verossimilhança da Poisson Generalizada na
 # parametrização de modelo de regressão.
+
 MRDCr::llgcnt
 
 #-----------------------------------------------------------------------
@@ -342,8 +343,6 @@ dev.off()
 
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
-
-opts_chunk$set(eval = FALSE)
 ```
 
 ```{r}
@@ -390,14 +389,27 @@ aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
 colnames(aux)[1] <- "fit"
 pred$pois <- cbind(pred$pois, exp(aux))
-str(pred$pois)
 
 # Preditos pela Quasi-Poisson.
 aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
 colnames(aux)[1] <- "fit"
-pred$pois <- cbind(pred$pois, exp(aux))
-str(pred$pois)
+pred$quasi <- cbind(pred$quasi, exp(aux))
+
+# TODO documentar no pacote.
+fitted.gcnt <- function(lambda, alpha, offset = NULL, ymax = 40) {
+    if (is.null(offset)) {
+        offset <- 1
+    }
+    pars <- cbind(lambda, alpha, offset)
+    y <- 1:ymax
+    apply(pars, MARGIN = 1,
+          FUN = function(p) {
+              sum(pgamma(p[3],
+                         shape = p[2] * y,
+                         rate = p[2] * p[1]))
+          })
+}
 
 # Matrix de covariância completa e sem o alpha (marginal).
 V <- vcov(m3)
@@ -409,16 +421,12 @@ pred$gcnt$eta <- c(X %*% coef(m3)[-1])
 pred$gcnt <- cbind(pred$gcnt,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
                          FUN = function(x) {
-                             exp(pred$gcnt$eta + x)
+                             fitted.gcnt(
+                                 lambda = exp(pred$gcnt$eta + x),
+                                 alpha = exp(coef(m3)["alpha"]),
+                                 ymax = 300)
                          }))
-
-# TODO fitted.gcnt
-fitted.gcnt <- function(lambda, alpha, offset, nmax) {
-    y <- 0:nmax
-    sum(pgamma(offset,
-               shape = exp(alpha) * y,
-               rate = exp(alpha) * exp(lambda)))
-}
+pred$gcnt$eta <- NULL
 
 pred <- ldply(pred, .id = "modelo")
 pred <- arrange(pred, umid, K, modelo)
@@ -426,7 +434,7 @@ pred <- arrange(pred, umid, K, modelo)
 key <- list(type = "o", divide = 1,
             lines = list(pch = 1:nlevels(pred$modelo),
                          lty = 1, col = 1),
-            text = list(c("Poisson", "Poisson Generelizada")))
+            text = list(c("Poisson", "Quasi-Poisson", "Gamma Count")))
 
 xyplot(fit ~ K | umid, data = pred,
        layout = c(NA, 1), as.table = TRUE,
@@ -453,10 +461,26 @@ xyplot(ngra ~ K | umid, data = soja, layout = c(NA, 1),
        xlab = expression("Dose de potássio aplicada"~(mg ~ dm^{3})),
        strip = strip.custom(strip.names = TRUE, var.name = "Umidade"))
 
+# NOTE: Essa contagem é alta e uma análise preliminar não retornou
+# Hessiana para o modelo Gamma-Count ajustado com a mle2. A suspeita que
+# é seja pela ordem de magnitude dos dados. Sendo assim, vamos
+# considerar um offset artifical de 10 apenas para correr as análises.
+#
+# Warning message:
+# In mle2(llgcnt, start = start, data = L, fixed = list(alpha = 0),  :
+#   couldn't invert Hessian
+#
+# Warning message:
+# In mle2(llgcnt, start = start, data = L, vecpar = TRUE) :
+#   couldn't invert Hessian
+
+soja$off <- 10
+
 #-----------------------------------------------------------------------
 # Modelo Poisson.
 
-m0 <- glm(ngra ~ bloc + umid * K, data = soja, family = poisson)
+m0 <- glm(ngra ~ offset(log(off)) + bloc + umid * K,
+          data = soja, family = poisson)
 m1 <- update(m0, family = quasipoisson)
 
 # Diagnóstico.
@@ -472,7 +496,7 @@ summary(m1)
 # Modelo Poisson Generalizado.
 
 L <- with(soja,
-          list(y = ngra, offset = 1, X = model.matrix(m0)))
+          list(y = ngra, offset = off, X = model.matrix(m0)))
 
 # Usa as estimativas do Poisson como valores iniciais.
 start <- c(alpha = 0, coef(m0))
@@ -492,9 +516,10 @@ m3 <- mle2(llgcnt, start = start, data = L, vecpar = TRUE)
 anova(m3, m2)
 
 # Estimaitvas dos parâmetros.
-cbind("PoissonGLM" = c(NA, coef(m0)),
-      "PoissonML" = coef(m2),
-      "Gcnteraliz" = coef(m3))
+c0 <- cbind("PoissonGLM" = c(NA, coef(m0)),
+            "PoissonML" = coef(m2),
+            "GCount" = coef(m3))
+splom(c0[-(1:2), ]) + layer(panel.abline(a = 0, b = 1, lty = 2))
 
 # Perfil para o parâmetro de dispersão.
 plot(profile(m3, which = "alpha"))
@@ -505,7 +530,9 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
+```
 
+```{r}
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -528,11 +555,15 @@ linearHypothesis(model = m0,
 #-----------------------------------------------------------------------
 # Predição com bandas de confiança.
 
-X <- LSmatrix(m0, effect = c("umid", "K"))
+# Por causa do offset, não tem como usar a LSmatrix.
+pred <- unique(subset(soja, select = c("umid", "K")))
+X <- model.matrix(formula(m0)[-2],
+                  data = cbind(off = 1, bloc = soja$bloc[1], pred))
+i <- grep(x = colnames(X), pattern = "^bloc")
+X[, i] <- X[, i] * 0 + 1/(length(i) + 1)
 
-pred <- attr(X, "grid")
 pred <- transform(pred,
-                  K = as.integer(K),
+                  K = as.numeric(as.character(K)),
                   umid = factor(umid))
 pred <- list(pois = pred, quasi = pred, gcnt = pred)
 
@@ -551,7 +582,7 @@ aux <- confint(glht(m1, linfct = X),
 colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
-# Preditos pela Poisson Generalizada.
+# Matrix de covariância completa e sem o alpha (marginal).
 V <- vcov(m3)
 V <- V[-1, -1]
 U <- chol(V)
@@ -561,8 +592,12 @@ pred$gcnt$eta <- c(X %*% coef(m3)[-1])
 pred$gcnt <- cbind(pred$gcnt,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
                          FUN = function(x) {
-                             exp(pred$gcnt$eta + x)
+                             fitted.gcnt(
+                                 lambda = exp(pred$gcnt$eta + x),
+                                 alpha = exp(coef(m3)["alpha"]),
+                                 ymax = 300)
                          }))
+pred$gcnt$eta <- NULL
 
 # Junta o resultado dos 3 modelos.
 pred <- ldply(pred, .id = "modelo")
@@ -573,7 +608,7 @@ key <- list(type = "o", divide = 1,
             lines = list(pch = 1:nlevels(pred$modelo),
                          lty = 1, col = 1),
             text = list(c("Poisson", "Quasi-Poisson",
-                          "Poisson Generelizada")))
+                          "Gamma-Count")))
 
 xyplot(fit ~ K | umid, data = pred,
        layout = c(NA, 1), as.table = TRUE,
@@ -585,6 +620,8 @@ xyplot(fit ~ K | umid, data = pred,
        prepanel = prepanel.cbH,
        desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
+
+opts_chunk$set(eval = FALSE)
 ```
 
 ## Número de Grãos por Vagem ##
@@ -627,17 +664,7 @@ anova(m1, test = "F")
 L <- with(soja,
           list(y = ngra, offset = nvag, X = model.matrix(m0)))
 
-# De acordo com a estimativa de phi da Quasi-Poisson, esse dado é
-# subdisperso. Já que na verossimilhaça (1 + alpha * y) > -1 quando
-# alpha < 0, então o menor valor possível para gamma para ter uma
-# log-verossimilhança avaliável é
--1/max(soja$ngra)
-
-# Mesmo com esse lower bound, o valor chute para alpha foi definido por
-# tentativa erro. O valor -0.003 dá Error e o valor -0.002 na hora de
-# perfilhar encontra um mínimo melhor. Então, por tentativa erro
-# chegou-se no -0.0026.
-start <- c(alpha = -0.0026, coef(m0))
+start <- c(alpha = 0, coef(m0))
 parnames(llgcnt) <- names(start)
 
 # Com alpha fixo em 0 corresponde à Poisson.
@@ -653,9 +680,10 @@ m3 <- mle2(llgcnt, start = start, data = L, vecpar = TRUE)
 # Teste para nulinidade do parâmetro de dispersão (H_0: alpha == 0).
 anova(m3, m2)
 
-cbind("PoissonGLM" = c(NA, coef(m0)),
-      "PoissonML" = coef(m2),
-      "Gcnteraliz" = coef(m3))
+c0 <- cbind("PoissonGLM" = c(NA, coef(m0)),
+            "PoissonML" = coef(m2),
+            "GCount" = coef(m3))
+splom(c0[-(1:2), ]) + layer(panel.abline(a = 0, b = 1, lty = 2))
 
 # Perfil para o parâmetro de dispersão.
 plot(profile(m3, which = "alpha"))
@@ -665,7 +693,9 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
+```
 
+```{r}
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -715,7 +745,7 @@ aux <- confint(glht(m1, linfct = X),
 colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
-# Preditos pela Poisson Generalizada.
+# Matrix de covariância completa e sem o alpha (marginal).
 V <- vcov(m3)
 V <- V[-1, -1]
 U <- chol(V)
@@ -725,8 +755,12 @@ pred$gcnt$eta <- c(X %*% coef(m3)[-1])
 pred$gcnt <- cbind(pred$gcnt,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
                          FUN = function(x) {
-                             exp(pred$gcnt$eta + x)
+                             fitted.gcnt(
+                                 lambda = exp(pred$gcnt$eta + x),
+                                 alpha = exp(coef(m3)["alpha"]),
+                                 ymax = 300)
                          }))
+pred$gcnt$eta <- NULL
 
 # Junta o resultado dos 3 modelos.
 pred <- ldply(pred, .id = "modelo")
@@ -737,7 +771,7 @@ key <- list(type = "o", divide = 1,
             lines = list(pch = 1:nlevels(pred$modelo),
                          lty = 1, col = 1),
             text = list(c("Poisson", "Quasi-Poisson",
-                          "Poisson Generelizada")))
+                          "Gamma-Count")))
 
 xyplot(fit ~ K | umid, data = pred,
        layout = c(NA, 1), as.table = TRUE,
@@ -755,12 +789,12 @@ xyplot(fit ~ K | umid, data = pred,
 
 Experimento conduzido em casa de vegetação para avaliar o efeito da
 desfolha, em diferentes fases de desenvolvimento do algodão, sobre a
-produção da cultura. As parcelas foram vasos com duas plantas
-que tiveram a área das folhas removidas com uma tesoura, simulando o ataque de
-insetos desfolhadores, nos níveis de 0, 25, 50, 75 e 100% de remoção de
-área foliar. Em cada fase de desenvolvimento (de 5), 5 parcelas sofreram
-desfolha nos níveis mencionados. O número de capulhos ao final do
-experimento foi contado.
+produção da cultura. As parcelas foram vasos com duas plantas que
+tiveram a área das folhas removidas com uma tesoura, simulando o ataque
+de insetos desfolhadores, nos níveis de 0, 25, 50, 75 e 100% de remoção
+de área foliar. Em cada fase de desenvolvimento (de 5), 5 parcelas
+sofreram desfolha nos níveis mencionados. O número de capulhos ao final
+do experimento foi contado.
 
 ```{r}
 #-----------------------------------------------------------------------
