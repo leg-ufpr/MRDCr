@@ -28,7 +28,8 @@ corporal do animal ao longo do período de observação.
 
 ```{r, echo = FALSE, include=FALSE}
 ##### Carregamento e tratamento inicial dos dados
-dados <- read.csv2('Dadoscomp.csv',sep=',')
+setwd("~/Desktop")
+dados <- read.csv('Dadoscomp.csv',sep=',')
 dados$tratamento <- factor(dados$tratamento)
 levels(dados$tratamento) <- c('Observ', 'Observ + Interv')
 dados$linhagem <- factor(dados$linhagem)
@@ -202,7 +203,7 @@ summary(ajusteboot)
 ```
 
 
-### Apanhado geral dos resultados.
+### Resumo geral dos resultados.
 
 ```{r}
 

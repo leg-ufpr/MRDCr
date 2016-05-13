@@ -36,8 +36,8 @@ require(hnp)
 require(MASS)
 require(effects)
 
-# setwd("C:/Users/CCE/Dropbox/Backup Parana/Parana/Curso - dados discretos")
-dados <- read.csv2('Baseauto2.csv', header=TRUE, sep=',')
+setwd("~/Desktop")
+dados <- read.csv('Baseauto2.csv', header=TRUE, sep=',', dec = ',')
 
 options(scipen = 3) ### Era zero.
 
@@ -160,7 +160,7 @@ anova(ajusteps, ajusteps2, test = 'Chisq')
 ```
 
 
-### Regressão usando a distribuição binomial negativa.
+## Regressão usando a distribuição binomial negativa.
 
 ```{r}
 ajustenb2 <- glm.nb(Sinistros ~ Tipo+Sexo+Idade+I(Idade**2)+Valor+Civil+log(Exposicao),data= dados)
@@ -334,7 +334,7 @@ rownames(matfreq) <- c('Amostra', 'Poisson não ajustada por covariáveis', 'Poi
 ```
 
 
-### Frequências amostrais e frequências ajustadas pelas distribuições Poisson e Binomial Negativa (sem e com inclusão de covariáveis)
+## Comparação dos ajustes
 
 ```{r, results = 'markup'}
 kable(matfreq, format = "markdown", caption = "Frequências amostrais e freuências ajustadas para o número de sinistros")
