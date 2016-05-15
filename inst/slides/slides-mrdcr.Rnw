@@ -65,7 +65,7 @@
 \setbeamertemplate{headline}{\bfseries
   \leavevmode%
   \hbox{%
-    \begin{beamercolorbox}[wd=.5\paperwidth, ht=2.2ex, dp=1ex, right, 
+    \begin{beamercolorbox}[wd=.5\paperwidth, ht=2.2ex, dp=1ex, right,
       rightskip=1em]{section in head/foot}
       \hspace*{2ex}\insertsectionhead
     \end{beamercolorbox}%
@@ -81,7 +81,7 @@
 \setbeamertemplate{footline}{\ttfamily\bfseries
   \leavevmode%
   \hbox{%
-    \begin{beamercolorbox}[wd=.35\paperwidth, ht=2.4ex, dp=1ex, right, 
+    \begin{beamercolorbox}[wd=.35\paperwidth, ht=2.4ex, dp=1ex, right,
       rightskip=1em]{footlinecolor}
       \insertshortauthor%
     \end{beamercolorbox}%
@@ -105,7 +105,7 @@
 }
 
 \setbeamertemplate{subsection in toc}{
-  {\color{teal!80} 
+  {\color{teal!80}
   \bfseries\inserttocsectionnumber.\inserttocsubsectionnumber}~
   \leftskip=2em{\color{black}\inserttocsubsection\par}
 }
@@ -138,7 +138,7 @@
 \title{Modelos de Regressão para Dados de Contagem com R}
 \author[Walmes Zeviani, Eduardo Jr \& Cesar Taconelli]{
   Prof. Dr. Walmes M. Zeviani\\
-  Eduardo E. Ribeiro Jr\\ 
+  Eduardo E. Ribeiro Jr\\
   Prof. Dr. Cesar A. Taconelli
 }
 \institute[UFPR]{
@@ -168,7 +168,7 @@ source("_setup.R")
 
 \begin{columns}[c]
   \column{.35\textwidth}
-\begin{flushright}	
+\begin{flushright}
   \includegraphics[scale=0.2]{./images/git_icon}\\
 \end{flushright}
 % \hfill
@@ -184,7 +184,7 @@ source("_setup.R")
   {\tt \large
     \textcolor{url}{M}odelos de
     \textcolor{url}{R}egressão para
-    \textcolor{url}{D}ados de 
+    \textcolor{url}{D}ados de
     \textcolor{url}{C}ontagem com
     \textcolor{url}{r} -
     \href{https://github.com/leg-ufpr/MRDCr}{MRDCr}
