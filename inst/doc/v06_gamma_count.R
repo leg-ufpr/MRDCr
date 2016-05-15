@@ -1,151 +1,7 @@
----
-title: "Análise de Contagens com Modelo Gamma Gount"
-author: >
-  Walmes M. Zeviani,
-  Eduardo E. Ribeiro Jr &
-  Cesar A. Taconeli
-vignette: >
-  %\VignetteIndexEntry{"Análise de Contagens com Modelo Gamma Count"}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r setup, include=FALSE}
+## ----setup, include=FALSE-----------------------------------------
 source("_setup.R")
-```
 
-## Função Densidade ##
-
-Se uma variável aleatória $Y$ tem distribuição de probabilidades Gamma
-Count, então sua função de probabilidade é
-$$
-p(y,\lambda,\alpha) =
-   \left(\int_{0}^{1}
-   \frac{(\alpha\lambda)^{y\alpha}}{\Gamma(y\alpha)}\,
-   u^{y\alpha-1}
-   \exp\{-\alpha\lambda u\}\, \textrm{d}u \right)
-   - \left(\int_{0}^{1}
-   \frac{(\alpha\lambda)^{y\alpha}}{\Gamma((y+1)\alpha)}\,
-   u^{(y+1)\alpha-1}
-   \exp\{-\alpha\lambda u\}\, \textrm{d}u \right),
-$$
-em que $\lambda$ é o parâmetro de locação e $\alpha$ o parâmetro de
-dispersão.
-
-Essa função de probabilidade resulta da relação que existe entre
-intervalo de tempo entre eventos e do número de eventos dentro de um
-intervalo.
-
-Considere que $\tau$ seja a variável aleatória tempo entre eventos que
-acontecem ao longo de um domínio com distribuição $\tau \sim
-\text{Gama}(\alpha, \beta)$. Sendo assim, a função desidade de $\tau$ é
-
-$$
-f(\tau, \alpha, \beta) =
-  \frac{\beta^\alpha}{\Gamma(\alpha)}
-  \cdot \tau^{\alpha-1}\cdot \exp\{-\beta\tau\},
-$$
-cuja média é $\text{E}(\tau) = \frac{\alpha}{\beta}$ e a variância é
-$\text{V}(\tau) = \frac{\alpha}{\beta^2}.$
-
-<!--
-Se fizermos $\text{E}(\tau) = \frac{\alpha}{\beta} = \lambda$, então
-podemos usar $\alpha/\lambda$ no lugar de $\beta$ para ter uma
-parametrização com um parâmetro que represente a média da variável
-aleatória. Sendo assim, a densidade na parametrição com $\lambda$ é
-
-$$
-f(\tau, \alpha, \lambda) =
-  \frac{(\alpha\lambda)^\alpha}{\Gamma(\alpha)}
-  \cdot \tau^{\alpha-1}\cdot \exp\{-\alpha\lambda\tau\},
-$$
-cuja média é $\text{E}(\tau) = \lambda$ e a variância é
-$\text{V}(\tau) = \frac{\alpha}{(\alpha\lambda)^2} =
-\frac{1}{\alpha\lambda^2}.$
--->
-
-Ainda, o tempo decorrido até a ocorrência o *n*-ésimo evento é portanto,
-
-$$
-\vartheta_n = \tau_1+\cdots+\tau_n ~ \sim \text{Gama}(n\alpha, \beta),
-$$
-pois a soma de variáveis aleatórias Gama tem distribuição Gama, cuja
-média é $\text{E}(\vartheta) = \frac{n\alpha}{\beta}$ e a variância é,
-$\text{V}(\vartheta) = \frac{n\alpha}{\beta^2}$. A função densidade de
-$\vartheta_n$ então é
-
-$$
-f_n(\vartheta, \alpha, \beta) =
-  \frac{\beta^{n\alpha}}{\Gamma(n\alpha)}\cdot
-  \vartheta^{n\alpha-1}\cdot \exp\{-\beta\vartheta\},
-$$
-e a função acumulada é
-
-$$
-F_n(T) = \Pr(\vartheta_n \leq T) =
-  \int_{0}^{T} \frac{\beta^{n\alpha}}{\Gamma(n\alpha)}\cdot
-  t^{n\alpha-1}\cdot
-  \exp\{-\beta t\}\,\text{d}t.
-$$
-
-Decorre que, se $[0, T)$ é um intervalo e $N$ é o número de eventos
-ocorridos dentro desse intervalo, então $N < n$ se e somente se
-$\vartheta_n \geq T$, ou seja
-$$
-\Pr(N < n) = \Pr(\vartheta_n \geq T) = 1-F_n(T).
-$$
-
-Como
-$$
-F_n(T) = G(n\alpha, \beta T) =
-  \frac{1}{\Gamma(n\alpha)}
-  \int_{0}^{T} t^{n\alpha-1}\cdot\exp\{-\beta t\}\, \text{d}t,
-$$
-podemos escrever $\Pr(N = n)$ como sendo a diferença de acumuladas da
-Gama,
-$$
-\Pr(N = n) = G(n\alpha, \beta T) - G((n+1)\alpha, \beta T).
-$$
-
-Em resumo, a distribuição para o número de eventos, quando se assume a
-distribuição do intervalo entre eventos é Gamma, é resultado da
-diferença de duas acumuladas da distribuição Gamma.
-
-A média da variável de contagem é resultado de
-$$
-\begin{align*}
-  E(N) &= \sum_{i=0}^{\infty} i\cdot \Pr(i) \\
-       &= \sum_{i=1}^{\infty} i\cdot \Pr(i)\\
-       &= \sum_{i=1}^{\infty} G(i\alpha, \beta T).\\
-\end{align*}
-$$
-
-Para um $T$ cada vez maior, tem-se que
-$$
-  N(T)\; \dot{\sim}\; \text{Normal}\left(
-    \frac{\beta}{\alpha},
-    \frac{\beta}{\alpha^2}\right).
-$$
-
-Considere que
-$$
-  \frac{\beta}{\alpha} = \exp\{x^{\top}\theta\} \Rightarrow
-  \beta = \alpha \exp\{x^{\top}\theta\}.
-$$
-
-Essa parametrização produz um modelo de regressão para a média do tempo
-entre eventos definida por
-$$
-  \text{E}(\tau|x) = \frac{\alpha}{\beta} = \exp\{-x^{\top}\theta\}.
-$$
-
-O modelo de regressão é para o tempo entre eventos ($\tau$) e não
-diretamente para contagem porque, a menos que $\alpha = 1$, não certo
-que $\text{E}(N_i|x_i) = [\text{E}(\tau_i|x_i)]^{-1}$. Dessa maneira,
-$-\theta$ mede a variação percentual do tempo médio entre eventos para
-uma unidade de $x$.
-
-```{r, message=FALSE, error=FALSE, warning=FALSE}
+## ---- message=FALSE, error=FALSE, warning=FALSE-------------------
 # Definições da sessão.
 library(lattice)
 library(latticeExtra)
@@ -158,9 +14,8 @@ library(car)
 library(doBy)
 library(multcomp)
 library(MRDCr)
-```
 
-```{r}
+## -----------------------------------------------------------------
 # Função densidade na parametrização original.
 dgcnt
 
@@ -195,73 +50,67 @@ useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
                    strip.names = TRUE,
                    var.name = expression(alpha == ""),
                    sep = ""))
-```
 
-## Recursos interativos  com o `rpanel` ##
+## ---- eval=FALSE--------------------------------------------------
+#  # Função densidade na parametrização de modelo de regressão.
+#  MRDCr::dgcnt
+#  
+#  react <- function(panel){
+#      with(panel,
+#      {
+#          m <- LAMBDA
+#          s <- sqrt(LAMBDA/exp(ALPHA))
+#          y <- 0:max(c(YMAX, ceiling(m + 5 * s)))
+#          py <- dgcnt(y = y, lambda = LAMBDA, alpha = exp(ALPHA))
+#          if (POIS) {
+#              pz <- dpois(y, lambda = m)
+#          } else {
+#              pz <- 0
+#          }
+#          py[!is.finite(py)] <- 0
+#          plot(py ~ y, type = "h",
+#               ylim = c(0, max(c(py, pz))),
+#                   xlab = expression(y),
+#               ylab = expression(f(y)))
+#          mtext(side = 3,
+#                text = substitute(sum(f(y)) == s,
+#                                  list(s = round(sum(py), 5))))
+#          if (EX) {
+#              m <- sum(y * py)
+#              # v <- sum((y - m)^2 * py)
+#              legend("topright", bty = "n",
+#                     legend = substitute(E(Y) == mu,
+#                                         list(mu = m)))
+#              abline(v = m, col = 2)
+#          }
+#          if (POIS) {
+#              lines(y + 0.3, pz, type = "h", col = 3)
+#          }
+#      })
+#      panel
+#  }
+#  
+#  panel <- rp.control(title = "Gamma Count",
+#                      size = c(300, 100), YMAX = 50)
+#  rp.slider(panel = panel, action = react,
+#            variable = LAMBDA, title = "lambda",
+#            from = 1, to = 0.75 * panel$YMAX,
+#            initval = 5, resolution = 0.1,
+#            showvalue = TRUE)
+#  rp.slider(panel = panel, action = react,
+#            variable = ALPHA, title = "alpha",
+#            from = -5, to = 5,
+#            initval = 0, resolution = 0.02,
+#            showvalue = TRUE)
+#  rp.checkbox(panel = panel,
+#              variable = EX, action = react, title = "E(Y)",
+#              labels = "Mostrar o valor esperado?")
+#  rp.checkbox(panel = panel,
+#              variable = POIS, action = react, title = "Poisson",
+#              labels = "Adicionar a distribução Poisson?")
+#  rp.do(panel = panel, action = react)
 
-```{r, eval=FALSE}
-# Função densidade na parametrização de modelo de regressão.
-MRDCr::dgcnt
-
-react <- function(panel){
-    with(panel,
-    {
-        m <- LAMBDA
-        s <- sqrt(LAMBDA/exp(ALPHA))
-        y <- 0:max(c(YMAX, ceiling(m + 5 * s)))
-        py <- dgcnt(y = y, lambda = LAMBDA, alpha = exp(ALPHA))
-        if (POIS) {
-            pz <- dpois(y, lambda = m)
-        } else {
-            pz <- 0
-        }
-        py[!is.finite(py)] <- 0
-        plot(py ~ y, type = "h",
-             ylim = c(0, max(c(py, pz))),
-                 xlab = expression(y),
-             ylab = expression(f(y)))
-        mtext(side = 3,
-              text = substitute(sum(f(y)) == s,
-                                list(s = round(sum(py), 5))))
-        if (EX) {
-            m <- sum(y * py)
-            # v <- sum((y - m)^2 * py)
-            legend("topright", bty = "n",
-                   legend = substitute(E(Y) == mu,
-                                       list(mu = m)))
-            abline(v = m, col = 2)
-        }
-        if (POIS) {
-            lines(y + 0.3, pz, type = "h", col = 3)
-        }
-    })
-    panel
-}
-
-panel <- rp.control(title = "Gamma Count",
-                    size = c(300, 100), YMAX = 50)
-rp.slider(panel = panel, action = react,
-          variable = LAMBDA, title = "lambda",
-          from = 1, to = 0.75 * panel$YMAX,
-          initval = 5, resolution = 0.1,
-          showvalue = TRUE)
-rp.slider(panel = panel, action = react,
-          variable = ALPHA, title = "alpha",
-          from = -5, to = 5,
-          initval = 0, resolution = 0.02,
-          showvalue = TRUE)
-rp.checkbox(panel = panel,
-            variable = EX, action = react, title = "E(Y)",
-            labels = "Mostrar o valor esperado?")
-rp.checkbox(panel = panel,
-            variable = POIS, action = react, title = "Poisson",
-            labels = "Adicionar a distribução Poisson?")
-rp.do(panel = panel, action = react)
-```
-
-## Verossimilhança e Estimação ##
-
-```{r}
+## -----------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Função de log-Verossimilhança da Poisson Generalizada na
 # parametrização de modelo de regressão.
@@ -350,18 +199,8 @@ c(mean(y),
   exp(coef(n1)[2]),
   fitted.gcnt(lambda = exp(coef(n1)[2]),
               alpha = exp(coef(n1)[1]), ymax = 100))
-```
 
-## Número de Vagens Produzidas em Soja ##
-
-Resultados de um experimento fatorial (3 x 5), em delineamento de blocos
-casualizados, que estudou a influência de níveis de potássio na adubação
-de soja em combinação com irrigação em casa de vegetação. As variáveis
-de contagem registradas nesse experimento foram o número de vagens
-viáveis (e não viáveis) e o número total de sementes por parcela com
-duas plantas de soja.
-
-```{r}
+## -----------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Carregando e explorando os dados.
 
@@ -437,9 +276,8 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
-```
 
-```{r}
+## -----------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -526,13 +364,8 @@ xyplot(fit ~ K | umid, data = pred,
        prepanel = prepanel.cbH,
        desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
-```
 
-## Número de Grãos Produzidas em Soja ##
-
-Análise do número de grãos por pacela do experimento com soja.
-
-```{r}
+## -----------------------------------------------------------------
 #-----------------------------------------------------------------------
 
 xyplot(ngra ~ K | umid, data = soja, layout = c(NA, 1),
@@ -613,9 +446,8 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
-```
 
-```{r}
+## -----------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -704,11 +536,8 @@ xyplot(fit ~ K | umid, data = pred,
        prepanel = prepanel.cbH,
        desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
-```
 
-## Número de Grãos por Vagem ##
-
-```{r}
+## -----------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Número de grãos por vagem (offset).
 
@@ -777,9 +606,8 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
-```
 
-```{r}
+## -----------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -905,22 +733,8 @@ xyplot(ngra/nvag ~ K | umid, data = soja, layout = c(NA, 1),
                desloc = 0.15 * scale(as.integer(pred$modelo),
                                   scale = FALSE),
                panel = panel.cbH))
-```
 
-## Número de Capulhos Produzidos em Algodão ##
-
-Experimento conduzido em casa de vegetação para avaliar o efeito da
-desfolha, em diferentes fases de desenvolvimento do algodão, sobre a
-produção da cultura. As parcelas foram vasos com duas plantas que
-tiveram a área das folhas removida com uma tesoura, simulando o ataque
-de insetos desfolhadores, nos níveis de 0, 25, 50, 75 e 100% de remoção
-de área foliar. Em cada fase de desenvolvimento (de 5), 5 parcelas
-sofreram desfolha nos níveis mencionados. Trata-se então de um
-experimento em arranjo fatorial 5 desfolhas $\times$ 5 fases com 5
-repetições por cela. O número de capulhos ao final do experimento foi
-contado.
-
-```{r}
+## -----------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Número de capulhos em função do nível de desfolha artificial e fase
 # fenológica do algodoeiro.
@@ -990,9 +804,8 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
-```
 
-```{r}
+## -----------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -1082,17 +895,13 @@ p2 <- xyplot(fit ~ des | est, data = pred, groups = modelo,
              panel.groups = panel.cbH,
              panel = panel.superpose)
 # p2
-```
 
-```{r, fig.width=7, fig.height=3.5}
+## ---- fig.width=7, fig.height=3.5---------------------------------
 update(p1, type = "p", layout = c(NA, 1),
        key = key, spread = 0.07) +
     as.layer(p2, under = TRUE)
-```
 
-## Número de Nematoides em Linhagens de Feijão ##
-
-```{r}
+## -----------------------------------------------------------------
 #-----------------------------------------------------------------------
 
 data(nematoide, package = "MRDCr")
@@ -1163,9 +972,8 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
-```
 
-```{r}
+## -----------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -1245,14 +1053,8 @@ xyplot(nema/off ~ cult, data = nematoide,
                desloc = 0.25 * scale(as.integer(pred$modelo),
                                     scale = FALSE),
                panel = panel.cbH))
-```
 
-## Número de Gols por Partida de Futebol ##
-
-Análise do número de gols feitos pelos times mandantes e desafiantes no
-Campeonato Brasileiro de 2010.
-
-```{r}
+## -----------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Log-verossimilhança para o número de gols dos times em uma partida.
 
@@ -1478,8 +1280,7 @@ dwl <- rbind(Pois = c(sum(diag(plapois)),
 colnames(dwl) <- sprintf(paste(levels(db$home)[i], collapse = " %s "),
                          c("=", ">", "<"))
 t(dwl)
-```
 
-```{r, eval=FALSE, include=FALSE}
-opts_chunk$set(eval = FALSE)
-```
+## ---- eval=FALSE, include=FALSE-----------------------------------
+#  opts_chunk$set(eval = FALSE)
+
