@@ -219,6 +219,9 @@ source("_setup.R")
 \subsection{Modelo Poisson-Generalizada}
 \label{sec-poisson-generalizada}
 
+<<pgnz, child = "poisson_generalizada.Rnw">>=
+@
+
 \subsection{Modelo COM-Poisson}
 \label{sec-com-poisson}
 
@@ -227,6 +230,9 @@ source("_setup.R")
 
 \subsection{Modelo Gamma-Count}
 \label{sec-gamma-count}
+
+<<gcnt, child = "gamma_count.Rnw">>=
+@
 
 \section{Modelos para Excesso de Zeros}
 \label{sec-excesso-zeros}
