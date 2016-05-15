@@ -1,0 +1,165 @@
+<<setup-child, include=FALSE>>=
+set_parent("slides-mrdcr.Rnw")
+@
+
+\begin{frame}{A distribuição de probabilidade}
+  \begin{itemize}
+  \item Introduzida por \cite{ConsulJain1997} e estudada em detalhes por
+    \cite{Consul1989}
+  \item Modela casos de superdispersão e subdispersão.
+  \item A Poisson é um caso particular.
+  \item Se $Y \sim $ Poisson Generalizada,
+    sua função de probabilidade é
+    \begin{equation*}
+      f(y) =
+      \begin{cases}
+        \theta (\theta + \gamma y)^{y - 1}
+        \exp\{-(\theta + \gamma y)\}, &
+        y = 0, 1, 2, \ldots \\
+        0, &
+        y > m \text{ quando } \gamma < 0.
+      \end{cases}
+    \end{equation*}
+  \item $\theta > 0$.
+  \item $\max\{-1, -\theta/m\} < \gamma < 1$.
+  \item $m$ é maior inteiro positivo para o qual $\theta + m\gamma >
+    0$ quando $\gamma$ é negativo.
+  \item {Note que o espaço paramétrico de $\gamma$ é dependente do
+      parâmetro $\theta$}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Propriedades da Poisson Generalizada}
+  Média e variância
+  \begin{itemize}
+  \item $\text{E}(Y) = \theta (1 - \gamma)^{-1}$.
+  \item $\text{V}(Y) = \theta (1 - \gamma)^{-3}$.
+  \end{itemize}
+  Relação média-variância
+  \begin{itemize}
+  \item Superdispersa se $ \gamma > 0$.
+  \item Subdispersa se $\gamma < 0$.
+  \end{itemize}
+  Quando $\gamma = 0$ a Poisson Generalizada reduz a distribuição
+  Poisson e, portanto, apresenta equidispersão.
+\end{frame}
+
+\begin{frame}{Parametrização de média para modelo de regressão}
+  Defina
+  \begin{equation*}
+    \theta = \dfrac{\lambda}{1+\alpha\lambda}, \qquad
+    \gamma = \alpha \dfrac{\lambda}{1+\alpha\lambda}.
+  \end{equation*}
+
+  Ao substituir na função densidade, tem-se
+  \begin{equation*}
+    f(y) = \left( \dfrac{\lambda}{1+\alpha\lambda} \right)^{y}
+    \frac{(1+\alpha y)^{y-1}}{y!}
+    \exp\left\{-\lambda \frac{(1+\alpha y)}{(1+\alpha \lambda)}\right\}.
+  \end{equation*}
+
+  \begin{itemize}
+  \item $\text{E}(y) = \lambda$,
+  \item $\text{V}(y) = \lambda (1+\alpha \lambda)^2$.
+  \item Superdispersa se $\alpha > 0$,
+  \item Subdispersa se $\alpha < 0$.
+  \item Poisson se $\alpha = 0$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Restrições no espaço paramétrico}
+  \begin{itemize}
+  \item $\lambda > 0.$
+  \item $1+\alpha\lambda > 0.$
+  \item $1+\alpha y > 0.$
+  \end{itemize}
+  Considerando uma amostra aleteatória de $y_i$ e valores conhecidos de
+  $\lambda_i$, $i = 1,2,\ldots$, as restrições combinadas sobre $\alpha$
+  resultam em
+  \begin{equation}
+    \alpha > \min \left\{ \frac{-1}{\max(y_i)},
+      \frac{-1}{\max(\lambda_i)} \right\},\quad
+    \text{ quando } \alpha < 0.
+  \end{equation}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Função de log-verossimilhança}
+  Considerando uma amostra aleatória $y_i, i=1,2,\ldots,n$, a
+  verossimilhança é
+  \begin{equation}
+    L(y; \lambda, \alpha) =
+    \prod_{i=1}^{n} \left(
+      \frac{\lambda}{1+\alpha\lambda}\right)^{y}
+    \frac{(1+\alpha y_{i})^{y_{i}-1}}{y_{i}!}
+    \exp\left\{-\lambda\frac{(1+\alpha y_{i})}{
+        (1+\alpha\lambda)}\right\}.
+  \end{equation}
+  A função de log-verossimilhança é
+  \begin{equation}
+    \ell(y; \lambda, \alpha) =
+    \sum_{i=1}^{n} y_{i}\ln(\lambda)-
+    \ln(1+\alpha\lambda)+
+    (y_{i}-1)\ln(1+\alpha y)-
+    \lambda\frac{(1+\alpha y_{i})}{(1+\alpha\lambda)}-
+    \ln(y_{i}!)
+  \end{equation}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Implementação da log-verossimilhança}
+<<echo = TRUE>>=
+library(MRDCr)
+llpgnz
+@
+\end{frame}
+
+\begin{frame}[fragile]
+<<fig.width = 9, fig.height = 4.5, out.width = "0.95\\textwidth">>=
+grid <- expand.grid(lambda = c(2, 8, 15),
+                    alpha = c(-0.05, 0, 0.05))
+y <- 0:35
+
+py <- mapply(FUN = dpgnz,
+             lambda = grid$lambda,
+             alpha = grid$alpha,
+             MoreArgs = list(y = y), SIMPLIFY = FALSE)
+grid <- cbind(grid[rep(1:nrow(grid), each = length(y)), ],
+              y = y,
+              py = unlist(py))
+
+useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
+                      ylab = expression(f(y)),
+                      xlab = expression(y),
+                      data = grid, type = "h",
+                      panel = function(x, y, ...) {
+                          m <- sum(x * y)
+                          panel.xyplot(x, y, ...)
+                          panel.abline(v = m, lty = 2)
+                      }),
+               strip = strip.custom(
+                   strip.names = TRUE,
+                   var.name = expression(lambda == ""),
+                   sep = ""),
+               strip.left = strip.custom(
+                   strip.names = TRUE,
+                   var.name = expression(alpha == ""),
+                   sep = ""))
+@
+\end{frame}
+
+\begin{frame}{Estudos de caso}
+  {\it Vignette} \href{run:../doc/v04_poisson_generalizada.html}{\tt
+    poisson\_generalizada.html}
+  \begin{description}
+  \item[\tt soja]: Número de vagens, de grãos e de grãos por vagem.
+  \item[\tt capdesfo]: Número de capulhos produzidos em algodão.
+  \item[\tt nematoide]: Número de nematoides em raízes de linhagens de
+    feijoeiro.
+  \end{description}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Conclusões}
+  TODO
+\end{frame}
