@@ -98,8 +98,8 @@ $$
 Como
 $$
 F_n(T) = G(n\alpha, \beta T) =
-  \frac{1}{\Gamma(n\alpha)}
-  \int_{0}^{T} t^{n\alpha-1}\cdot\exp\{-\beta t\}\, \text{d}t,
+  \int_{0}^{T} \frac{\beta^{n\alpha}}{\Gamma(n\alpha)} 
+  t^{n\alpha-1}\cdot\exp\{-\beta t\}\, \text{d}t,
 $$
 podemos escrever $\Pr(N = n)$ como sendo a diferença de acumuladas da
 Gama,
@@ -140,7 +140,7 @@ $$
 $$
 
 O modelo de regressão é para o tempo entre eventos ($\tau$) e não
-diretamente para contagem porque, a menos que $\alpha = 1$, não certo
+diretamente para contagem porque, a menos que $\alpha = 1$, não é certo
 que $\text{E}(N_i|x_i) = [\text{E}(\tau_i|x_i)]^{-1}$. Dessa maneira,
 $-\theta$ mede a variação percentual do tempo médio entre eventos para
 uma unidade de $x$.
