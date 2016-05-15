@@ -265,13 +265,42 @@ data: Revival of the Conway-Maxwell-Poisson distribution. {\em Journal of
 the Royal Statistical Society. Series C: Applied Statistics}, 54(1),
 127–142.
 
-\bibitem{Zeiles2008} Zeileis, A., Kleiber, C., Jackman, S. (2008). 
+\bibitem{Zeiles2008} Zeileis, A., Kleiber, C., Jackman, S. (2008).
 Regression Models for Count Data in R. {\em Journal of Statistical
-Software}, 27(8), 1 - 25. 
+Software}, 27(8), 1 - 25.
 \url{doi:http://dx.doi.org/10.18637/jss.v027.i08}
 
 \bibitem{Winkelmann2008} Winkelmann, R. (2008). {\em Econometric analysis
 of count data} (5th Ed.). Springer Science \& Business Media.
+
+\bibitem{silva2012}
+\MakeUppercase{Silva, A. M.; Degrande, P. E.; Suekane, R.; Fernandes,
+  M. G.; Zeviani, W. M.}
+\newblock{Impacto de diferentes níveis de desfolha artificial nos
+  estádios fenológicos do algodoeiro}.
+\newblock \textbf{Revista de Ciências Agrárias}, v.35, n.1, 2012 (prelo).
+
+\bibitem{Winkelmann1994}
+\MakeUppercase{Winkelmann, R.; Zimmermann, K.}
+\newblock {Count data models for demographic data}.
+\newblock \textbf{Mathematical Population Studies}, v.4, n.3, p.205--221, 1994.
+
+\bibitem{Winkelmann1995}
+\MakeUppercase{Winkelmann, R.}
+\newblock{Duration dependence and dispersion in count-data models}.
+\newblock \textbf{Journal of Business \& Economic Statistics}, v.13, n.4,
+  p.467--474, 1995.
+
+\bibitem{ConsulJain1997}
+\MakeUppercase{Consul, P. C. and G. C. Jain}
+\newblock{A generalization of the Poisson distribution}.
+\textbf{Technometrics}, v.15, n.4, p.791--799, 1973.
+
+\bibitem{Consul1989}
+\MakeUppercase{Consul, P. C}
+\newblock{Generalized Poisson Distributions: Properties and
+Applications}. \textbf{Statistics: Textbooks and Monographs}, New
+York: Marcel Dekker Inc. 1989.
 
 \end{thebibliography}
 \end{frame}
