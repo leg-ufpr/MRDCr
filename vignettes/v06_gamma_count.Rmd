@@ -32,8 +32,9 @@ $$
 em que $\lambda$ é o parâmetro de locação e $\alpha$ o parâmetro de
 dispersão.
 
-Essa função decorre da relação que existe entre intervalo de tempo entre
-eventos e do número de eventos dentro de um intervalo.
+Essa função de probabilidade resulta da relação que existe entre
+intervalo de tempo entre eventos e do número de eventos dentro de um
+intervalo.
 
 Considere que $\tau$ seja a variável aleatória tempo entre eventos que
 acontecem ao longo de um domínio com distribuição $\tau \sim
@@ -88,7 +89,7 @@ F_n(T) = \Pr(\vartheta_n \leq T) =
 $$
 
 Decorre que, se $[0, T)$ é um intervalo e $N$ é o número de eventos
-ocorridos dentro desse intervalo, então $N_T < n$ se e somente se
+ocorridos dentro desse intervalo, então $N < n$ se e somente se
 $\vartheta_n \geq T$, ou seja
 $$
 \Pr(N < n) = \Pr(\vartheta_n \geq T) = 1-F_n(T).
@@ -103,8 +104,12 @@ $$
 podemos escrever $\Pr(N = n)$ como sendo a diferença de acumuladas da
 Gama,
 $$
-\Pr(N_T=n) = G(n\alpha, \beta) - G((n+1)\alpha, \beta).
+\Pr(N = n) = G(n\alpha, \beta) - G((n+1)\alpha, \beta).
 $$
+
+Em resumo, a distribuição para o número de eventos, quando se assume a
+distribuição do intervalo entre eventos é Gamma, é resultado da
+diferença de duas acumuladas da distribuição Gamma.
 
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 # Definições da sessão.
@@ -167,9 +172,10 @@ MRDCr::dgcnt
 react <- function(panel){
     with(panel,
     {
-        y <- 0:YMAX
+        m <- LAMBDA
+        s <- sqrt(LAMBDA/exp(ALPHA))
+        y <- 0:max(c(YMAX, ceiling(m + 5 * s)))
         py <- dgcnt(y = y, lambda = LAMBDA, alpha = exp(ALPHA))
-        m <- sum(y * py)
         if (POIS) {
             pz <- dpois(y, lambda = m)
         } else {
@@ -184,6 +190,11 @@ react <- function(panel){
               text = substitute(sum(f(y)) == s,
                                 list(s = round(sum(py), 5))))
         if (EX) {
+            m <- sum(y * py)
+            # v <- sum((y - m)^2 * py)
+            legend("topright", bty = "n",
+                   legend = substitute(E(Y) == mu,
+                                       list(mu = m)))
             abline(v = m, col = 2)
         }
         if (POIS) {
@@ -258,6 +269,53 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
+
+# TODO documentar no pacote.
+fitted.gcnt <- function(lambda, alpha, offset = NULL, ymax = 40) {
+    if (is.null(offset)) {
+        offset <- 1
+    }
+    pars <- cbind(lambda, alpha, offset)
+    y <- 1:ymax
+    py <- apply(pars, MARGIN = 1,
+                FUN = function(p) {
+                    sum(pgamma(p[3],
+                               shape = p[2] * y,
+                               rate = p[2] * p[1]))
+                    # sum(y * dgcnt(y = y, lambda = p[1], alpha = p[2]))
+                })
+    names(py) <- NULL
+    return(py)
+}
+
+mean(y)
+fitted.gcnt(lambda = exp(coef(n1)[2]),
+            alpha = exp(coef(n1)[1]),
+            offset = 2)
+
+#-----------------------------------------------------------------------
+# A média da Gamma-Count.
+
+y <- rpois(100, lambda = 5)
+L <- list(y = y, X = cbind(rep(1, length(y))))
+start <- c(alpha = 0, lambda = 1)
+parnames(llgcnt) <- names(start)
+n1 <- mle2(llgcnt, start = start, data = L, vecpar = TRUE)
+
+c(mean(y),
+  exp(coef(n1)[2]),
+  fitted.gcnt(lambda = exp(coef(n1)[2]), alpha = exp(coef(n1)[1])))
+
+y <- rpois(500, lambda = 50)
+L <- list(y = y, X = cbind(rep(1, length(y))))
+start <- c(alpha = 0, lambda = 1)
+parnames(llgcnt) <- names(start)
+n1 <- mle2(llgcnt, start = start, data = L, vecpar = TRUE)
+
+c(mean(y),
+  exp(coef(n1)[2]),
+  fitted.gcnt(lambda = exp(coef(n1)[2]),
+              alpha = exp(coef(n1)[1]), ymax = 100))
 ```
 
 ## Número de Vagens Produzidas em Soja ##
@@ -275,6 +333,8 @@ duas plantas de soja.
 
 data(soja, package = "MRDCr")
 str(soja)
+
+# help(soja, package = "MRDCr", help_type = "html")
 
 # A observação 74 é um outlier.
 soja <- soja[-74, ]
@@ -320,16 +380,19 @@ m2 <- mle2(llgcnt, start = start, data = L,
 c(logLik(m2), logLik(m0))
 cbind(coef(m2)[-1], coef(m0))
 
-# Poisson Generalizada.
+# Gamma-Count estimando o alpha.
 m3 <- mle2(llgcnt, start = start, data = L, vecpar = TRUE)
 
 # Teste para nulinidade do parâmetro de dispersão (H_0: alpha == 0).
 anova(m3, m2)
 
-# Estimativas dos coeficientes.
-cbind("PoissonGLM" = c(NA, coef(m0)),
-      "PoissonML" = coef(m2),
-      "GCount" = coef(m3))
+# Estimaitvas dos parâmetros.
+c0 <- cbind("PoissonGLM" = c(NA, coef(m0)),
+            "PoissonML" = coef(m2),
+            "GCount" = coef(m3))
+c0
+
+splom(c0[-(1:2), ]) + layer(panel.abline(a = 0, b = 1, lty = 2))
 
 # Perfil para o parâmetro de dispersão.
 plot(profile(m3, which = "alpha"))
@@ -340,12 +403,12 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
-
-# Tamanho das covariâncias com \alpha.
-each(sum, mean, max)(abs(V[1, -1]))
 ```
 
 ```{r}
+# Tamanho das covariâncias com \alpha.
+each(sum, mean, max)(abs(V[1, -1]))
+
 #-----------------------------------------------------------------------
 # Testes de hipótese.
 
@@ -356,9 +419,6 @@ L <- t(replicate(sum(ai), rbind(coef(m3) * 0), simplify = "matrix"))
 L[, ai] <- diag(sum(ai))
 
 # Cáclculo da estatística Chi-quadrado.
-# t(L %*% coef(m3)) %*%
-#     solve(L %*% vcov(m3) %*% t(L)) %*%
-#     (L %*% coef(m3))
 crossprod(L %*% coef(m3),
           solve(L %*% vcov(m3) %*% t(L),
                 L %*% coef(m3)))
@@ -374,7 +434,6 @@ linearHypothesis(model = m0,
 # Predição com bandas de confiança.
 
 X <- LSmatrix(m0, effect = c("umid", "K"))
-
 pred <- attr(X, "grid")
 pred <- transform(pred,
                   K = as.integer(K),
@@ -396,21 +455,6 @@ aux <- confint(glht(m0, linfct = X),
 colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
-# TODO documentar no pacote.
-fitted.gcnt <- function(lambda, alpha, offset = NULL, ymax = 40) {
-    if (is.null(offset)) {
-        offset <- 1
-    }
-    pars <- cbind(lambda, alpha, offset)
-    y <- 1:ymax
-    apply(pars, MARGIN = 1,
-          FUN = function(p) {
-              sum(pgamma(p[3],
-                         shape = p[2] * y,
-                         rate = p[2] * p[1]))
-          })
-}
-
 # Matrix de covariância completa e sem o alpha (marginal).
 V <- vcov(m3)
 V <- V[-1, -1]
@@ -421,6 +465,7 @@ pred$gcnt$eta <- c(X %*% coef(m3)[-1])
 pred$gcnt <- cbind(pred$gcnt,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
                          FUN = function(x) {
+                             # exp(pred$gcnt$eta + x)
                              fitted.gcnt(
                                  lambda = exp(pred$gcnt$eta + x),
                                  alpha = exp(coef(m3)["alpha"]),
@@ -434,7 +479,8 @@ pred <- arrange(pred, umid, K, modelo)
 key <- list(type = "o", divide = 1,
             lines = list(pch = 1:nlevels(pred$modelo),
                          lty = 1, col = 1),
-            text = list(c("Poisson", "Quasi-Poisson", "Gamma Count")))
+            text = list(c("Poisson", "Quasi-Poisson",
+                          "Gamma-Count")))
 
 xyplot(fit ~ K | umid, data = pred,
        layout = c(NA, 1), as.table = TRUE,
@@ -475,6 +521,7 @@ xyplot(ngra ~ K | umid, data = soja, layout = c(NA, 1),
 #   couldn't invert Hessian
 
 soja$off <- 10
+fivenum(with(soja, ngra/off))
 
 #-----------------------------------------------------------------------
 # Modelo Poisson.
@@ -489,7 +536,7 @@ plot(m0); layout(1)
 
 # Medidas de decisão.
 # anova(m0, test = "Chisq")
-anova(m1, test = "Chisq")
+anova(m1, test = "F")
 summary(m1)
 
 #-----------------------------------------------------------------------
@@ -519,6 +566,8 @@ anova(m3, m2)
 c0 <- cbind("PoissonGLM" = c(NA, coef(m0)),
             "PoissonML" = coef(m2),
             "GCount" = coef(m3))
+c0
+
 splom(c0[-(1:2), ]) + layer(panel.abline(a = 0, b = 1, lty = 2))
 
 # Perfil para o parâmetro de dispersão.
@@ -592,10 +641,11 @@ pred$gcnt$eta <- c(X %*% coef(m3)[-1])
 pred$gcnt <- cbind(pred$gcnt,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
                          FUN = function(x) {
-                             fitted.gcnt(
-                                 lambda = exp(pred$gcnt$eta + x),
-                                 alpha = exp(coef(m3)["alpha"]),
-                                 ymax = 300)
+                             exp(pred$gcnt$eta + x)
+                             # fitted.gcnt(
+                             #     lambda = exp(pred$gcnt$eta + x),
+                             #     alpha = exp(coef(m3)["alpha"]),
+                             #     ymax = 100)
                          }))
 pred$gcnt$eta <- NULL
 
@@ -620,8 +670,6 @@ xyplot(fit ~ K | umid, data = pred,
        prepanel = prepanel.cbH,
        desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
-
-opts_chunk$set(eval = FALSE)
 ```
 
 ## Número de Grãos por Vagem ##
@@ -683,6 +731,8 @@ anova(m3, m2)
 c0 <- cbind("PoissonGLM" = c(NA, coef(m0)),
             "PoissonML" = coef(m2),
             "GCount" = coef(m3))
+c0
+
 splom(c0[-(1:2), ]) + layer(panel.abline(a = 0, b = 1, lty = 2))
 
 # Perfil para o parâmetro de dispersão.
@@ -716,6 +766,26 @@ linearHypothesis(model = m0,
                  coef. = coef(m3))
 
 #-----------------------------------------------------------------------
+
+# X <- model.matrix(m0)
+# soja$nvag
+#
+# cbind(y = soja$ngra,
+#       Pois = soja$nvag * exp(X %*% coef(m0)),
+#       Quas = soja$nvag * exp(X %*% coef(m1)),
+#       Gcnt = exp(X %*% coef(m3)[-1]))
+#
+# cbind(y = soja$ngra/soja$nvag,
+#       Pois = exp(X %*% coef(m0)),
+#       Quas = exp(X %*% coef(m1)),
+#       Gcnt = exp(X %*% coef(m3)[-1]))
+#
+# fitted.gcnt(lambda = 1, alpha = 1)
+# fitted.gcnt(lambda = 2, alpha = 1)
+# fitted.gcnt(lambda = 2, alpha = 0.4)
+# fitted.gcnt(lambda = 2, alpha = 3.1)
+
+#-----------------------------------------------------------------------
 # Predição com bandas de confiança.
 
 # Por causa do offset, não tem como usar a LSmatrix.
@@ -745,6 +815,9 @@ aux <- confint(glht(m1, linfct = X),
 colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
+# # TODO
+# m3 <- m2
+
 # Matrix de covariância completa e sem o alpha (marginal).
 V <- vcov(m3)
 V <- V[-1, -1]
@@ -752,20 +825,29 @@ U <- chol(V)
 aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
                   FUN = function(x) { sum(x^2) }))
 pred$gcnt$eta <- c(X %*% coef(m3)[-1])
+
+# Comparando as estimativas de média para contagem.
+c(Pois = pred$pois$fit[1],
+  Gcnt1 = exp(pred$gcnt$eta)[1],
+  GCnt2 = fitted.gcnt(
+      lambda = exp(pred$gcnt$eta)[1],
+      alpha = exp(coef(m3)["alpha"]),
+      ymax = 80))
+
 pred$gcnt <- cbind(pred$gcnt,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
                          FUN = function(x) {
-                             fitted.gcnt(
-                                 lambda = exp(pred$gcnt$eta + x),
-                                 alpha = exp(coef(m3)["alpha"]),
-                                 ymax = 300)
+                             exp(pred$gcnt$eta + x)
+                             # fitted.gcnt(
+                             #     lambda = exp(pred$gcnt$eta + x),
+                             #     alpha = exp(coef(m3)["alpha"]),
+                             #     ymax = 50)
                          }))
 pred$gcnt$eta <- NULL
 
 # Junta o resultado dos 3 modelos.
 pred <- ldply(pred, .id = "modelo")
 pred <- arrange(pred, umid, K, modelo)
-pred$K <- as.numeric(as.character(pred$K))
 
 key <- list(type = "o", divide = 1,
             lines = list(pch = 1:nlevels(pred$modelo),
@@ -773,16 +855,22 @@ key <- list(type = "o", divide = 1,
             text = list(c("Poisson", "Quasi-Poisson",
                           "Gamma-Count")))
 
-xyplot(fit ~ K | umid, data = pred,
-       layout = c(NA, 1), as.table = TRUE,
-       xlim = extendrange(range(pred$K), f = 0.2),
-       key = key, pch = pred$modelo,
+xyplot(ngra/nvag ~ K | umid, data = soja, layout = c(NA, 1),
+       type = c("p", "smooth"),
+       xlim = extendrange(range(as.numeric(pred$K)), f = 0.2),
+       key = key,
        xlab = expression("Dose de potássio"~(mg~dm^{-3})),
-       ylab = "Número de grãos por parcela",
-       ly = pred$lwr, uy = pred$upr, cty = "bars", length = 0,
-       prepanel = prepanel.cbH,
-       desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
-       panel = panel.cbH)
+       ylab = "Número de grãos por vagem",
+       strip = strip.custom(strip.names = TRUE, var.name = "Umidade")) +
+    as.layer(
+        xyplot(fit ~ K | umid, data = pred,
+               layout = c(NA, 1), as.table = TRUE,
+               pch = pred$modelo,
+               ly = pred$lwr, uy = pred$upr, cty = "bars", length = 0,
+               prepanel = prepanel.cbH,
+               desloc = 0.15 * scale(as.integer(pred$modelo),
+                                  scale = FALSE),
+               panel = panel.cbH))
 ```
 
 ## Número de Capulhos Produzidos em Algodão ##
@@ -790,11 +878,13 @@ xyplot(fit ~ K | umid, data = pred,
 Experimento conduzido em casa de vegetação para avaliar o efeito da
 desfolha, em diferentes fases de desenvolvimento do algodão, sobre a
 produção da cultura. As parcelas foram vasos com duas plantas que
-tiveram a área das folhas removidas com uma tesoura, simulando o ataque
+tiveram a área das folhas removida com uma tesoura, simulando o ataque
 de insetos desfolhadores, nos níveis de 0, 25, 50, 75 e 100% de remoção
 de área foliar. Em cada fase de desenvolvimento (de 5), 5 parcelas
-sofreram desfolha nos níveis mencionados. O número de capulhos ao final
-do experimento foi contado.
+sofreram desfolha nos níveis mencionados. Trata-se então de um
+experimento em arranjo fatorial 5 desfolhas $\times$ 5 fases com 5
+repetições por cela. O número de capulhos ao final do experimento foi
+contado.
 
 ```{r}
 #-----------------------------------------------------------------------
@@ -804,10 +894,12 @@ do experimento foi contado.
 data(capdesfo, package = "MRDCr")
 str(capdesfo)
 
+# help(capdesfo, package = "MRDCr", help_type = "html")
+
 p1 <- xyplot(ncap ~ des | est, data = capdesfo,
              col = 1, type = c("p", "smooth"), col.line = "gray50",
              layout = c(2, 3), as.table = TRUE,
-             xlim = extendrange(c(0:1), f = 0.15),
+             xlim = extendrange(capdesfo$des, f = 0.15),
              xlab = "Nível de desfolhas artificial",
              ylab = "Número de capulho produzidos",
              spread = 0.035, panel = panel.beeswarm)
@@ -823,7 +915,7 @@ m1 <- update(m0, family = quasipoisson)
 par(mfrow = c(2, 2))
 plot(m0); layout(1)
 
-anova(m0, test = "Chisq")
+# anova(m0, test = "Chisq")
 anova(m1, test = "F")
 summary(m1)
 
@@ -850,18 +942,23 @@ anova(m3, m2)
 
 summary(m3)
 
-plot(profile(m3, which = "alpha"))
+c0 <- cbind("PoissonGLM" = c(NA, coef(m0)),
+            "PoissonML" = coef(m2),
+            "GCount" = coef(m3))
+c0
+splom(c0[-(1:2), ]) + layer(panel.abline(a = 0, b = 1, lty = 2))
 
-cbind("PoissonGLM" = c(NA, coef(m0)),
-      "PoissonML" = coef(m2),
-      "Gcnteraliz" = coef(m3))
+# Perfil para o parâmetro de dispersão.
+plot(profile(m3, which = "alpha"))
 
 V <- cov2cor(vcov(m3))
 corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
+```
 
+```{r}
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -913,10 +1010,23 @@ U <- chol(V)
 aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
                   FUN = function(x) { sum(x^2) }))
 pred$gcnt$eta <- c(X %*% coef(m3)[-1])
+
+# Comparando as estimativas de média para contagem.
+c(Pois = pred$pois$fit[1],
+  Gcnt1 = exp(pred$gcnt$eta)[1],
+  GCnt2 = fitted.gcnt(
+      lambda = exp(pred$gcnt$eta)[1],
+      alpha = exp(coef(m3)["alpha"]),
+      ymax = 30))
+
 pred$gcnt <- cbind(pred$gcnt,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
                          FUN = function(x) {
-                             exp(pred$gcnt$eta + x)
+                             # exp(pred$gcnt$eta + x)
+                             fitted.gcnt(
+                                 lambda = exp(pred$gcnt$eta + x),
+                                 alpha = exp(coef(m3)["alpha"]),
+                                 ymax = 50)
                          }))
 
 pred <- ldply(pred, .id = "modelo")
@@ -924,7 +1034,7 @@ pred <- arrange(pred, est, des, modelo)
 
 key <- list(lines = list(lty = 1),
             text = list(c("Poisson", "Quasi-Poisson",
-                          "Poisson Generelizada")))
+                          "Gamma-Count")))
 key$lines$col <-
     trellis.par.get("superpose.line")$col[1:nlevels(pred$modelo)]
 
@@ -946,7 +1056,7 @@ update(p1, type = "p", layout = c(NA, 1),
     as.layer(p2, under = TRUE)
 ```
 
-## Número de Nematóides em Linhagens de Feijão
+## Número de Nematoides em Linhagens de Feijão ##
 
 ```{r}
 #-----------------------------------------------------------------------
@@ -954,17 +1064,14 @@ update(p1, type = "p", layout = c(NA, 1),
 data(nematoide, package = "MRDCr")
 str(nematoide)
 
+# help(nematoide, package = "MRDCr", help_type = "html")
+
 # Número de nematóides por grama de raíz.
 plot(nema ~ off, data = nematoide)
 
-# Média do número de nematóides por grama de raíz.
-mv <- aggregate(cbind(y = nema/off) ~ cult, data = nematoide,
-                FUN = function(x) c(m = mean(x), v = var(x)))
-
-xyplot(y[, "v"] ~ y[, "m"], data = mv,
-       xlab = "Média amostral",
-       ylab = "Variância amostral") +
-    layer(panel.abline(a = 0, b = 1, lty = 2))
+xyplot(nema/off ~ cult, data = nematoide,
+       xlab = "Linhagens de feijão",
+       ylab = "Número de nematoides por grama de raíz")
 
 #-----------------------------------------------------------------------
 # Ajuste do Poisson.
@@ -1007,6 +1114,12 @@ m3 <- gcnt(formula(m0), data = nematoide)
 # 2 * diff(c(logLik(m0), logLik(m3)))
 anova(m3, m2)
 
+c0 <- cbind("PoissonGLM" = c(NA, coef(m0)),
+            "PoissonML" = coef(m2),
+            "GCount" = coef(m3))
+c0
+splom(c0[-(1:2), ]) + layer(panel.abline(a = 0, b = 1, lty = 2))
+
 # Perfil de log-verossimilhança para o parâmetro de dispersão.
 plot(profile(m3, which = "alpha"))
 
@@ -1016,7 +1129,9 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
+```
 
+```{r}
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -1024,34 +1139,6 @@ each(sum, mean, max)(abs(V[1, -1]))
 pars <- data.frame(Pois = c(0, coef(m0)), Gcnt = coef(m3))
 xyplot(Gcnt ~ Pois, data = pars, aspect = "iso", grid = TRUE) +
     layer(panel.abline(a = 0, b = 1, lty = 2))
-
-#-----------------------------------------------------------------------
-
-X <- model.matrix(m0)
-
-# # Predito do número de nematóides observado (considera o offset).
-# with(nematoide, {
-#     cbind(y = nema,
-#           Pois = nematoide$off * exp(X %*% coef(m0)),
-#           Gcnt = nematoide$off * exp(X %*% coef(m1)[-1]))
-# })
-
-# Predito do número de nematóides por grama de raíz.
-pred <- with(nematoide, {
-    data.frame(y = nema/off,
-               Pois = c(exp(X %*% coef(m0))),
-               Gcnt = c(exp(X %*% coef(m3)[-1])))
-})
-str(pred)
-
-splom(pred) + layer(panel.abline(a = 0, b = 1))
-
-# Correlação predito x observado.
-cor(pred)
-
-# Média das observações de das estimativas por cultivar.
-predm <- aggregate(as.matrix(pred) ~ cult, data = nematoide, FUN = mean)
-cor(predm[, -1])
 
 #-----------------------------------------------------------------------
 # Predição com intervalos de confiança.
@@ -1083,10 +1170,23 @@ U <- chol(V)
 aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
                   FUN = function(x) { sum(x^2) }))
 pred$gcnt$eta <- c(X %*% coef(m3)[-1])
+
+# Comparando as estimativas de média para contagem.
+c(Pois = pred$pois$fit[1],
+  Gcnt1 = exp(pred$gcnt$eta)[1],
+  GCnt2 = fitted.gcnt(
+      lambda = exp(pred$gcnt$eta)[1],
+      alpha = exp(coef(m3)["alpha"]),
+      ymax = 500))
+
 pred$gcnt <- cbind(pred$gcnt,
                    apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
                          FUN = function(x) {
-                             exp(pred$gcnt$eta + x)
+                             # exp(pred$gcnt$eta + x)
+                             fitted.gcnt(
+                                 lambda = exp(pred$gcnt$eta + x),
+                                 alpha = exp(coef(m3)["alpha"]),
+                                 ymax = 500)
                          }))
 
 pred <- ldply(pred, .id = "modelo")
@@ -1096,7 +1196,7 @@ key <- list(type = "o", divide = 1,
             lines = list(pch = 1:nlevels(pred$modelo),
                          lty = 1, col = 1),
             text = list(c("Poisson", "Quasi-Poisson",
-                          "Poisson Generelizada")))
+                          "Gamma-Count")))
 
 xyplot(nema/off ~ cult, data = nematoide,
        key = key,
@@ -1111,40 +1211,10 @@ xyplot(nema/off ~ cult, data = nematoide,
                desloc = 0.25 * scale(as.integer(pred$modelo),
                                     scale = FALSE),
                panel = panel.cbH))
+```
 
-#-----------------------------------------------------------------------
-# Resíduos de Pearson.
+## Número de Gols por Partida de Futebol ##
 
-X <- model.matrix(m0)
-
-# # Resíduos de Pearson no Poisson.
-# with(nematoide,  {
-#     y <- nema
-#     # haty <- fitted(m0)
-#     haty <- nematoide$off * exp(X %*% coef(m0))
-#     sdy <- sqrt(haty)
-#     cbind((y - haty)/sdy,
-#           residuals(m0, type = "pearson"))
-# })
-
-# Resíduos de Pearson do Poisson Generalizado.
-rp <- with(nematoide,  {
-    y <- nema
-    alph <- coef(m3)["alpha"]
-    haty <- c(nematoide$off * exp(X %*% coef(m3)[-1]))
-    sdy <- sqrt(haty) * (1 + alph * haty)
-    (y - haty)/sdy
-})
-
-rp <- stack(data.frame(Pois = residuals(m0, type = "pearson"),
-                       Gcnt = rp))
-
-qqmath(~values | ind, data = rp,
-       xlab = "Quantis teóricos",
-       ylab = "Resíduos de Pearson",
-       panel = function(...) {
-           panel.qqmathline(...)
-           panel.qqmath(...)
-       })
-
+```{r}
+opts_chunk$set(eval = FALSE)
 ```
