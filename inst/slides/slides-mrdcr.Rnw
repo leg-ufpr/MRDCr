@@ -1,6 +1,7 @@
 \documentclass[10pt, aspectratio=169]{beamer}
 
 \usepackage[brazil]{babel}
+\usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
 \usepackage{multicol}
@@ -10,18 +11,13 @@
 
 %% ======================================================================
 %% Fontes
-\usepackage{palatino}
-\usepackage{eulervm}
-\usepackage[none]{ubuntu}
+
+\usepackage{mathpazo}
+\usepackage{inconsolata}
 \usepackage{verbatim}
 
 \usefonttheme{professionalfonts}
 \usefonttheme{serif}
-\renewcommand{\ttdefault}{ubuntumono}
-\renewcommand{\ttfamily}{\fontUbuntuMono}
-\makeatletter
-\def\verbatim@font{\normalsize\fontUbuntuMono}
-\makeatother
 
 %% ======================================================================
 %% Cores para links
