@@ -19,13 +19,12 @@ cmp
 ## ------------------------------------------------------------------------
 
 set.seed(2016)
-x <- rep(1:3, 2)
-t <- rnorm(6, 5)
-y <- rpois(6, lambda = x*t)
-(da <- data.frame(x, t, y))
+x <- rep(1:3, 3)
+y <- rpois(9, lambda = x)
+(da <- data.frame(x, y))
 
 ## Definindo o prditor do modelo
-formula <- y ~ x + I(x^2) + offset(log(t))
+formula <- y ~ x + I(x^2)
 
 ##-------------------------------------------
 ## O framework
@@ -34,18 +33,17 @@ formula <- y ~ x + I(x^2) + offset(log(t))
 frame <- model.frame(formula, data = da)
 (X <- model.matrix(formula, data = da))
 (y <- model.response(frame))
-(o <- model.offset(frame))
 
 ## Utiliza como valores iniciais as estimativas dos parametros de um
 ## modelo GLM-Poisson
-m0 <- glm.fit(x = X, y = y, offset = o, family = poisson())
-start <- c(phi = 0, m0$coefficients)
+m0 <- glm.fit(x = X, y = y, family = poisson())
+(start <- c(phi = 0, m0$coefficients))
 
 ## Otimiza a função de log-verossimilhança via bbmle
 library(bbmle)
 parnames(llcmp) <- names(start)
 mle2(llcmp, start = start,
-     data = list(y = y, X = X, offset = o, sumto = 50),
+     data = list(y = y, X = X, sumto = 50),
      vecpar = TRUE)
 
 
@@ -103,8 +101,6 @@ m3C <- cmp(f3, data = capmosca)
 
 ## ------------------------------------------------------------------------
 
-library(bbmle)
-
 ## Verossimilhancas dos modelos ajustados
 cbind("Poisson" = sapply(list(m1P, m2P, m3P), logLik),
       "COM-Poisson" = sapply(list(m1C, m2C, m3C), logLik))
@@ -128,6 +124,9 @@ summary(m3C)
 ## verificar se o ajuste proporcionou uma densidade válida se faz
 ## necessária
 convergencez(m3C)
+
+## Reajustando o modelo
+logLik(m3C <- cmp(f3, data = capmosca, sumto = 30))
 
 
 ## ------------------------------------------------------------------------
@@ -211,7 +210,8 @@ aux <- c(loglambdas) + outer(se, qn, FUN = "*")
 aux <- apply(aux, MARGIN = 2,
              FUN = function(col) {
                  sapply(col, FUN = function(p) {
-                     y <- 0:30; py <- dcmp(y, p, phi, sumto = 50)
+                     y <- 0:30
+                     py <- dcmp(y, exp(p), exp(phi), sumto = 50)
                      sum(y*py)
                  })
              })
@@ -227,7 +227,7 @@ cols <- trellis.par.get("superpose.line")$col[1:2]
 key <- list(
     lines = list(lty = 1, col = cols),
     rect = list(col = cols, alpha = 0.1, lty = 3, border = NA),
-    text = list(c("Poisson", "COM-Poisson")))
+    text = list(c("COM-Poisson", "Poisson")))
 
 ## Gráfico dos valores preditos e IC de 95% para média 
 update(xy, type = c("p", "g"), key = key, alpha = 0.7) +
@@ -266,32 +266,18 @@ xtabs(~K + umid, data = soja)
 key <- list(
     type = "b", divide = 1,
     ## points = list(pch = 1, col = cols),
-    lines = list(pch = 1, lty = 1,
-                 col = c(cols, trellis.par.get("dot.symbol")$col)),
-    text = list(c("Nº de grãos por parcela", "Nº de vagens viáveis",
-                  "Nº de grãos por vagem")))
+    lines = list(pch = 1, lty = 1, col = cols),
+    text = list(c("Nº de grãos por parcela", "Nº de vagens viáveis")))
 
-xy1 <- xyplot(ngra + nvag ~ K | umid,
-             data = soja,
-             xlab = "Nível de adubação potássica",
-             ylab = "Contagem",
-             type = c("p", "g", "smooth"),
-             key = key,
-             layout = c(NA, 1),
-             strip = strip.custom(
-                 strip.names = TRUE, var.name = "Umidade"))
-
-xy2 <- xyplot(ngra/nvag ~ K | umid,
-             data = soja,
-             xlab = "Nível de adubação potássica",
-             ylab = "Contagem",
-             type = c("p", "g", "smooth"),
-             layout = c(NA, 1),
-             strip = strip.custom(
-                 strip.names = TRUE, var.name = "Umidade"))
-
-print(xy1, split = c(1, 1, 1, 2), more = TRUE)
-print(xy2, split = c(1, 2, 1, 2), more = FALSE)
+xyplot(ngra + nvag ~ K | umid,
+       data = soja,
+       xlab = "Nível de adubação potássica",
+       ylab = "Contagem",
+       type = c("p", "g", "smooth"),
+       key = key,
+       layout = c(NA, 1),
+       strip = strip.custom(
+           strip.names = TRUE, var.name = "Umidade"))
 
 
 ## ------------------------------------------------------------------------
@@ -329,26 +315,11 @@ mvp2 <- xyplot(nvag[, "var"] ~ nvag[, "mean"],
                    panel.abline(a = 0, b = 1, lty = 2)
                })
 
-##-------------------------------------------
-## Para o número de grãos por vagem
-xlim <- ylim <- extendrange(c(mv$ng2v), f = 0.05)
-mvp3 <- xyplot(ng2v[, "var"] ~ ng2v[, "mean"],
-               data = mv,
-               xlim = xlim, ylim = ylim,
-               ylab = "Variância Amostral",
-               xlab = "Média Amostral",
-               main = "Número grãos por vagem",
-               panel = function(x, y) {
-                   panel.xyplot(x, y, type = c("p", "r"), grid = TRUE)
-                   panel.abline(a = 0, b = 1, lty = 2)
-               })
-
-print(mvp1, split = c(1, 1, 3, 1), more = TRUE)
-print(mvp2, split = c(2, 1, 3, 1), more = TRUE)
-print(mvp3, split = c(3, 1, 3, 1), more = FALSE)
+print(mvp1, split = c(1, 1, 2, 1), more = TRUE)
+print(mvp2, split = c(2, 1, 2, 1), more = FALSE)
 
 
-## ------------------------------------------------------------------------
+## ----ajuste2, cache = TRUE-----------------------------------------------
 
 ##-------------------------------------------
 ## Para o número de vagens viáveis por parcela
@@ -380,21 +351,6 @@ m2P.ng <- glm(f2.ng, data = soja, family = poisson)
 m1C.ng <- cmp(f1.ng, data = soja, sumto = 700)
 m2C.ng <- cmp(f2.ng, data = soja, sumto = 700)
 
-##-------------------------------------------
-## Para o número de grãos produzidos por vagem
-
-## Preditores considerados
-f1.gpv <- ngra ~ offset(log(nvag)) + bloc + umid + K
-f2.gpv <- ngra ~ offset(log(nvag)) + bloc + umid * K
-
-## Ajustando os modelos Poisson
-m1P.gpv <- glm(f1.gpv, data = soja, family = poisson)
-m2P.gpv <- glm(f2.gpv, data = soja, family = poisson)
-
-## Ajustando os modelos COM-Poisson
-m1C.gpv <- cmp(f1.gpv, data = soja, sumto = 350)
-m2C.gpv <- cmp(f2.gpv, data = soja, sumto = 350)
-
 
 ## ------------------------------------------------------------------------
 
@@ -402,11 +358,10 @@ m2C.gpv <- cmp(f2.gpv, data = soja, sumto = 350)
 ## Verossimilhancas dos modelos ajustados
 cbind("Poisson" = sapply(
           list("nvagem adtv" = m1P.nv, "nvagem mult" = m2P.nv,
-               "ngraos adtv" = m1P.ng, "ngraos mult" = m2P.ng,
-               "ngrapv adtv" = m1P.gpv, "ngrapv mult" = m2P.gpv),
+               "ngraos adtv" = m1P.ng, "ngraos mult" = m2P.ng),
           logLik),
       "COM-Poisson" = sapply(
-          list(m1C.nv, m2C.nv, m1C.ng, m2C.ng, m1C.gpv, m2C.gpv),
+          list(m1C.nv, m2C.nv, m1C.ng, m2C.ng),
           logLik))
 
 ##-------------------------------------------
@@ -419,10 +374,6 @@ anova(m1C.nv, m2C.nv)
 ## Dos modelos para o número de grão por parcela
 anova(m1P.ng, m2P.ng, test = "Chisq")
 anova(m1C.ng, m2C.ng)
-
-## Dos modelos para o número de grão por vagem
-anova(m1P.gpv, m2P.gpv, test = "Chisq")
-anova(m1C.gpv, m2C.gpv)
 
 
 ## ------------------------------------------------------------------------
@@ -437,10 +388,6 @@ summary(m2C.nv)
 summary(m2P.ng)
 summary(m2C.ng)
 
-## o número de grão por vagem
-summary(m1P.gpv)
-summary(m1C.gpv)
-
 
 ## ------------------------------------------------------------------------
 
@@ -449,16 +396,11 @@ summary(m1C.gpv)
 ## verificar se o ajuste proporcionou uma densidade válida se faz
 ## necessária
 
-par(mfrow = c(1, 3))
-
 ## No modelo para o número de vagens viáveis
 convergencez(m2C.nv)
 
 ## No modelo para o número de grão por parcela
 convergencez(m2C.ng)
-
-## No modelo para o número de grão por vagem
-convergencez(m1C.gpv)
 
 
 ## ------------------------------------------------------------------------
@@ -473,10 +415,6 @@ plot(m2P.nv)
 ## Avaliação do modelo para o número de grão por parcela
 par(mfrow = c(2, 2))
 plot(m2P.ng)
-
-## Avaliação do modelo para o número de grão por vagem
-par(mfrow = c(2, 2))
-plot(m1P.gpv)
 
 
 ## ---- cache = TRUE-------------------------------------------------------
@@ -509,33 +447,20 @@ m2Cfixed.ng <- cmp(f2.ng, data = soja, fixed = list("phi" = 0),
                    sumto = 700)
 anova(m2C.ng, m2Cfixed.ng)
 
-##-------------------------------------------
-## No modelo para o número de grão por vagem
 
-## Usando o ajuste Poisson
-trv <- 2 * (logLik(m1C.gpv) - logLik(m1P.gpv))
-attributes(trv) <- NULL
-round(c(trv, pchisq(trv, 1, lower = FALSE)), digits = 5)
-
-## Reajustando o COM-Poisson para phi = 0 (ou equivalente nu = 1)
-m1Cfixed.gpv <- cmp(f1.gpv, data = soja, fixed = list("phi" = 0),
-                    sumto = 350)
-anova(m1C.gpv, m1Cfixed.gpv)
+## ----perf2, echo = FALSE, warnings = FALSE-------------------------------
 
 ##-------------------------------------------
 ## Via perfis de log-verossimilhança
 perf.nv <- profile(m2C.nv, which = "phi")
 perf.ng <- profile(m2C.ng, which = "phi")
-perf.gpv <- profile(m1C.gpv, which = "phi")
-
-par(mfrow = c(1, 3))
-plot(perf.nv)
-plot(perf.ng)
-plot(perf.gpv)
 
 confint(perf.nv)
 confint(perf.ng)
-confint(perf.gpv)
+
+par(mfrow = c(1, 2))
+plot(perf.nv)
+plot(perf.ng)
 
 
 ## ------------------------------------------------------------------------
@@ -555,14 +480,6 @@ corrplot.mixed(Corr, lower = "number", upper = "ellipse",
 ## No modelo para o número de grão por parcela
 Vcov.ng <- vcov(m2C.ng)
 Corr <- cov2cor(Vcov.ng)
-
-corrplot.mixed(Corr, lower = "number", upper = "ellipse",
-               diag = "l", tl.pos = "lt", tl.col = "black",
-               tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
-
-## No modelo para o número de grão por vagem
-Vcov.gpv <- vcov(m1C.gpv)
-Corr <- cov2cor(Vcov.gpv)
 
 corrplot.mixed(Corr, lower = "number", upper = "ellipse",
                diag = "l", tl.pos = "lt", tl.col = "black",
@@ -617,13 +534,6 @@ colnames(aux) <- c("fit", "lwr", "upr")
 aux <- data.frame(modelo = "Poisson", aux)
 predP.ng <- cbind(pred, aux)
 
-## No modelo para o número de grãos por vagem
-aux <- exp(confint(glht(m1P.gpv, linfct = X1),
-               calpha = univariate_calpha())$confint)
-colnames(aux) <- c("fit", "lwr", "upr")
-aux <- data.frame(modelo = "Poisson", aux)
-predP.gpv <- cbind(pred, aux)
-
 ##----------------------------------------------------------------------
 ## Considerando a COM-Poisson
 
@@ -649,7 +559,8 @@ aux <- c(loglambdas) + outer(se, qn, FUN = "*")
 aux <- apply(aux, MARGIN = 2,
              FUN = function(col) {
                  sapply(col, FUN = function(p) {
-                     y <- 0:200; py <- dcmp(y, p, phi, sumto = 300)
+                     y <- 0:200
+                     py <- dcmp(y, exp(p), exp(phi), sumto = 300)
                      sum(y*py)
                  })
              })
@@ -678,41 +589,13 @@ aux <- c(loglambdas) + outer(se, qn, FUN = "*")
 aux <- apply(aux, MARGIN = 2,
              FUN = function(col) {
                  sapply(col, FUN = function(p) {
-                     y <- 0:350; py <- dcmp(y, p, phi, sumto = 700)
+                     y <- 0:350
+                     py <- dcmp(y, exp(p), exp(phi), sumto = 700)
                      sum(y*py)
                  })
              })
 aux <- data.frame(modelo = "COM-Poisson", aux)
 predC.ng <- cbind(pred, aux)
-
-##-------------------------------------------
-## No modelo para o número de grãos por vagem
-## Obtendo os parâmetros da distribuição (lambdas e phi)
-betas <- coef(m1C.gpv)[-1]
-phi <- coef(m1C.gpv)[1]
-loglambdas <- X1 %*% betas
-
-## Obtendo os erros padrão das estimativas
-##   Obs.: Deve-se usar a matriz de variâncias e covariâncias
-##   condicional, pois os parâmetros de locação (betas) e dispersão
-##   (phi) não são ortogonais.
-Vc <- Vcov.gpv[-1, -1] - Vcov.gpv[-1, 1] %*%
-    solve(Vcov.gpv[1, 1]) %*% Vcov.gpv[1, -1]
-U <- chol(Vc)
-se <- sqrt(apply(X1 %*% t(U), MARGIN = 1, FUN = function(x) {
-    sum(x^2)
-}))
-
-aux <- c(loglambdas) + outer(se, qn, FUN = "*")
-aux <- apply(aux, MARGIN = 2,
-             FUN = function(col) {
-                 sapply(col, FUN = function(p) {
-                     y <- 0:30; py <- dcmp(y, p, phi, sumto = 50)
-                     sum(y*py)
-                 })
-             })
-aux <- data.frame(modelo = "COM-Poisson", aux)
-predC.gpv <- cbind(pred, aux)
 
 ##-------------------------------------------
 ## Visualizando os valores preditos intervalares pelos dois modelos
@@ -721,9 +604,6 @@ da.nv <- da.nv[with(da.nv, order(umid, K, modelo)), ]
 
 da.ng <- rbind(predP.ng, predC.ng)
 da.ng <- da.ng[with(da.ng, order(umid, K, modelo)), ]
-
-da.gpv <- rbind(predP.gpv, predC.gpv)
-da.gpv <- da.gpv[with(da.gpv, order(umid, K, modelo)), ]
 
 source(paste0("https://gitlab.c3sl.ufpr.br/leg/legTools/raw/",
               "issue%2315/R/panel.segplot.by.R"))
@@ -768,50 +648,10 @@ xy2 <- xyplot(ngra ~ K | umid, data = soja,
             panel = panel.segplot.by, f = 0.1, as.table = TRUE)
     )    
 
-xy3 <- xyplot(ngra/nvag ~ K | umid, data = soja,
-       xlab = "Nível de adubação potássica",
-       ylab = "Contagem",
-       type = c("p", "g"), alpha = 0.7,
-       ## key = key,
-       layout = c(NA, 1),
-       as.table = TRUE,
-       strip = strip.custom(
-           strip.names = TRUE, var.name = "Umidade")) +
-    as.layer(    
-        segplot(
-            K ~ lwr + upr | umid,
-            centers = fit, groups = modelo, data = da.gpv,
-            grid = TRUE, horizontal = FALSE, draw = FALSE,
-            lwd = 2, pch = 1:nlevels(da$modelo) + 3,
-            panel = panel.segplot.by, f = 0.1, as.table = TRUE)
-    )    
-
 ## x11(width = 10, height = 50)
-print(xy1, split = c(1, 1, 1, 3), more = TRUE)
-print(xy2, split = c(1, 2, 1, 3), more = TRUE)
-print(xy3, split = c(1, 3, 1, 3), more = FALSE)
+print(xy1, split = c(1, 1, 1, 2), more = TRUE)
+print(xy2, split = c(1, 2, 1, 2), more = FALSE)
 
-
-## ---- eval = FALSE-------------------------------------------------------
-## 
-## ## Testando o termo offset
-## 
-## ##======================================================================
-## ## offset 2 e lambda = 5
-## trat <- rep(letters[1:3], 30)
-## X <- model.matrix(~trat)
-## betas <- c(-0.5, -2, 1.5)
-## lambdas <- exp(X %*% betas)
-## y <- rpois(nrow(X), lambda = lambdas * 2)
-## 
-## kk <- data.frame(trat = trat, o = 2, y = y)
-## kkm <- cmp(y ~ offset(log(o)) + trat, data = kk, sumto = 50)
-## kkg <- glm(y ~ offset(log(o)) + trat, data = kk, family = poisson)
-## 
-## cbind(coef(kkm), c(NA, coef(kkg)))
-## 
-## ##======================================================================
-## 
 
 ## ------------------------------------------------------------------------
 
@@ -896,6 +736,9 @@ summary(m4C)
 ## necessária
 convergencez(m4C)
 
+## Reajustando o modelo
+logLik(m4C <- cmp(f4, data = capdesfo, sumto = 30))
+
 
 ## ------------------------------------------------------------------------
 
@@ -919,8 +762,11 @@ round(c(trv, pchisq(trv, 1, lower = FALSE)), digits = 5)
 m4Cfixed <- cmp(f4, data = capdesfo, fixed = list("phi" = 0))
 anova(m4C, m4Cfixed)
 
+
+## ----perf3, cache = TRUE-------------------------------------------------
+
 ## Via perfil de log-verossimilhança
-perf <- profile(m4C, which = 1)
+perf <- profile(m4C, which = "phi")
 confint(perf)
 plot(perf)
 
@@ -979,7 +825,8 @@ aux <- c(loglambdas) + outer(se, qn, FUN = "*")
 aux <- apply(aux, MARGIN = 2,
              FUN = function(col) {
                  sapply(col, FUN = function(p) {
-                     y <- 0:50; py <- dcmp(y, p, phi, sumto = 100)
+                     y <- 0:50
+                     py <- dcmp(y, exp(p), exp(phi), sumto = 100)
                      sum(y*py)
                  })
              })
@@ -990,7 +837,132 @@ predC <- cbind(pred, aux)
 ## Visualizando os valores preditos intervalares pelos dois modelos
 da <- rbind(predP, predC)
 
+## Legenda
+cols <- trellis.par.get("superpose.line")$col[1:2]
+key <- list(
+    lines = list(lty = 1, col = cols),
+    rect = list(col = cols, alpha = 0.1, lty = 3, border = NA),
+    text = list(c("COM-Poisson", "Poisson")))
+
 ## Gráfico dos valores preditos e IC de 95% para média 
+update(xy, type = c("p", "g"), key = key, alpha = 0.7) +
+    as.layer(xyplot(fit ~ des | est,
+                    groups = modelo,
+                    data = da,
+                    type = "l",
+                    ly = da$lwr,
+                    uy = da$upr,
+                    cty = "bands",
+                    alpha = 0.5,
+                    prepanel = prepanel.cbH,
+                    panel.groups = panel.cbH,
+                    panel = panel.superpose))
+
+
+## ------------------------------------------------------------------------
+
+## Reparametriza para a média (aproximada)
+llcmp3 <- function (params, y, X, offset = NULL, sumto = 50) {
+    betas <- params[-1]
+    phi <- params[1]
+    nu <- exp(phi)
+    if (is.null(offset)) 
+        offset <- 0
+    ##-------------------------------------------
+    ## Reparametrização para a média
+    mu <- exp(X %*% betas)
+    Xb <- nu * log(mu + (nu - 1)/(2 * nu))
+    ##-------------------------------------------
+    i <- 0:sumto
+    zs <- sapply(Xb, function(loglambda) sum(exp(i * loglambda - 
+                                                 nu * lfactorial(i))))
+    Z <- sum(log(zs))
+    ll <- sum(y * Xb - nu * lfactorial(y)) - Z
+    return(-ll)
+}
+
+
+## ------------------------------------------------------------------------
+
+## Modifica framework para llcmp3
+cmp3 <- function (formula, data, start = NULL, sumto = NULL, ...) {
+    frame <- model.frame(formula, data)
+    terms <- attr(frame, "terms")
+    y <- model.response(frame)
+    X <- model.matrix(terms, frame)
+    ## off <- model.offset(frame)
+    ## if (is.null(sumto)) 
+    ##     sumto <- ceiling(max(y)^1.5)
+    if (is.null(start)) {
+        m0 <- glm.fit(x = X, y = y, family = poisson())
+        start <- c(phi = 0, m0$coefficients)
+    }
+    bbmle::parnames(llcmp3) <- names(start)
+    model <- bbmle::mle2(llcmp3, start = start, data = list(y = y, 
+        X = X), vecpar = TRUE, ...)
+    return(model)
+}
+
+
+## ------------------------------------------------------------------------
+
+## Ajustando o modelo
+m4C2 <- cmp3(f4, data = capdesfo)
+convergencez(m4C2)
+
+
+## ------------------------------------------------------------------------
+
+## Perfis de verossimilhança para phi
+perf <- profile(m4C2, which = "phi")
+confint(perf)
+plot(perf)
+
+
+## ------------------------------------------------------------------------
+
+##-------------------------------------------
+## Verificando a matriz de variâncias e covariâncias
+Vcov <- vcov(m4C2)
+Corr <- cov2cor(Vcov)
+
+corrplot.mixed(Corr, lower = "number", upper = "ellipse",
+               diag = "l", tl.pos = "lt", tl.col = "black",
+               tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
+
+
+## ------------------------------------------------------------------------
+
+X <- m4C2@data$X
+mu <- c(exp(X %*% coef(m4C2)[-1]))
+
+##-------------------------------------------
+## Considerando a COM-Poisson reparametrizada para a média
+f4; f4[-2]
+X <- model.matrix(f4[-2], data = pred)
+
+betas <- coef(m4C2)[-1]
+phi <- coef(m4C2)[1]
+logmu <- X %*% betas
+
+## Obtendo os erros padrão das estimativas
+##   Obs.: Deve-se usar a matriz de variâncias e covariâncias
+##   condicional, pois os parâmetros de locação (betas) e dispersão
+##   (phi) não são ortogonais.
+Vc <- Vcov[-1, -1] - Vcov[-1, 1] %*% solve(Vcov[1, 1]) %*% Vcov[1, -1]
+U <- chol(Vc)
+se <- sqrt(apply(X %*% t(U), MARGIN = 1, FUN = function(x) {
+    sum(x^2)
+}))
+
+aux <- exp(c(logmu) + outer(se, qn, FUN = "*"))
+aux <- data.frame(modelo = "COM-Poisson", aux)
+predC2 <- cbind(pred, aux)
+
+##-------------------------------------------
+## Visualizando os valores preditos intervalares pelos dois modelos
+da <- rbind(predP, predC2)
+
 update(xy, type = c("p", "g"), key = key, alpha = 0.7) +
     as.layer(xyplot(fit ~ des | est,
                     groups = modelo,
@@ -1060,8 +1032,8 @@ m1P <- glm(f1, data = ninfas, family = poisson)
 m2P <- glm(f2, data = ninfas, family = poisson)
 
 ## Ajustando os modelos COM-Poisson
-m1C <- cmp(f1, data = ninfas, sumto = 600)
-m2C <- cmp(f2, data = ninfas, sumto = 600)
+m1C <- cmp(f1, data = ninfas, sumto = 800)
+m2C <- cmp(f2, data = ninfas, sumto = 800)
 
 
 ## ------------------------------------------------------------------------
@@ -1088,7 +1060,7 @@ summary(m1C)
 ## constante de normalização Z. Assim uma visualização pós ajuste para
 ## verificar se o ajuste proporcionou uma densidade válida se faz
 ## necessária
-convergencez(m1C, incremento = 100, maxit = 10)
+convergencez(m1C)
 
 
 ## ------------------------------------------------------------------------
@@ -1113,8 +1085,11 @@ round(c(trv, pchisq(trv, 1, lower = FALSE)), digits = 5)
 m1Cfixed <- cmp(f1, data = ninfas, fixed = list("phi" = 0))
 anova(m1C, m1Cfixed)
 
+
+## ----perf4, cache = TRUE, warnings = FALSE-------------------------------
+
 ## Via perfil de log-verossimilhança
-perf <- profile(m1C, which = 1)
+perf <- profile(m1C, which = "phi")
 confint(perf)
 plot(perf)
 
@@ -1186,7 +1161,8 @@ aux <- c(loglambdas) + outer(se, qn, FUN = "*")
 aux <- apply(aux, MARGIN = 2,
              FUN = function(col) {
                  sapply(col, FUN = function(p) {
-                     y <- 0:400; py <- dcmp(y, p, phi, sumto = 600)
+                     y <- 0:400
+                     py <- dcmp(y, exp(p), exp(phi), sumto = 600)
                      sum(y*py)
                  })
              })
