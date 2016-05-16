@@ -1,28 +1,41 @@
 #' @title Avaliação da Convergência da Constante Normalizadora
-#' @description Avalia a convergência da constante de normalização de
-#'     um modelo COM-Poisson definida por: \deqn{Z = \sum
+#' @author Eduardo E. R. Junior, \email{edujrrib@gmail.com}
+#' @export
+#' @description Avalia a convergência da constante de normalização de um
+#'     modelo COM-Poisson definida por: \deqn{Z = \sum
 #'     \frac{\lambda^i}{(i!)^\nu}}, em que o parâmetro \eqn{\nu} é
 #'     tomado como \eqn{\exp{\phi}}.
 #' @param model Objeto resultante da função \code{\link[MRDCr]{cmp}}.
 #' @param tol Critério de parada do algoritmo, representa o valor
-#'     tolerado para a diferença do valor de \eqn{Z(\lambda, \phi)}
-#'     entre duas iterações. O valor padrão é 1e-4
+#'     tolerado para a diferença de \eqn{\frac{\lambda^i}{(i!)^\nu} -
+#'     0}, pois no limite \eqn{i \rightarrow \infty} o incremente
+#'     \eqn{\frac{\lambda^i}{(i!)^\nu}} tende a 0.
 #' @param incremento Número de incrementos da soma a serem considerados
 #'     a cada iteração. Padrão definido como 10, ou seja, a cada
-#'     iteração 10 passos incrementos são somados a Z.
+#'     iteração 10 incrementos são calculados.
 #' @param maxit Número máximo de iterações a serem realizadas pelo
 #'     algoritmo. Se este número for atingido e o critério de tolerância
 #'     não for atendido, uma mensagem de aviso será exibida.
 #' @param plot Argumento lógico. Se \code{TRUE} (padrão) os gráficos dos
-#'     incrementos da constante são exibidos.
+#'     incrementos daa constantes, calculadas para cada observação são
+#'     exibidos.
 #' @return Uma lista com os incrementos das constantes Z,
 #'     \eqn{Z(\lambda, \phi)} da distribuição COM-Poisson, calculados
 #'     para cada observação.
-#' @author Eduardo E. R. Junior, \email{edujrrib@gmail.com}
-#' @export
-
+#' @examples
+#'
+#' m1 <- cmp(ncap ~ est * (des + I(des^2)), data = capdesfo)
+#' tablez <- convergencez(m1)
+#' str(tablez)
+#' 
+#' m2 <- cmp(ncap ~ dexp + I(dexp^2), data = capmosca)
+#' tablez <- convergencez(m2)
+#' str(tablez)
+#'
+#' @importFrom lattice xyplot
+#' @importFrom grDevices extendrange
 convergencez <- function(model, tol = 1e-4, incremento = 10,
-                         maxit = 50, plot = TRUE) {
+                         maxit = 150, plot = TRUE) {
     ##-------------------------------------------
     ## Calcula Z para um c(lambda, phi)
     calcula <- function(loglambda, phi) {
@@ -53,15 +66,39 @@ convergencez <- function(model, tol = 1e-4, incremento = 10,
     phi <- model@coef[1]
     loglambdas <- X %*% betas
     zs <- sapply(loglambdas, calcula, phi, simplify = FALSE)
+    stcalc <- max(sapply(zs, length))
+    ##-------------------------------------------
+    n <- length(zs)
+    id <- c(); ii <- c()
+    for (i in 1:n) {
+        l <- length(zs[[i]])
+        ii <- c(ii, 1:l)
+        id <- c(id, rep(i, times = l))
+    }
+    da <- data.frame(zs = unlist(zs), id = id, ii = ii)
     ##-------------------------------------------
     if (plot) {
-        mx <- max(sapply(zs, max))
-        lx <- max(sapply(zs, length))
-        plot(zs[[1]], type = "l", xlim = c(0, lx), ylim = c(0, mx))
-        abline(v = sumto)
-        for (i in 2:length(zs)) lines(zs[[i]], type = "l")
+        ylab = expression(frac(lambda^j, "(j!)"^nu))
+        sumtos <- c(sumto, stcalc)
+        print(
+            xyplot(zs ~ ii, groups = id, 
+                   data = da, type = "l",
+                   ylab = list(ylab, rot = 0),
+                   xlab = "j",
+                   xlim = extendrange(c(1, max(sumtos))),
+                   panel = function(x, y, ...) {
+                       panel.xyplot(x, y, ...)
+                       panel.abline(v = sumtos, h = 0)
+                       panel.text(
+                           x = sumtos*0.95,
+                           y = max(y)*c(0.9, 0.8),
+                           labels =
+                               paste("sumto\n",
+                                     c("considerado", "calculado")))
+                   })
+        )
     }
-    invisible(zs)
+    invisible(da)
 }
 
 #' @title Log-Verossimilhança do Modelo Conway-Maxwell-Poisson

@@ -4,26 +4,28 @@
 \alias{convergencez}
 \title{Avaliação da Convergência da Constante Normalizadora}
 \usage{
-convergencez(model, tol = 1e-04, incremento = 10, maxit = 50,
+convergencez(model, tol = 1e-04, incremento = 10, maxit = 150,
   plot = TRUE)
 }
 \arguments{
 \item{model}{Objeto resultante da função \code{\link[MRDCr]{cmp}}.}
 
 \item{tol}{Critério de parada do algoritmo, representa o valor
-tolerado para a diferença do valor de \eqn{Z(\lambda, \phi)}
-entre duas iterações. O valor padrão é 1e-4}
+tolerado para a diferença de \eqn{\frac{\lambda^i}{(i!)^\nu} -
+0}, pois no limite \eqn{i \rightarrow \infty} o incremente
+\eqn{\frac{\lambda^i}{(i!)^\nu}} tende a 0.}
 
 \item{incremento}{Número de incrementos da soma a serem considerados
 a cada iteração. Padrão definido como 10, ou seja, a cada
-iteração 10 passos incrementos são somados a Z.}
+iteração 10 incrementos são calculados.}
 
 \item{maxit}{Número máximo de iterações a serem realizadas pelo
 algoritmo. Se este número for atingido e o critério de tolerância
 não for atendido, uma mensagem de aviso será exibida.}
 
 \item{plot}{Argumento lógico. Se \code{TRUE} (padrão) os gráficos dos
-incrementos da constante são exibidos.}
+incrementos daa constantes, calculadas para cada observação são
+exibidos.}
 }
 \value{
 Uma lista com os incrementos das constantes Z,
@@ -31,10 +33,21 @@ Uma lista com os incrementos das constantes Z,
     para cada observação.
 }
 \description{
-Avalia a convergência da constante de normalização de
-    um modelo COM-Poisson definida por: \deqn{Z = \sum
+Avalia a convergência da constante de normalização de um
+    modelo COM-Poisson definida por: \deqn{Z = \sum
     \frac{\lambda^i}{(i!)^\nu}}, em que o parâmetro \eqn{\nu} é
     tomado como \eqn{\exp{\phi}}.
+}
+\examples{
+
+m1 <- cmp(ncap ~ est * (des + I(des^2)), data = capdesfo)
+tablez <- convergencez(m1)
+str(tablez)
+
+m2 <- cmp(ncap ~ dexp + I(dexp^2), data = capmosca)
+tablez <- convergencez(m2)
+str(tablez)
+
 }
 \author{
 Eduardo E. R. Junior, \email{edujrrib@gmail.com}
