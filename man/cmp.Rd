@@ -7,21 +7,27 @@
 cmp(formula, data, start = NULL, sumto = NULL, ...)
 }
 \arguments{
-\item{formula}{Um objeto da classe \code{\link{formula}}. Se
-necessária a inclusão de \emph{offset} deve-se indicá-lo como
-\code{\link{offset}}.}
+\item{formula}{Um objeto da classe \code{\link{formula}}.}
 
-\item{data}{Um objeto de classe \code{data.frame}, cujo contém as
+\item{data}{Um objeto de classe \code{data.frame}, que contém as
 variáveis descritas na \code{formula}.}
 
-\item{start}{Um vetor de parâmetros do modelo tomados como valores
-iniciais para o algoritmo iterativo. Se \code{NULL} os parâmetros
-de um modelo log-linear Poisson e \eqn{\phi = 0} são tomados como
-valores iniciais para o preditor e para o parâmetro de dispersão.}
+\item{start}{Um vetor nomeado com os valores iniciais para os
+parâmetros do modelo necessários para o início do procedimento de
+estimação. Se \code{NULL} as estimativas de um modelo log-linear
+Poisson, com \eqn{\phi = 0}, são utilizadas como valores
+iniciais, pois uma chamada da \code{\link[stats]{glm.fit}} é
+feita internamente para obtê-los. O parâmetro \eqn{\phi} deve ser
+o primeiro elemento do vetor. Os restantes devem estar na
+correspondente às colunas da matriz gerada pelo argumento
+\code{formula}.}
 
 \item{sumto}{Número de incrementos a serem considerados para a soma
-da constante normalizadora. Como padrão, \code{NULL} o número de
-incrementos é o valor inteiro de \eqn{(\max y)^1.2}.}
+daa constantea normalizadoraa. Como padrão, \code{NULL} o número
+de incrementos é o valor inteiro de \eqn{(\max y)^1.2}, porém
+ressalta-se que este valor padrão não é o ideal. Uma avaliação da
+escolha desse argumento, pós ajuste pode ser realizada via
+\code{\link[MRDCr]{convergencez}}.}
 
 \item{...}{Argumentos opcionais do framework de maximização numérica
 \code{\link[bbmle]{mle2}}.}
@@ -32,10 +38,26 @@ Um objeto de classe \code{mle2}, retornado da função de
     máxima verossimilhança.
 }
 \description{
-Estima os parâmetros de um modelo COM-Poisson sob a
-    otimização da função de log-verossimilhança. A sintaxe
-    assemelha-se com a função \code{\link{glm}} (Generalized Linear
-    Models).
+Estima os parâmetros de um modelo COM-Poisson pela
+    otimização da função de log-verossimilhança definida em
+    \code{\link{llcmp}}. A sintaxe assemelha-se com a função
+    \code{\link{glm}} (Generalized Linear Models).
+}
+\examples{
+str(capdesfo)
+m0 <- cmp(ncap ~ est + (des + I(des^2)), data = capdesfo, sumto = 40)
+m1 <- cmp(ncap ~ est * (des + I(des^2)), data = capdesfo, sumto = 40)
+
+convergencez(m0)
+convergencez(m1)
+
+library(bbmle)
+anova(m0, m1)
+summary(m1)
+
+\dontrun{
+plot(profile(m1, which = "phi"))
+}
 }
 \author{
 Eduardo E. R. Junior, \email{edujrrib@gmail.com}
