@@ -4,35 +4,57 @@
 \alias{dcmp}
 \title{Probabilidades do Modelo Conway-Maxwell-Poisson}
 \usage{
-dcmp(y, loglambda, phi, sumto)
+dcmp(y, lambda, nu, sumto)
 }
 \arguments{
-\item{y}{Valor da contagem}
+\item{y}{Valor da variável de contagem.}
 
-\item{loglambda}{Logaritmo neperiano do parâmetro \eqn{\lambda} da
-distribuição}
+\item{lambda}{Valor do parâmetro \eqn{\lambda} da distribuição
+COM-Poisson.}
 
-\item{phi}{Valor do parâmetro \eqn{\phi}, definido como
-\eqn{\log(\nu)} na distribuição de probabilidades COM-Poisson}
+\item{nu}{Valor do parâmetro \eqn{\nu} da distribuição COM-Poisson.}
 
-\item{sumto}{Número de incrementos a serem considerados para a soma
-da constante normalizadora Z.}
+\item{sumto}{Número de incrementos a serem considerados para a
+cálculo da constante normalizadora Z.}
 }
 \description{
-Calcula as probabilidades conforme modelo COM-Poisson
+Calcula as probabilidades para uma variável aleatória
+    distribuída conforme modelo COM-Poisson.
+
+\deqn{p(y,\lambda,\nu) =
+    \frac{\lambda^y}{(y!)^\nu Z(\lambda, \nu)}
+}
+
+em que \eqn{Z(\lambda, \nu)} é a constante de normalização definida
+    por \eqn{\sum_{j=0}^{\infty} \frac{\lambda^j}{(j!)^\nu}}.  Nesta
+    implementação o número de incrementos considerados para cálculo
+    dessa constante é definido por \code{sumto}. \eqn{\lambda > 0} e
+    \eqn{\nu \geq 0} são os parâmetros da distribuição.
 }
 \examples{
-dpois(5, 5)
-dcmp(5, log(5), 0, sumto = 20)
+dpois(5, lambda = 5)
+dcmp(5, lambda = 5, nu = 1, sumto = 20)
 
-x <- 0:30
-px1 <- dpois(x, 15)
-px2 <- dcmp(x, log(915), log(2.5), sumto = 50)
-px3 <- dcmp(x, log(2.2), log(0.3), sumto = 50)
-
-plot(y = px2, x = x, type = "h", lwd = 2)
-lines(y = px1, x = x - 0.2, type = "h", lwd = 2, col = 4)
-lines(y = px3, x = x + 0.2, type = "h", lwd = 2, col = 2)
+probs <- data.frame(y = 0:30)
+within(probs, {
+    py0 <- dpois(y, lambda = 15)
+    py1 <- dcmp(y, lambda = 15, nu = 1, sumto = 50)
+    py2 <- dcmp(y, lambda = 915, nu = 2.5, sumto = 50)
+    py3 <- dcmp(y, lambda = 2.2, nu = 0.3, sumto = 50)
+    plot(py0 ~ y, type = "h",
+         ylim = c(0, max(c(py0, py2, py3))),
+         ylab = expression(Pr(Y == y)))
+    points(y + 0.1, py1, type = "h", col = 2)
+    points(y - 0.3, py2, type = "h", col = 3)
+    points(y + 0.3, py3, type = "h", col = 4)
+    legend("topleft", bty = "n",
+           col = c(1:4), lty = 1,
+           legend = expression(
+               Poisson(lambda == 15),
+               CMP(lambda == 15, nu == 1),
+               CMP(lambda == 915, nu == 2.5),
+               CMP(lambda == 2.2, nu == 0.3)))
+})
 }
 \author{
 Eduardo E. R. Junior, \email{edujrrib@gmail.com}
