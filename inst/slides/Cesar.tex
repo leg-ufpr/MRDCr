@@ -139,22 +139,45 @@
 
 %% ======================================================================
 
+%% Inicia o documento
+
 \begin{document}
-
-
-% Titulo
-\title[\sc{MRCR}]{Modelos de Regressão para Dados de Contagens com o R}
-
-\author[Zeviani, W.M.; Ribeiro Jr, E.E.; Taconeli, C.A.]{Walmes Marques Zeviani, Eduardo Elias Ribeiro Junior, Cesar Augusto Taconeli}
-
-\institute{Universidade Federal do Paraná} % opcional
-\date{\today}
 
 \begin{frame}
   \titlepage
 \end{frame}
 
-\renewcommand{\vec}[1]{\mathbf{#1}}
+
+
+\begin{frame}{Conteúdo}
+
+\begin{multicols}{2}
+
+\begin{enumerate}
+    \item Introdução
+    \item Modelos Lineares Generalizados
+    \item Modelo de Regressão Poisson
+    \item Modelo de Quase-Verossimilhança
+    \item Modelos Paramétricos Alternativos
+    
+    \begin{enumerate}
+        \item Modelo Binomial Negativo
+        \item Modelo Poisson Generalizado
+        \item Modelo COM-Poisson
+        \item Modelo Gamma-Count
+    \end{enumerate}
+    \item Modelos para Excesso de Zeros
+    \begin{enumerate}
+        \item Modelos de Barreira (Hurdle)
+        \item Modelos de Mistura (Zero Inflated)
+    \end{enumerate}
+    \item Modelos com Efeitos Aleatórios
+\end{enumerate}
+
+\end{multicols}
+
+\end{frame}
+
 
 
 
@@ -220,7 +243,7 @@ aquém, em quantidade e diversidade, em relação ao verificado para dados cont�
 
 %%% Slide 5
 
-\begin{frame}{Limitações do modelo de regressão com erros normais na análise de dados de contagens}
+\begin{frame}{Regressão com erros normais na análise de dados de contagens}
     
     \vspace{0,5cm}
     
@@ -244,7 +267,7 @@ aquém, em quantidade e diversidade, em relação ao verificado para dados cont�
 %%% Slide 6
 
 
-\begin{frame}{Limitações do modelo de regressão com erros normais na análise de dados de contagens}
+\begin{frame}{Regressão com erros normais na análise de dados de contagens}
     
     
     \vspace{0,2cm}
@@ -343,7 +366,7 @@ $$
 
     
 $$
-    \epsilon =\lim_{\Delta t\rightarrow 0}\frac{P\left \{ \text{evento ocorrer em} \left ( t,t+\Delta t \right ) \right \}}{\Delta t},
+    \lambda (t) =\lim_{\Delta t\rightarrow 0}\frac{P\left \{ \text{evento ocorrer em} \left ( t,t+\Delta t \right ) \right \}}{\Delta t},
 $$  
 
      \vspace{0,3cm}
@@ -430,7 +453,7 @@ Dentre as principais propriedades da distribuição de Poisson, tem-se:
 
 %%% Slide 13
 
-\begin{frame}{Ilustração}
+\begin{frame}{Distribuição Poisson para diferentes valores de $\mu$}
     
     \begin{figure}[h]
     \includegraphics[height=6cm,width=9cm]{images/graf1.pdf}
@@ -783,6 +806,26 @@ com $\boldsymbol{I^{-1}(\boldsymbol{\beta})}=Var(\boldsymbol{\hat{\beta}})=\phi 
 
 %%%-----------------------------------------------------------------------------------------
 
+%%% Slide 32
+
+\begin{frame}{Modelo Linear Generalizado} 
+
+\begin{itemize}
+
+
+\item O parâmetro de dispersão, $\phi$, pode ser estimado usando o método de momentos, resultando em:
+
+\vspace{0.5cm}
+
+$$ \hat{\phi}=\frac{\sum_{i=1}^{n} (y_{i}-\hat{\mu}_{i})^{2}}{n-p}. $$
+
+\end{itemize}
+
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+
 
 
 %%% Slide 18
@@ -994,33 +1037,7 @@ $$U(\boldsymbol{\beta}) =\sum_{i=1}^{n}(y_{i}-exp(\boldsymbol{x'_{i}\beta}))\bol
 \item As equações de estimação via quase-verossimilhança, neste caso, são idênticas às obtidas com base na verossimilhança da regressão Poisson.
 
 
-
-\end{itemize}
-
-\end{frame}
-
-
-%%%-----------------------------------------------------------------------------------------
-
-
-
-%%% Slide 41
-
-\begin{frame}{Modelo Linear Generalizado - Quase-Verossimilhança} 
-
-\begin{itemize}
-
-
-
-\item Como principais alternativas para definição de $V(\mu)$, podemos considerar proporcionalidade em relação a alguma potência de $\mu$, como $V(\mu) \text{ } \propto \text{ } \mu$; $V(\mu)\text{ } \propto \text{ } \mu^2$ e $V(\mu) \text{ } \propto \text{ } \mu^3$.
-
-\vspace{0.5cm}
-
-\item O parâmetro de dispersão, $\phi$, pode ser estimado usando o método de momentos, resultando em:
-
-\vspace{0.5cm}
-
-$$ \hat{\phi}=\frac{\sum_{i=1}^{n} (y_{i}-\hat{\mu}_{i})^{2}}{n-p}. $$
+\item Como principais alternativas para definição de $V(\mu)$, podemos considerar proporcionalidade em relação a alguma potência de $\mu$, como $V(\mu) \text{ } \propto \text{ } \mu$ e $V(\mu)\text{ } \propto \text{ } \mu^2$.
 
 
 \end{itemize}
@@ -1028,70 +1045,20 @@ $$ \hat{\phi}=\frac{\sum_{i=1}^{n} (y_{i}-\hat{\mu}_{i})^{2}}{n-p}. $$
 \end{frame}
 
 
-
-%%% Slide 43
-
-\begin{frame}{Modelo Linear Generalizado - Pseudo Máxima Verossimilhança} 
-
-\begin{itemize}
-
-
-
-\item Para se prevenir de possível especificação incorreta da variância, podemos estimar $Var(\boldsymbol{\hat{\beta}})$ de forma robusta usando um estimador do tipo sanduíche.
-
-\vspace{0.5cm}
-
-\item Suponha que a média do modelo seja corretamente especificada, mas a função de variância escolhida $(\tilde{V})$ seja diferente da verdadeira $V$.
-
-\vspace{0.5cm}
-
-\item Nesse caso,  $ Var(\boldsymbol{\hat{\beta}}) \neq \phi \boldsymbol{(D'\tilde{V}^{-1}D)} ^{-1}$, uma vez que $\tilde{V} \neq \ V$. 
-
-\end{itemize}
-
-\end{frame}
-
-%%%-----------------------------------------------------------------------------------------
-
-%%% Slide 44
-
-\begin{frame}{Modelo Linear Generalizado - Pseudo Máxima Verossimilhança} 
-
-\begin{itemize}
-
-
-\item Uma forma robusta de proceder a estimação de  $ Var(\boldsymbol{\hat{\beta}})$ é com base em:
-
-$$ Var_{Rb}(\boldsymbol{\hat{\beta}})=
-\boldsymbol{(D'\tilde{V}^{-1}D)} ^{-1}
- \boldsymbol{(D'\tilde{V}^{-1}E\tilde{V}^{-1}D)}  
-\boldsymbol{(D'\tilde{V}^{-1}D)} ^{-1},$$
-
-em que 
-
-$$ \boldsymbol{E} = diag\{(y_1-\mu_1)^2,(y_2-\mu_2)^2,...,(y_n-\mu_n)^2\}$$
-
-\vspace{0.5cm}
-
-\item O estimador sanduíche é resultante da avaliação de $Var_{Rb}$ em $\boldsymbol{\hat{\beta}}$, sendo consistente mesmo quando  $\tilde{V} \neq\ V.$   
-
-\end{itemize}
-
-\end{frame}
 
 
 %%%-----------------------------------------------------------------------------------------
 
 %%% Slide45
 
-\begin{frame}{Modelo Linear Generalizado - Pseudo Máxima Verossimilhança} 
+\begin{frame}{Modelo Linear Generalizado - Quase Verossimilhança} 
 
 \begin{itemize}
 
 \item Para a regressão Poisson:
 
 $$
-Var(\boldsymbol{\hat{\beta}_{PQL}})=\left [ \sum_{i=1}^{n} \boldsymbol{x_{i}x'_{i}}\mu_{i} \right ]^{-1}
+Var(\boldsymbol{\hat{\beta}_{QL}})=\left [ \sum_{i=1}^{n} \boldsymbol{x_{i}x'_{i}}\mu_{i} \right ]^{-1}
 \sum_{i=1}^{n} \boldsymbol{x_{i}x'_{i}} \omega_{i} \left [ \sum_{i=1}^{n} \boldsymbol{x_{i}x'_{i}}\mu_{i} \right ]^{-1},
 $$
 
@@ -1099,8 +1066,7 @@ com $\mu_{i}=exp({\boldsymbol{x'_{i}\beta}})$ e $\omega_{i}=Var(y_{i}|\boldsymbo
 
 \vspace{0.5cm}
 
-\item Podemos considerar $\omega_i=V(\mu_i;\phi)$ ou, simplesmente, o estimador robusto, baseado em $\omega_i=(y_i-\mu_i)^2$.
-
+\item Podemos considerar $\omega_i=V(\mu_i;\phi)$, como $\omega_i \propto \mu_i$, $\omega_i \propto \mu_i^2$ ou, simplesmente, o estimador robusto, baseado em $\omega_i=(y_i-\mu_i)^2$.
 
 \end{itemize}
 
@@ -1159,11 +1125,10 @@ $$
 
 \vspace{0.5cm}
 
-sendo $r=\alpha$ e $p=(\mu/\alpha)/(1+\mu/\alpha),$ com $0<p<1$ e $r>0$.  
+sendo $r=\alpha$ e $p=\mu/(\mu+\alpha),$ com $0<p<1$ e $r>0$.  
 \vspace{0.5cm}
 
-\item Modelagem do número de "sucessos" até o r-ésimo "fracasso",
-configurando uma generalização da distribuição geométrica.
+\item Modelagem do número de "sucessos" até o r-ésimo "fracasso" ($r = 1,2,3,...$), configurando uma generalização da distribuição geométrica (para $r=1$).
 
 \vspace{0.5cm}
 
@@ -1183,18 +1148,17 @@ configurando uma generalização da distribuição geométrica.
 
 \begin{itemize}
 
-\item A principal motivação para a distribuição binomial negativa baseia-se num processo de contagem heterogêneo, em que $Y \sim Poisson( \mu \nu)$ e $\nu$ tem distribuição $Gama(\alpha, \beta):$
+\item A principal motivação para a distribuição binomial negativa baseia-se num processo de contagem heterogêneo, em que $Y \sim Poisson( \theta)$ e $\theta$ tem distribuição $Gama(\alpha, \beta):$
 
 $$
-g\left ( \nu;\alpha,\beta \right )=\frac{\beta^{\alpha}}{\Gamma\left ( \alpha \right )}\nu^{\alpha-1}e^{-\beta \nu},\quad \alpha, \beta, \nu>0,
+g\left ( \theta;\alpha,\beta \right )=\frac{\beta^{\alpha}}{\Gamma\left ( \alpha \right )}\theta^{\alpha-1}e^{-\beta \theta},\quad \alpha, \beta, \nu>0,
 $$
 
-com $E(\nu)=\theta=\alpha /\beta$ e variância $Var(\nu)=\alpha /\beta^2.$
-
+com $E(\theta)=\theta=\alpha /\beta$ e variância $Var(\theta)=\alpha /\beta^2.$
 
 \vspace{0.5cm}
 
-\item Como resultado, temos uma mistura Poisson-Gamma, resultando, marginalmente, na distribuição binomial negativa.
+\item Como resultado, temos uma mistura Poisson-Gamma, resultando, marginalmente (em relação a $\theta$), na distribuição binomial negativa.
 
 
 \end{itemize}
@@ -1211,7 +1175,7 @@ com $E(\nu)=\theta=\alpha /\beta$ e variância $Var(\nu)=\alpha /\beta^2.$
     
     \begin{figure}[h]
     \includegraphics[height=5.5cm,width=9cm]{images/graf2.pdf}
-    \caption{Distribuição binomial para $\mu=2$ e diferentes valores de $\alpha}.
+    \caption{Distribuição binomial para $\mu=2$ e diferentes valores de $\alpha.}
     \label{Fig1}
     \centering
     
