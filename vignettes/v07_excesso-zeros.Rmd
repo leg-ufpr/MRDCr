@@ -338,4 +338,223 @@ cbind("vglm_posnegbin" = exp(coef(mcount)[2]),
 
 ```
 
+# Número de sinistros em uma seguradora de veículos #
 
+## Análise exploratória ##
+
+```{r}
+
+sinistros <- read.table("base.txt", header = TRUE)
+str(sinistros)
+## help(sinistros)
+
+```
+
+Dados referentes ao acompanhamento de clientes de uma seguradora de
+automóveis ao longo de um ano. Foram registrados as variáveis descritas
+abaixo para 16483 clientes.
+
+* `tipo`: Tipo de veículo segurado. Fator com seis níveis (_hatch_,
+    _mono_, _picape_, _sedan_, _wagon_ e _suv_).
+* `sexo`: Sexo do cliente. Fator com dois níveis, _M_ para clientes do
+    sexo masculino e _F_ para feminino.
+* `civil`: Estado civil do cliente. Fator com quatro níveis (_Casado_,
+  _Divorciado_, _Solteiro_ e _Viuvo_).
+* `valor`: Valor do veículo segurado, em 1000 reais.
+* `expos`: Período de cobertura do cliente durante o ano sob análise.
+* `nsinist`: Número de sinistros registrados no período.
+
+```{r}
+
+summary(sinistros)
+
+```
+
+## Ajuste de modelos ##
+
+```{r}
+
+library(pscl)
+
+## Preditores
+f0 <- nsinist ~ 1 + offset(log(expos))
+f1 <- nsinist ~ sexo + valor + offset(log(expos))
+f2 <- nsinist ~ sexo * valor + offset(log(expos))
+
+## Poisson
+m0P <- glm(f0, data = sinistros, family = poisson)
+m1P <- glm(f1, data = sinistros, family = poisson)
+m2P <- glm(f2, data = sinistros, family = poisson)
+
+## Hurdle Poisson
+m0HP <- hurdle(f0, data = sinistros, dist = "poisson")
+m1HP <- hurdle(f1, data = sinistros, dist = "poisson")
+m2HP <- hurdle(f2, data = sinistros, dist = "poisson")
+
+## Zero Inflated Poisson
+m0ZP <- zeroinfl(f0, data = sinistros, dist = "poisson")
+m1ZP <- zeroinfl(f1, data = sinistros, dist = "poisson")
+m2ZP <- zeroinfl(f2, data = sinistros, dist = "poisson")
+
+## Binomial Negativa
+library(MASS)
+m0BN <- glm.nb(f0, data = sinistros)
+m1BN <- glm.nb(f1, data = sinistros)
+m2BN <- glm.nb(f2, data = sinistros)
+
+## Hurdle Binomial Negativa
+m0HBN <- hurdle(f0, data = sinistros, dist = "negbin")
+m1HBN <- hurdle(f1, data = sinistros, dist = "negbin")
+m2HBN <- hurdle(f2, data = sinistros, dist = "negbin")
+
+## Zero Inflated Poisson
+m0ZBN <- zeroinfl(f0, data = sinistros, dist = "negbin")
+m1ZBN <- zeroinfl(f1, data = sinistros, dist = "negbin")
+m2ZBN <- zeroinfl(f2, data = sinistros, dist = "negbin")
+
+```
+
+## Comparação dos ajustes ##
+
+```{r}
+
+## Via log-verossimilhança
+cbind("Poisson" = sapply(list(m0P, m1P, m2P), logLik),
+      "HUPoisson" = sapply(list(m0HP, m1HP, m2HP), logLik),
+      "ZIPoisson" = sapply(list(m0ZP, m1ZP, m2ZP), logLik),
+      "BinNeg" = sapply(list(m0BN, m1BN, m2BN), logLik),
+      "HUBinNeg" = sapply(list(m0HBN, m1HBN, m2HBN), logLik),
+      "ZIBinNeg" = sapply(list(m0ZBN, m1ZBN, m2ZBN), logLik)
+      )
+
+```
+
+```{r}
+
+## Testes de razão de verossimilhanças
+lmtest::lrtest(m0ZP, m1ZP, m2ZP)
+
+lmtest::lrtest(m0ZBN, m1ZBN, m2ZBN)
+
+```
+
+```{r}
+
+## Para a componente de contagens não negativas é necessário um modelo
+## Binomial Negativa, considerando superdispersão dos dados?
+vuong(m1ZP, m1ZBN)
+
+```
+
+## Avaliação do modelo proposto ##
+
+```{r}
+
+## Estimativas do modelo proposto
+summary(m1ZP)
+
+## Retira efeito de sexo na componente das contagens nulas
+m3ZP <- zeroinfl(nsinist ~ sexo + valor + offset(log(expos)) |
+                     offset(log(expos)) + valor,
+                 data = sinistros)
+
+lmtest::lrtest(m1ZP, m3ZP)
+
+```
+
+```{r}
+
+## Avaliação de diferentes especificações para a componente de contagens
+## nulas 
+m3ZP.probi <- zeroinfl(nsinist ~ sexo + valor + offset(log(expos)) |
+                           offset(log(expos)) + valor, link = "probit",
+                       data = sinistros)
+
+m3ZP.clogl <- zeroinfl(nsinist ~ sexo + valor + offset(log(expos)) |
+                           offset(log(expos)) + valor, link = "cloglog",
+                       data = sinistros)
+
+## Comparação das funções de ligação
+sapply(list("logit" = m3ZP, "probit" = m3ZP.probi,
+            "cloglog" = m3ZP.clogl), logLik)
+
+```
+
+```{r diag2, cache = TRUE}
+
+##======================================================================
+## Uma pequena avaliação dos resíduos 
+p1 <- xyplot(residuals(m3ZP) ~ fitted(m3ZP),
+             ## aspect = "xy",
+             type = c("p", "g", "spline"))
+
+p2 <- qqmath(~residuals(m3ZP, type = "pearson"),
+             ## aspect = "xy",
+             type = c("p", "g"),
+             panel = function(x, ...) {
+                 panel.qqmathline(x, ...)
+                 panel.qqmath(x, ...)
+             })
+
+qqsimul <- hnp::hnp(m3ZP, plot = FALSE, sim = 50)
+
+p3 <- with(qqsimul,
+           xyplot(residuals ~ x, pch = 20) +
+           as.layer(
+               xyplot(median + lower + upper ~ x,
+                      type = "l", col = 1, lty = c(2, 1, 1)))
+           )
+
+print(p1, split = c(1, 1, 3, 1), more = TRUE)
+print(p2, split = c(2, 1, 3, 1), more = TRUE)
+print(p3, split = c(3, 1, 3, 1), more = FALSE)
+
+```
+
+## Predição ##
+
+```{r}
+
+## Região para predição
+pred <- expand.grid(sexo = c("M", "F"),
+                    valor = 1:200, expos = 1)
+##-------------------------------------------
+## Estimando as médias
+aux <- predict(m3ZP, newdata = pred, type = "response")
+predmu <- cbind(pred, fit = aux)
+
+xyplot(fit ~ valor,
+       groups = sexo,
+       data = predmu,
+       type = c("l", "g"),
+       auto.key = list(
+           columns = 2, cex.title = 1,
+           lines = TRUE, points = FALSE,
+           title = "Número de crianças"))
+
+```
+
+```{r}
+
+##-------------------------------------------
+## Estimando probabilidades
+pred <- expand.grid(sexo = c("M", "F"),
+                    valor = c(1, 50), expos = 1)
+
+py <- c(t(predict(m3ZP, type = "prob", at = 0:5, newdata = pred)))
+carac <- with(pred, paste("Sexo:", sexo, "Valor:", valor))
+da <- data.frame(y = 0:5, py = py,
+                 sexo = rep(c("M", "F"), each = 6),
+                 valor = rep(c(1, 50), each = 12))
+
+useOuterStrips(
+    barchart(py ~ y | sexo + factor(valor), data = da,
+             stack = FALSE, horizontal = FALSE,
+             as.table = TRUE, between = list(y = 0.5),
+             scales = list( y = "free", x = list(labels = 0:5))
+             ),
+    strip = strip.custom(strip.names = TRUE, var.name = "Sexo"),
+    strip.left = strip.custom(strip.names = TRUE, var.name = "Valor")
+)
+
+```
