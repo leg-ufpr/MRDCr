@@ -153,6 +153,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
+## -----------------------------------------------------------------
 # TODO documentar no pacote.
 fitted.gcnt <- function(lambda, alpha, offset = NULL, ymax = 40) {
     if (is.null(offset)) {
