@@ -1299,6 +1299,40 @@ xyplot(nema/off ~ cult, data = nematoide,
 Análise do número de gols feitos pelos times mandantes e desafiantes no
 Campeonato Brasileiro de 2010.
 
+Para essa análise assume-se que o número de gols feito pelo time
+mandante ($y_h$) e pelo time desafiante ($y_a$) na mesma partida são
+variáveis de contagem independentes. O preditor correspondente ao número
+de gols do time mandante é
+$$
+  \eta_h = \gamma_h - \delta_a + \omega,
+$$
+em que $\gamma_h$ é a força de ataque do time mandante, $\delta_a$ é
+a força de defesa do time desafiante e $\omega$ é vantagem pro time
+mandante devido a jogar em casa. Para o número de gols do time
+desafiante é análogo
+$$
+  \eta_a = \gamma_a - \delta_h,
+$$
+exceto pelo fato de não adicionarmos parâmetro devido ao mando de campo.
+
+Considerando a independência entre os gols dos times que se enfrentam,
+temos então que
+$$
+  \Pr(Y_h = y_h \cap Y_a = y_a) = \Pr(Y_h = y_h) \times \Pr(Y_a = y_a).
+$$
+
+Dessa forma, a verossimilhança de uma partida é
+
+$$
+  L(y_h, y_a; \gamma_h, \gamma_a, \delta_h, \delta_a, \omega) =
+  \Pr(y_h | \eta_h = \gamma_h - \delta_a + \omega) \times
+  \Pr(y_a | \eta_a = \gamma_a - \delta_h).
+$$
+
+Ao serem considerados 20 times, serão 41 parâmetros estimados presentes
+nos nestes preditores, além dos eventuais parâmetros complementares da
+distribuição que determina $\Pr(Y)$, como parâmetros de dispersão.
+
 ```{r}
 #-----------------------------------------------------------------------
 # Log-verossimilhança para o número de gols dos times em uma partida.
