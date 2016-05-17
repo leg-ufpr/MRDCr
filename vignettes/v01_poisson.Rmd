@@ -185,5 +185,3 @@ cat(format(Sys.time(),
            format = "Atualizado em %d de %B de %Y.\n\n"))
 sessionInfo()
 ```
-
-<!------------------------------------------- -->

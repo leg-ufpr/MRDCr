@@ -150,7 +150,6 @@ uma unidade de $x$.
 library(lattice)
 library(latticeExtra)
 library(grid)
-library(rpanel)
 library(bbmle)
 library(corrplot)
 library(plyr)
@@ -195,68 +194,6 @@ useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
                    strip.names = TRUE,
                    var.name = expression(alpha == ""),
                    sep = ""))
-```
-
-## Recursos interativos  com o `rpanel` ##
-
-```{r, eval=FALSE}
-# Função densidade na parametrização de modelo de regressão.
-MRDCr::dgcnt
-
-react <- function(panel){
-    with(panel,
-    {
-        m <- LAMBDA
-        s <- sqrt(LAMBDA/exp(ALPHA))
-        y <- 0:max(c(YMAX, ceiling(m + 5 * s)))
-        py <- dgcnt(y = y, lambda = LAMBDA, alpha = exp(ALPHA))
-        if (POIS) {
-            pz <- dpois(y, lambda = m)
-        } else {
-            pz <- 0
-        }
-        py[!is.finite(py)] <- 0
-        plot(py ~ y, type = "h",
-             ylim = c(0, max(c(py, pz))),
-                 xlab = expression(y),
-             ylab = expression(f(y)))
-        mtext(side = 3,
-              text = substitute(sum(f(y)) == s,
-                                list(s = round(sum(py), 5))))
-        if (EX) {
-            m <- sum(y * py)
-            # v <- sum((y - m)^2 * py)
-            legend("topright", bty = "n",
-                   legend = substitute(E(Y) == mu,
-                                       list(mu = m)))
-            abline(v = m, col = 2)
-        }
-        if (POIS) {
-            lines(y + 0.3, pz, type = "h", col = 3)
-        }
-    })
-    panel
-}
-
-panel <- rp.control(title = "Gamma Count",
-                    size = c(300, 100), YMAX = 50)
-rp.slider(panel = panel, action = react,
-          variable = LAMBDA, title = "lambda",
-          from = 1, to = 0.75 * panel$YMAX,
-          initval = 5, resolution = 0.1,
-          showvalue = TRUE)
-rp.slider(panel = panel, action = react,
-          variable = ALPHA, title = "alpha",
-          from = -5, to = 5,
-          initval = 0, resolution = 0.02,
-          showvalue = TRUE)
-rp.checkbox(panel = panel,
-            variable = EX, action = react, title = "E(Y)",
-            labels = "Mostrar o valor esperado?")
-rp.checkbox(panel = panel,
-            variable = POIS, action = react, title = "Poisson",
-            labels = "Adicionar a distribução Poisson?")
-rp.do(panel = panel, action = react)
 ```
 
 ## Verossimilhança e Estimação ##
@@ -1563,6 +1500,10 @@ colnames(dwl) <- sprintf(paste(levels(db$home)[i], collapse = " %s "),
 t(dwl)
 ```
 
-```{r, eval=FALSE, include=FALSE}
-opts_chunk$set(eval = FALSE)
+## Informações da sessão
+
+```{r, echo=FALSE, results="hold"}
+cat(format(Sys.time(),
+           format = "Atualizado em %d de %B de %Y.\n\n"))
+sessionInfo()
 ```
