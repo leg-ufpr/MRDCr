@@ -1,0 +1,280 @@
+## ----setup, include=FALSE-----------------------------------------
+source("_setup.R")
+
+## ---- message=FALSE, error=FALSE, warning=FALSE-------------------
+# Definições da sessão.
+library(lattice)
+library(latticeExtra)
+library(grid)
+# library(rpanel)
+# library(bbmle)
+# library(corrplot)
+library(plyr)
+library(car)
+library(doBy)
+library(multcomp)
+library(MRDCr)
+
+## ---- eval=FALSE, include=FALSE-----------------------------------
+#  opts_chunk$set(eval = FALSE)
+
+## -----------------------------------------------------------------
+data(nematoide, package = "MRDCr")
+str(nematoide)
+
+m0 <- glm(nema ~ offset(log(off)) + cult,
+          data = nematoide, family = poisson)
+m1 <- update(m0, family = quasipoisson)
+
+library(lme4)
+
+nematoide$ue <- 1:nrow(nematoide)
+
+m2 <- glmer(nema ~ offset(log(off)) + (1 | cult) + (1 | ue),
+            data = nematoide, family = poisson)
+summary(m2)
+
+# ???
+
+
+## -----------------------------------------------------------------
+data(soja, package = "MRDCr")
+str(soja)
+
+soja <- soja[-74, ]
+soja$K <- factor(soja$K)
+soja$ue <- 1:nrow(soja)
+str(soja)
+
+m0 <- glm(ngra ~ bloc + umid * K,
+          data = soja, family = poisson)
+m1 <- update(m0, family = quasipoisson)
+
+m2 <- glmer(ngra ~ (1 | bloc) + umid * K,
+            data = soja, family = poisson)
+m3 <- update(m2, . ~ . + (1 | ue))
+
+
+logLik(m0)
+logLik(m2)
+logLik(m3)
+anova(m2, m3)
+
+summary(m3)
+
+#-----------------------------------------------------------------------
+# Predição com intervalos de confiança.
+
+X <- LSmatrix(m0, effect = c("umid", "K"))
+pred <- attr(X, "grid")
+pred <- transform(pred,
+                  K = as.integer(as.character(K)),
+                  umid = factor(umid))
+pred <- list(pois = pred, quasi = pred, pmis1 = pred, pmis2 = pred)
+
+# Quantil normal para fazer um IC de 95%.
+qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
+
+# Preditos pela Poisson.
+aux <- confint(glht(m0, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$pois <- cbind(pred$pois, exp(aux))
+
+aux <- confint(glht(m1, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$quasi <- cbind(pred$quasi, exp(aux))
+
+# Removendo as colunas correspondentes ao blocos.
+X <- X[, -grep(pattern = "^bloc", x = colnames(X))]
+
+# Poisson Misto 1: ~ (1 | bloc)
+aux <- confint(glht(m2, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$pmis1 <- cbind(pred$pmis1, exp(aux))
+
+# Poisson Misto 2: ~ (1 | bloc) + (1 | ue).
+aux <- confint(glht(m3, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$pmis2 <- cbind(pred$pmis2, exp(aux))
+
+pred <- ldply(pred, .id = "modelo")
+pred <- arrange(pred, umid, K, modelo)
+
+key <- list(type = "o", divide = 1,
+            lines = list(pch = 1:nlevels(pred$modelo),
+                         lty = 1, col = 1),
+            text = list(c("Poisson", "Quasi-Poisson",
+                          "Poissin Misto 1", "Poissin Misto 2")))
+
+xyplot(fit ~ K | umid, data = pred,
+       layout = c(NA, 1), as.table = TRUE,
+       xlim = extendrange(range(pred$K), f = 0.1),
+       key = key, pch = pred$modelo,
+       xlab = expression("Dose de potássio"~(mg~dm^{-3})),
+       ylab = "Número de grãos por parcela",
+       ly = pred$lwr, uy = pred$upr, cty = "bars", length = 0,
+       prepanel = prepanel.cbH,
+       desloc = 6 * scale(as.integer(pred$modelo), scale = FALSE),
+       panel = panel.cbH)
+
+
+## -----------------------------------------------------------------
+#-----------------------------------------------------------------------
+# devtools::load_all()
+
+data(confterm, package = "MRDCr")
+data(conftemp, package = "MRDCr")
+
+xyplot(nap ~ idade | resfr, data = confterm,
+       groups = galp, type = "o",
+       xlab = "Idade das aves (dias)",
+       ylab = "Número de aves perdidas por galpão",
+       strip = strip.custom(factor.levels = c(
+                                "Com sistema de resfriamento",
+                                "Sem sistema de resfriamento")),
+       auto.key = list(corner = c(0.05, 0.9)))
+
+# Amplitude estendida das variáveis.
+lim <- with(conftemp, apply(cbind(h, ctr, itgu), MARGIN = 2,
+                            FUN = extendrange, f = 0.2))
+
+# Anotação da eixo x do gráfico.
+scales <- list(
+    y = list(relation = "free"),
+    x = list(at = seq(from = 1,
+                      to = ceiling(max(conftemp$hr/24)) * 24,
+                      by = 24)))
+scales$x$labels <- seq_along(scales$x$at)
+
+xyplot(h + ctr + itgu ~ hr, data = conftemp,
+       outer = TRUE, type = "l", layout = c(1, NA),
+       scales = scales, xlim = range(scales$x$at),
+       xlab = "Dias",
+       ylab = "Variáveis térmicas",
+       panel = function(y, subscripts, ...) {
+           wp <- which.packet()
+           r <- lim[, wp[1]]
+           panel.rect(10.5 + 24 * (scales$x$labels - 1), r[1],
+                      20 + 24 * (scales$x$labels - 1), r[2],
+                      col = "blue",
+                      border = "transparent",
+                      alpha = 0.25)
+           panel.xyplot(y = y, subscripts = subscripts, ...)
+       })
+
+#-----------------------------------------------------------------------
+# Juntando os datasets.
+
+tempdia <- aggregate(cbind(hmax = h, cmax = ctr, imax = itgu) ~ idade,
+                     data = conftemp, FUN = max)
+splom(tempdia)
+
+confterm <- merge(confterm, tempdia, by = "idade")
+str(confterm)
+
+summary(confterm)
+
+# Na escala original, ao ajustar o modelo de efeitos aleatórios,
+# apareceu o aviso que segere diminuir a escala dos dados. Sendo assim,
+# os dados serão padronizados.
+#
+# Warning messages:
+# 1: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+#   Model failed to converge with max|grad| = 0.00183911 (tol = 0.001, component 1)
+# 2: In checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv,  :
+#   Model is nearly unidentifiable: very large eigenvalue
+#  - Rescale variables?;Model is nearly unidentifiable: large eigenvalue ratio
+#  - Rescale variables?
+
+confterm$ue <- 1:nrow(confterm)
+confterm <- within(confterm, {
+    idade <- idade - min(idade)
+    idade <- idade/max(idade)
+    hmax <- hmax - min(hmax)
+    hmax <- hmax/max(hmax)
+})
+
+summary(confterm)
+
+#-----------------------------------------------------------------------
+# Ajuste dos modelos.
+
+m0 <- glm(nap ~ galp + resfr * (idade + hmax),
+          data = confterm, family = poisson)
+m1 <- update(m0, family = quasipoisson)
+
+anova(m0, test = "Chisq")
+anova(m1, test = "F")
+
+summary(m1)
+
+m2 <- glmer(nap ~ (1 | galp) + resfr * (idade + hmax),
+            data = confterm, family = poisson)
+
+summary(m2)
+anova(m2)
+
+m3 <- update(m2, . ~ . + (1 | ue))
+
+anova(m2, m3)
+
+summary(m3)
+anova(m3)
+
+#-----------------------------------------------------------------------
+# Predição com bandas de confiança.
+
+pred <- unique(subset(confterm, select = c(idade, resfr, hmax)))
+X <- model.matrix(terms(m2), data = cbind(pred, nap = 1))
+pred$nap <- NULL
+str(pred)
+
+# pred <- list(pois = pred, quasi = pred, pmis1 = pred, pmis2 = pred)
+pred <- list(pmis1 = pred, pmis2 = pred)
+
+# Quantil normal para fazer um IC de 95%.
+qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
+
+# Poisson Misto 1: ~ (1 | galp)
+aux <- confint(glht(m2, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$pmis1 <- cbind(pred$pmis1, exp(aux))
+
+# Poisson Misto 2: ~ (1 | galp) + (1 | ue).
+aux <- confint(glht(m3, linfct = X),
+               calpha = univariate_calpha())$confint
+colnames(aux)[1] <- "fit"
+pred$pmis2 <- cbind(pred$pmis2, exp(aux))
+
+pred <- ldply(pred, .id = "modelo")
+pred <- arrange(pred, idade, resfr, modelo)
+
+key <- list(type = "o", divide = 1,
+            lines = list(pch = 1:nlevels(pred$modelo),
+                         lty = 1, col = 1),
+            text = list(c("Poisson", "Quasi-Poisson",
+                          "Poissin Misto 1", "Poissin Misto 2")))
+
+pred$idade <- 21 + (39 - 21) * pred$idade
+confterm$idade <- 21 + (39 - 21) * confterm$idade
+
+xyplot(fit ~ idade | modelo, groups = resfr, data = pred,
+       layout = c(NA, 1), as.table = TRUE, type = "l",
+       auto.key = list(lines = TRUE, points = FALSE,
+                       text = c("Com resfr.", "Sem resfr.")),
+       xlab = "Idade das aves (dias)",
+       ylab = "Número de aves perdidas",
+       strip = strip.custom(
+           factor.levels = c("P. Misto 1", "P. Misto 2")),
+       ly = pred$lwr, uy = pred$upr, cty = "bands", alpha = 0.25,
+       prepanel = prepanel.cbH,
+       panel.groups = panel.cbH,
+       panel = panel.superpose) +
+    as.layer(xyplot(nap ~ idade, groups = resfr, data = confterm))
+
+
