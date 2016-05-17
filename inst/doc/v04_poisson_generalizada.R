@@ -44,6 +44,36 @@ fy <- dpgnz0(y = y, theta = theta, gamma = gamma)
 plot(fy ~ y, type = "h", xlab = "y", ylab = "f(y)")
 lines(y + 0.3, dpois(y, lambda = theta), type = "h", col = 2)
 
+grid <- expand.grid(lambda = c(2, 8, 15),
+                    alpha = c(-0.05, 0, 0.05))
+y <- 0:35
+
+py <- mapply(FUN = dpgnz,
+             lambda = grid$lambda,
+             alpha = grid$alpha,
+             MoreArgs = list(y = y), SIMPLIFY = FALSE)
+grid <- cbind(grid[rep(1:nrow(grid), each = length(y)), ],
+              y = y,
+              py = unlist(py))
+
+useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
+                      ylab = expression(f(y)),
+                      xlab = expression(y),
+                      data = grid, type = "h",
+                      panel = function(x, y, ...) {
+                          m <- sum(x * y)
+                          panel.xyplot(x, y, ...)
+                          panel.abline(v = m, lty = 2)
+                      }),
+               strip = strip.custom(
+                   strip.names = TRUE,
+                   var.name = expression(lambda == ""),
+                   sep = ""),
+               strip.left = strip.custom(
+                   strip.names = TRUE,
+                   var.name = expression(alpha == ""),
+                   sep = ""))
+
 ## ---- eval=FALSE--------------------------------------------------
 #  react <- function(panel){
 #      with(panel,

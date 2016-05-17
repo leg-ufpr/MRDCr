@@ -200,6 +200,53 @@ c(mean(y),
   fitted.gcnt(lambda = exp(coef(n1)[2]),
               alpha = exp(coef(n1)[1]), ymax = 100))
 
+#-----------------------------------------------------------------------
+# A E(y) por sum(y * p(py)) e por lambda como função de alpha.
+
+grid <- expand.grid(lambda = exp(seq(-3, 3, length.out = 30)),
+                    alpha = exp(seq(-2, 2, length.out = 11)),
+                    KEEP.OUT.ATTRS = FALSE)
+summary(grid)
+
+y <- 0:500
+py <- mapply(FUN = dgcnt,
+             lambda = grid$lambda,
+             alpha = grid$alpha,
+             MoreArgs = list(y = y), SIMPLIFY = FALSE)
+grid$m <- sapply(py, FUN = function(py) sum(y * py))
+grid$alpha <- round(grid$alpha, 3)
+str(grid)
+
+cl <- brewer.pal(n = 10, name = "Spectral")
+
+xyplot(m ~ lambda, groups = alpha, data = grid, type = "l",
+       aspect = "iso", grid = TRUE, lwd = 2,
+       xlab = expression(lambda),
+       ylab = expression(sum(y %.% f(y))),
+       auto.key = list(space = "right",
+                       title = expression(alpha),
+                       points = FALSE, lines = TRUE),
+       par.settings = list(superpose.line = list(col = cl))) +
+    layer(panel.abline(a = 0, b = 1, lty = 2)) +
+    layer(panel.rect(xleft = 0, ybottom = 0,
+                     xright = 5, ytop = 5, lty = 2)) +
+    layer(panel.arrows(7, 13, 13, 7, length = 0.1)) +
+    layer(panel.text(x = 13, y = 7,
+                     labels = expression(alpha), pos = 4))
+
+xyplot(m ~ lambda, groups = alpha, type = "l",
+       data = subset(grid, findInterval(lambda, vec = c(0, 5)) == 1),
+       xlab = expression(lambda),
+       ylab = expression(sum(y %.% f(y))),
+       aspect = "iso", grid = TRUE, lwd = 2,
+       auto.key = list(space = "right",
+                       title = expression(alpha),
+                       points = FALSE, lines = TRUE),
+       par.settings = list(superpose.line = list(col = cl))) +
+    layer(panel.abline(a = 0, b = 1, lty = 2)) +
+    layer(panel.abline(a = -0.5, b = 1, lty = 2)) +
+    layer(panel.abline(a = 1, b = 1, lty = 2))
+
 ## -----------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Carregando e explorando os dados.
