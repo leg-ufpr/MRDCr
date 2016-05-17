@@ -73,11 +73,6 @@ colnames(aux)[1] <- "fit"
 pred <- cbind(pred, exp(aux))
 str(pred)
 
-urls <-
-    paste0("https://raw.githubusercontent.com/walmes/wzRfun/master/R/",
-           c("prepanel.cbH.R", "panel.cbH.R"))
-sapply(urls, source)
-
 xyplot(fit ~ K | umid, data = pred,
        layout = c(NA, 1), as.table = TRUE,
        ylab = "Número de vagens por vaso",
@@ -89,11 +84,6 @@ xyplot(fit ~ K | umid, data = pred,
 
 #-----------------------------------------------------------------------
 # Comparações múltiplas.
-
-urls <-
-    paste0("https://raw.githubusercontent.com/walmes/wzRfun/master/R/",
-           c("apc.R"))
-sapply(urls, source)
 
 L <- by(X, INDICES = pred$umid, FUN = as.matrix)
 names(L) <- levels(soja$umid)
