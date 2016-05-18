@@ -1,7 +1,6 @@
 context("Testa as Funções de Log-Verossimilhança")
 
 test_that("Tem os mesmo argumentos", {
-    apropos("formals")
     a_gcnt <- as.list(formals(llgcnt))
     a_pgnz <- as.list(formals(llpgnz))
     expect_equal(a_gcnt, a_pgnz)
