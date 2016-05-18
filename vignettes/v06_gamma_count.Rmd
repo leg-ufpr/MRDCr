@@ -1,5 +1,5 @@
 ---
-title: "Análise de Contagens com Modelo Gamma Gount"
+title: "Análise de Contagens com Modelo Gamma Count"
 author: >
   Walmes M. Zeviani,
   Eduardo E. Ribeiro Jr &
