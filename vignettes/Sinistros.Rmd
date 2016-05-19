@@ -32,11 +32,10 @@ seguintes variáveis:
 ```{r, echo = FALSE, include=FALSE}
 
 require(lattice)
-require(hnp)
 require(MASS)
 require(effects)
+require(knitr)
 
-setwd("~/Desktop")
 dados <- read.csv('Baseauto2.csv', header=TRUE, sep=',', dec = ',')
 
 options(scipen = 3) ### Era zero.
@@ -69,29 +68,29 @@ taxageral <- sum(dados$Sinistros)/sum(dados$Exposicao); taxageral ### Taxa de si
 
 tab <- aggregate(cbind(Exposicao, Sinistros) ~ Sexo, data = dados, sum)
 taxa <- with(tab, Sinistros/Exposicao)
-tab <- cbind(tab, taxa); tab ### Distribuição do número de sinistros por sexo.
+tab <- cbind(tab, taxa)
+### Distribuição do número de sinistros por sexo.
+kable(tab, align = 'c', caption = '**Taxa de sinistros segundo Sexo**')
 
 dados$idadecat <- cut(dados$Idade, breaks=c(18,30,60, 92), include.lowest = T)
 tab <- aggregate(cbind(Exposicao, Sinistros) ~ idadecat, data = dados, sum)
 taxa <- with(tab, Sinistros/Exposicao)
-tab <- cbind(tab, taxa); tab ### Distribuição do número de sinistros por sexo.
+tab <- cbind(tab, taxa)
+### Distribuição do número de sinistros por sexo.
+kable(tab, align = 'c', caption = '**Taxa de sinistros segundo Idade**')
 
 tabidsex <- aggregate(cbind(Exposicao, Sinistros) ~ Sexo + idadecat, data = dados, sum)
-Taxaidsex <- with(tabidsex, Sinistros/Exposicao)
-tabidsex <- cbind(tabidsex, Taxaidsex); tabidsex ### Distribuição do número de sinistros por idade e sexo.
+taxa <- with(tabidsex, Sinistros/Exposicao)
+tabidsex <- cbind(tabidsex, taxa)
+### Distribuição do número de sinistros por idade e sexo.
+kable(tabidsex, align = 'c', caption = '**Taxa de sinistros segundo Sexo e Idade**')
 
 tab <- aggregate(cbind(Exposicao, Sinistros) ~ Tipo, data = dados, sum)
 taxa <- with(tab, Sinistros/Exposicao)
-tab <- cbind(tab, taxa); tab ### Distribuição do número de sinistros por tipo de veículo.
+tab <- cbind(tab, taxa)
+### Distribuição do número de sinistros por tipo de veículo.
+kable(tab, align = 'c', caption = '**Taxa de sinistros segundo Tipo de Veículo**')
 
-tab <- aggregate(cbind(Exposicao, Sinistros) ~ Civil, data = dados, sum)
-taxa <- with(tab, Sinistros/Exposicao)
-tab <- cbind(tab, taxa); tab ### Distribuição do número de sinistros por estado civil.
-
-dados$valorcat <- cut(dados$Valor, breaks=quantile(dados$Valor), include.lowest = T)
-tab <- aggregate(cbind(Exposicao, Sinistros) ~ valorcat, data = dados, sum)
-taxa <- with(tab, Sinistros/Exposicao)
-tab <- cbind(tab, taxa); tab ### Distribuição do número de sinistros por valor do veículo.
 ```
 
 ## Regressão usando o modelo log-linear poisson.
@@ -101,24 +100,19 @@ dados <- na.omit(dados)
 ajusteps <- glm(Sinistros ~ Tipo+Sexo+Idade+I(Idade**2)+Valor+Civil+offset(log(Exposicao)), data = dados, family=poisson)
 summary(ajusteps)
 
-##### Estimação do parâmetro de dispersão. 
+### Modelo sem as variáveis não significativas.
 
-exp(coef(ajusteps))
+ajusteps2 <- glm(Sinistros ~ Sexo+Idade+I(Idade**2)+Valor+offset(log(Exposicao)), data = dados, family=poisson)
+anova(ajusteps2,ajusteps,test='Chisq')
 
-X2 <- sum(resid(ajusteps,type='pearson')**2)
-phichap <- X2/ajusteps$df.residual
+### Estimação do parâmetro de dispersão. 
+
+X2 <- sum(resid(ajusteps2,type='pearson')**2)
+phichap <- X2/ajusteps2$df.residual
 phichap ### Indicador de superdispersão.
 ```
 
-### Diagnóstico do ajuste (gráficos).
-
-```{r}
-##### Diagnóstico do modelo - gráficos.
-par(mfrow=c(2,2))
-plot(ajusteps)
-
-
-par(mfrow=c(1,1))
+```{r, echo = FALSE}
 envelope=function(modelo){
   dados=na.omit(modelo$data)
   nsim=100
@@ -145,35 +139,6 @@ envelope=function(modelo){
   lines(quantis,ls,type='l')
   points(quantis,r1,pch=16,cex=0.75)
 }
-
-envelope(ajusteps)
-
-```
-
-
-### Re-ajuste do modelo associando um parâmetro ao termo offset (log-exposicao)
-
-```{r}
-ajusteps2 <- glm(Sinistros ~ Tipo + Sexo + Idade +I(Idade**2) + Valor + Civil+log(Exposicao), data = dados, family=poisson)
-summary(ajusteps2)
-anova(ajusteps, ajusteps2, test = 'Chisq')
-```
-
-
-## Regressão usando a distribuição binomial negativa.
-
-```{r}
-ajustenb2 <- glm.nb(Sinistros ~ Tipo+Sexo+Idade+I(Idade**2)+Valor+Civil+log(Exposicao),data= dados)
-summary(ajustenb2) 
-
-### Verificando possibilidade de excluir estado civil e tipo de veículo do modelo.
-ajustenb3 <- update(ajustenb2, ~.-(Civil+Tipo))
-anova(ajustenb2, ajustenb3)
-
-## Estimação do parâmetro de dispersão
-X2 <- sum(resid(ajustenb3,type='pearson')**2) 
-phichap <- X2/ajustenb3$df.residual 
-phichap 
 ```
 
 
@@ -182,14 +147,44 @@ phichap
 ```{r}
 ##### Diagnóstico do modelo - gráficos.
 par(mfrow=c(2,2))
-plot(ajustenb3)
+plot(ajusteps2)
+
+par(mfrow=c(1,1))
+envelope(ajusteps2)
+```
+
+
+### Ajuste do modelo associando um parâmetro ao termo offset (log-exposicao)
+
+```{r}
+ajusteps3 <- glm(Sinistros ~ Sexo + Idade +I(Idade**2) + Valor + log(Exposicao), data = dados, family=poisson)
+summary(ajusteps3)
+anova(ajusteps2, ajusteps3, test = 'Chisq')
+```
+
+
+## Regressão usando a distribuição binomial negativa.
+
+```{r}
+ajustenb2 <- glm.nb(Sinistros ~ Sexo+Idade+I(Idade**2)+Valor+log(Exposicao),data= dados)
+summary(ajustenb2) 
+
+```
+
+
+### Diagnóstico do ajuste (gráficos).
+
+```{r}
+##### Diagnóstico do modelo - gráficos.
+par(mfrow=c(2,2))
+plot(ajustenb2)
 ```
 
 
 ```{r, echo = FALSE}
 dadosnb3 <- dados[,c('Sexo','Idade','Valor','Exposicao','Sinistros')]
-
-par(mfrow=c(1,1))
+dadosnb3$lexpo <- log(dados$Exposicao)
+ajustenb2 <- glm.nb(Sinistros ~ Sexo+Idade+I(Idade**2)+Valor+lexpo,data= dadosnb3)
 envelope=function(modelo){
   dados=na.omit(dadosnb3)
   nsim=100
@@ -221,32 +216,31 @@ envelope=function(modelo){
 
 ```{r}
 par(mfrow=c(1,1))
-envelope(ajustenb3)
+envelope(ajustenb2)
 ```
-
 
 
 ### Explorando os efeitos das covariáveis. Estimativas pontuais e ICs (95%)
 
 ```{r}
-intervalos <- confint(ajustenb3)
-estimat <- cbind(ajustenb3$coefficients, intervalos)
+intervalos <- confint(ajustenb2)
+estimat <- cbind(ajustenb2$coefficients, intervalos)
 colnames(estimat)[1] <- 'Estimativa pontual'
 
 ### Quadro de estimativas
-round(estimat, 5)
+kable(round(estimat, 5), align = 'c', caption = '**Estimativas pontuais e intervalos de confiança - Modelo Binomial Negativo**')
 ```
 
 
 ### Gráficos de efeitos
 
+```{r, echo = FALSE}
+
+```
+
 ```{r}
 
-dados$lexpo <- log(dados$Exposicao)
-ajustenb3 <- glm.nb(Sinistros ~ Sexo+Idade+I(Idade**2)+Valor+lexpo,data= dados)
-
-efeitos <- allEffects(ajustenb3, given.values=c(lexpo=0))
-
+efeitos <- allEffects(ajustenb2, given.values=c(lexpo=0))
 trellis.par.set(list(axis.text = list(cex = 1.2))) 
 
 plot(efeitos[[2]], type='response',main=list(
@@ -284,7 +278,7 @@ plot(efeitos[[4]], type='response',main=list(
 
 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, include=F}
 
 ## Frequências ajustadas pelas duas distribuições, com e sem covariaveis.
 
@@ -312,18 +306,18 @@ ajustenb <- glm.nb(Sinistros ~ 1,data=dados)
 
 media <- exp(coefficients(ajustenb))
 shape <- ajustenb$theta
-freqbn <- round(n*dnbinom(0:10, mu = media, size = shape)); freqbn
+freqbn <- round(n*dnbinom(0:10, mu = media, size = shape))
 
 
 ### Binomial negativa com covariaveis
-pred2 <- predict(ajustenb3,type='response')
+pred2 <- predict(ajustenb2,type='response')
 
 intervalo <- 0:10
 matprob <- matrix(0,nrow=nrow(dados),ncol=length(intervalo))
 probnb <- function(interv, media, shape)
     dnbinom(intervalo, mu = media, size = shape)
 for(i in 1:nrow(dados))
-    matprob[i,] <- probnb(interv = intervalo, media = pred2[i], shape = ajustenb3$theta)
+    matprob[i,] <- probnb(interv = intervalo, media = pred2[i], shape = ajustenb2$theta)
 pbarra <- colMeans(matprob)
 frebnaj <- round(n*pbarra)
 ams <- c(table(dados$Sinistros), rep(0,5))
@@ -337,7 +331,7 @@ rownames(matfreq) <- c('Amostra', 'Poisson não ajustada por covariáveis', 'Poi
 ## Comparação dos ajustes
 
 ```{r, results = 'markup'}
-kable(matfreq, format = "markdown", caption = "Frequências amostrais e freuências ajustadas para o número de sinistros")
+kable(matfreq, format = "markdown", caption = "Frequências amostrais e frequências ajustadas para o número de sinistros")
 ```
 
 

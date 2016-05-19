@@ -14,16 +14,16 @@ vignette: >
 source("_setup.R")
 ```
 
-Dados referentes a um experimento delineado em blocos, com o objetivo de 
+Dados referentes a um experimento realizado com o objetivo de 
 investigar o efeito de uma intervenção, por parte do cuidador, no 
 comportamento de ovelhas. 
 
-Para isso, foram considradas ovelhas de duas 
+Para isso, foram consideradas ovelhas de duas 
 linhagens distintas (pouco ou muito reativas), submetidas a dois tipos 
 diferentes de intervenção (observação ou observação + intervenção).
 
 A variável resposta aqui considerada é o número de mudanças na postura
-corporal do animal ao longo do período de observação.
+corporal do animal ao longo do período de observação (3 minutos).
 
 
 ```{r, echo = FALSE, include=FALSE}
@@ -59,6 +59,7 @@ require('car')
 require('RColorBrewer')
 require('sandwich')
 require('hnp')
+require('knitr')
 ```
 
 
@@ -103,8 +104,12 @@ mdp
 ajusteps <- glm(Nposturas ~ tratamento + linhagem, data=datapost4, family=poisson)
 summary(ajusteps)
 
+### Avaliando possível efeito de interação.
+ajustepsint <- glm(Nposturas ~ tratamento * linhagem, data=datapost4, family=poisson)
+anova(ajusteps,ajustepsint, test = 'Chisq')
+
 exp(coef(ajusteps)[2])
-### Estima-se que a frequência média de variação de postura no grupo com intervenção seja aproximadamente
+### Estima-se que a taxa de variação de postura no grupo com intervenção seja aproximadamente
 ### a metade em relação ao grupo sem intervenção.
 
 ##### Estimação do parâmetro de dispersão. 
@@ -164,11 +169,11 @@ envelope(ajusteps)
 
 ### Modelo quasi poisson (V(mu) = mu).
 ajuste12 <- glm(r4 ~ tratamento+linhagem, data=datapost4, family = 'quasipoisson')
-summary(ajuste12)
+# summary(ajuste12)
 
 ### Forma alternativa de declarar o Modelo quase-poisson (V(mu) = mu).
 ajuste13 <- glm(r4 ~ tratamento+linhagem, data=datapost4, family = quasi(variance = 'mu', link='log'))
-summary(ajuste13)
+# summary(ajuste13)
 
 ### Modelo de quase-verossimilhança (V(mu) = mu^2).
 ajuste14 <- glm(r4 ~ tratamento+linhagem, data=datapost4, family = quasi(variance = 'mu^2', link='log'))
@@ -192,12 +197,11 @@ qqline(resid(ajuste14,type='deviance'))
 ```{r}
 
 estrb <- coeftest(ajusteps, vcov=sandwich) ### Estimador sanduíche
-estrb
+estrb ### Estimação robusta.
 
 ### Usando bootstrap (R=999 simulações)
 ajusteboot <- Boot(ajusteps)
-plot(ajusteboot, index = 2) ### Distribuição bootstrap para o efeito de intervenção.
-summary(ajusteboot)
+summary(ajusteboot) ### Resultados obtidos via bootstrap.
 
 
 ```
@@ -218,24 +222,43 @@ quadres <- cbind(erroz, ics)
 
 rownames(quadres) <- c('Poisson', 'Quasi(mu)', 'Quasi(mu^2)', 'Robusto (sanduiche)', 'Bootstrap')
 
-### Quadro resumo para as estimativas produzidas pelos quatro modelos.
+### Quadro resumo para as estimativas produzidas pelos quatro modelos para o efeito de intervenção.
 kable(quadres, format = "markdown", caption = "Comparativo dos modelos ajustados")
 
-### Vamos avaliar o efeito das observações com maiores resíduos nos achados do modelo
+```
+
+### Verificando efeito das observações com maiores resíduos na análise.
+
+```{r}
 dadosexclud <- datapost4[-c(8,18,28),]
-ajusteexclud <- glm(Nposturas ~ tratamento+linhagem, data=dadosexclud, family = quasi(variance = 'mu', link='log'))
+
+### Ajustando o modelo Poisson sem as três observações.
+ajusteexcludpoi <- glm(Nposturas ~ tratamento+linhagem, data=dadosexclud, family = poisson)
+
+### Estimativa do parâmetro de dispersão.
+sum(resid(ajusteexcludpoi, type = 'pearson')**2)/ajusteexcludpoi$df.residual 
+
+### Gráficos de diagnóstico.
+par(mfrow=c(2,2))
+plot(ajusteexcludpoi)
+
+### Agora, o modelo quase-poisson
+ajusteexcludquasi <- glm(Nposturas ~ tratamento+linhagem, data=dadosexclud, family = quasi(variance = 'mu', link='log'))
 
 ### Estimativas produzidas pelo modelo quasipoisson com e sem as três observações.
 
-c1 <- compareCoefs(ajuste13, ajusteexclud, print = FALSE)
-colnames(c1) <- c('Est. com outliers','E.P. com outliers','Est. sem outliers','E.P. sem outliers')
-kable(c1)
+c1 <- compareCoefs(ajusteps, ajuste13, ajusteexcludpoi, ajusteexcludquasi, print = FALSE)
+colnames(c1) <- c('Est. Poisson c/out','E.P. Poisson c/out',
+                  'Est. Quasi c/out','E.P. Quasi c/out',
+                   'Est. Poisson s/out','E.P. Poisson s/out',
+                  'Est. Quasi s/out','E.P. Quasi s/out') 
+kable(round(c1,3), align = 'c')
 
 ### Efeito da intervenção desconsiderando as três observações.
-exp(coef(ajusteexclud)[2])
+exp(coef(ajusteexcludpoi)[2])
 
 ### O efeito de intervenção aumenta, e torna-se mais significativo, mediante exclusão dos outliers.
 
-```` 
+``` 
 
 

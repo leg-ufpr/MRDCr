@@ -211,7 +211,7 @@ Alguns exemplos de problemas envolvendo contagens:
     
 \vspace{0.5cm}    
     
-    \item Algumas alternativas: Distribuição Binomial, Poisson e generalizações; distribuições geradas por misturas, como a beta-binomial, binomial negativa; distribuições fundamentadas na modelagem do tempo entre eventos, como a Gamma-Count...
+    \item Algumas alternativas: Distribuição Binomial, Poisson e generalizações; distribuições geradas por misturas, como a beta-binomial, binomial negativa; distribuições fundamentadas na modelagem do tempo entre eventos, na razão de probabilidades sucessivas...
     
    
 \end{itemize}
@@ -302,7 +302,7 @@ aquém, em quantidade e diversidade, em relação ao verificado para dados cont�
 
         
 $$
-    P\left ( Y=k \right )=\frac{e^{-\mu}\mu^{k}}{k!},\hspace{5mm}k=0,1,2,...; \mu>0.
+    P\left ( Y=k \right )=\frac{e^{-\lambda}\lambda^{k}}{k!},\hspace{5mm}k=0,1,2,...; \lambda>0.
 $$
  
    \vspace{0,2cm}    
@@ -310,13 +310,61 @@ $$
        \item Se os eventos sob contagem  ocorrem independentemente e sujeitos a uma taxa constante $\lambda >0$, sob o modelo Poisson,  para um intervalo de exposição de tamanho $t$ tem-se: 
   
 $$
-    P\left ( Y=k \right )=\frac{e^{-\lambda t}(\lambda t)^{k}}{k!},\hspace{5mm}k=0,1,2,....
+    P\left ( Y_t=k \right )=\frac{e^{-\lambda t}(\lambda t)^{k}}{k!},\hspace{5mm}k=0,1,2,....
 $$
         \end{itemize}
         
 \end{frame}
 
 %%%-----------------------------------------------------------------------------------------
+
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 11
+
+\begin{frame}{Propriedades da distribuição de Poisson}
+
+Dentre as principais propriedades da distribuição de Poisson, tem-se:
+
+\vspace{0,3cm}
+
+\begin{itemize}
+
+    \item Média: $E(Y)= \lambda$;
+    \vspace{0,5cm}
+    
+    \item Variância: $Var(Y)=\lambda$ (equidispersão);
+    \vspace{0,5cm}
+    
+    \item Razão de probabilidades sucessivas: $\frac{P\left ( X=k \right )}{P\left ( X=k-1 \right )}=\frac{\lambda}{k},$ gerando a relação de recorrência:
+    
+    $$
+        P(Y=k)k=P(Y=k-1)\lambda;
+    $$
+    
+    \item Se $Y_{1},Y_{2},...,Y_{n}$ são v.a.s independentes com $Y_{i}\sim Poisson(\lambda_{i})$, e $\sum\lambda_{i}<\infty$, então $\sum Y_{i}\sim Poisson(\sum\lambda_{i})$.
+    
+    \end{itemize}
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 13
+
+\begin{frame}{Distribuição Poisson para diferentes valores de $\lambda$}
+    
+    \begin{figure}[h]
+    \includegraphics[height=6cm,width=9cm]{images/Graf_Poisson.pdf}
+    \caption{Distribuição de Poisson para diferentes valores de $\lambda$}
+    \label{Fig1}
+    \centering
+    
+\end{figure}
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
 
 %%% Slide 8
 
@@ -327,13 +375,15 @@ $$
     \vspace{0,5cm}
     
     \begin{itemize}
-        \item Caso limite da distribuição binomial$(n, \pi)$ quando $n\rightarrow \infty$ e $\pi\rightarrow 0$, fixado $\mu=n\pi$, ou seja:
+        \item Caso limite da distribuição binomial$(n, \pi)$ quando $n\rightarrow \infty$ e $\pi\rightarrow 0$, fixado $\lambda=n\pi$, ou seja:
+
+\vspace{0.4cm}
 
 $$
-     \underset{n \to \infty, \pi \to 0 }{lim}
+     \underset{n \to \infty  \pi \to 0 }{lim}
 \left [ \begin{pmatrix}
  n\\k 
-\end{pmatrix} \left ( \frac{\mu}{n} \right )^{k}\left ( 1-\frac{\mu}{n} \right )^{n-k}\right ]=\frac{e^{-\mu}\mu^{k}}{k!}.
+\end{pmatrix} \left ( \frac{\lambda}{n} \right )^{k}\left ( 1-\frac{\lambda}{n} \right )^{n-k}\right ]=\frac{e^{-\lambda}\lambda^{k}}{k!}.
 $$
 
     \vspace{0,5cm}
@@ -381,6 +431,23 @@ dado que o evento não ocorreu até o tempo $t$, \textbf{é constante} para todo
 
 %%%-----------------------------------------------------------------------------------------
 
+%%% Slide 13
+
+\begin{frame}{Diferentes comportamentos para $\lambda (t)$}
+    \vspace{-1.5cm}
+    \begin{figure}[h]
+    \includegraphics[height=8cm,width=10cm]{images/Graf_Risco.pdf}
+    \vspace{-0.8cm}
+    \caption{Diferentes comportamentos para $\lambda (t)$}
+    \label{Fig1}
+    \centering
+    
+\end{figure}
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+
 %%% Slide 10
 
 \begin{frame}{O processo de Poisson}
@@ -420,51 +487,7 @@ dado que o evento não ocorreu até o tempo $t$, \textbf{é constante} para todo
 \end{figure}
 \end{frame}
 
-%%%-----------------------------------------------------------------------------------------
 
-%%% Slide 11
-
-\begin{frame}{Propriedades da distribuição de Poisson}
-
-Dentre as principais propriedades da distribuição de Poisson, tem-se:
-
-\vspace{0,3cm}
-
-\begin{itemize}
-
-    \item Média: $E(Y)=\mu = \lambda t$;
-    \vspace{0,5cm}
-    
-    \item Variância: $Var(Y)=\mu$ (equidispersão);
-    \vspace{0,5cm}
-    
-    \item Razão de probabilidades sucessivas: $\frac{P\left ( X=k \right )}{P\left ( X=k-1 \right )}=\frac{\mu}{k},$ gerando a relação de recorrência:
-    
-    $$
-        P(Y=k)k=P(Y=k-1)\mu;
-    $$
-    
-    \item Se $Y_{1},Y_{2},...,Y_{n}$ são v.a.s independentes com $Y_{i}\sim Poisson(\mu_{i})$, e $\sum\mu_{i}<\infty$, então $\sum Y_{i}\sim Poisson(\sum\mu_{i})$,
-    
-    \end{itemize}
-\end{frame}
-
-%%%-----------------------------------------------------------------------------------------
-
-%%% Slide 13
-
-\begin{frame}{Distribuição Poisson para diferentes valores de $\mu$}
-    
-    \begin{figure}[h]
-    \includegraphics[height=6cm,width=9cm]{images/graf1.pdf}
-    \caption{Distribuição de Poisson para diferentes valores de $\mu$}
-    \label{Fig1}
-    \centering
-    
-\end{figure}
-\end{frame}
-
-%%%-----------------------------------------------------------------------------------------
 
 %%% Slide 15
 
@@ -492,7 +515,7 @@ Dentre as principais propriedades da distribuição de Poisson, tem-se:
 \begin{frame}{Regressão Poisson - Especificação do modelo} 
 
 \begin{itemize}
-    \item Sejam $Y_{1},Y_{2},...,Y_{n}$ variáveis aleatórias condicionalmente independentes, dado o vetor de covariáveis ${\vec{x_{i}}}'=(x_{i1},x_{i2},...,x_{ip}), i=1,2,...,n$. A regressão Poisson é definida pela distribuição de Poisson:
+    \item Sejam $Y_{1},Y_{2},...,Y_{n}$ variáveis aleatórias condicionalmente independentes, dado o vetor de covariáveis ${\boldsymbol{x_{i}}}'=(x_{i1},x_{i2},...,x_{ip}), i=1,2,...,n$. A regressão Poisson é definida pela distribuição de Poisson:
 
 
 $$
@@ -501,7 +524,7 @@ $$
 
 \vspace{0,2cm}
  
-sendo as covariáveis inseridas ao modelo da seguinte forma:
+sendo as covariáveis inseridas ao modelo por:
 
 $$
 \ln(\mu _{i})=\boldsymbol{x_{i}'} \boldsymbol{\beta},
@@ -528,7 +551,8 @@ em que ${\boldsymbol{\beta }}$ é o vetor de parâmetros de regressão.
     
     \begin{itemize}
         
-        \item $f(y_{i}|\boldsymbol{x_{i}})=\frac{\exp^{- \vec{{x_{i}}' \beta}}( \vec{{x_{i}}' \beta})^{y_{i}}}{y_{i}!},\hspace{5mm}y=0,1,2,...$
+        \item $f(y_{i}|\boldsymbol{x_{i}})=\frac{e^{-exp(\boldsymbol{x'_i\beta})}{exp({\boldsymbol{x'_i\beta}})}^{y_i}}{y_i!}$
+        
 
   
   \vspace{0,8cm}  
@@ -551,286 +575,11 @@ em que ${\boldsymbol{\beta }}$ é o vetor de parâmetros de regressão.
 
 
 
-%%%-----------------------------------------------------------------------------------------
-
-%%% Slide 25
-
-\begin{frame}{Modelos Lineares Generalizados(MLG)} 
-
-\begin{itemize}
-
-\item A teoria dos modelos lineares generalizados se estende às variáveis aleatórias cujas funções (densidade) de probabilidades possa ser expressas na forma exponencial linear:
-
-  \vspace{0,5cm}  
-
-$$
-    f\left ( y;\theta,\phi \right) =exp\left \{ \frac{y\theta-b\left ( \theta \right )}{\phi}+c\left ( y;\phi \right ) \right \},
-$$
-  \vspace{0,5cm}  
-sendo $\theta=\theta(\mu)$ denominado \textit{parâmetro canônico} e $\phi$ o parâmetro de dispersão.
-
-  \vspace{0,5cm}  
-
-\item Casos particulares: Binomial, Poisson, Normal, Gama, Exponencial...
-
-\end{itemize}
-\end{frame}
-
-%%%-----------------------------------------------------------------------------------------
-
-%%% Slide 26
-
-\begin{frame}{Modelos Lineares Generalizados} 
-\begin{itemize}
-
-\item Propriedades:
-
-$$
-    E[Y]=b'(\theta)=\frac{\partial b(\theta)}{\partial \theta};
-$$ 
-
-$$   
-    Var[Y]=\phi b''(\theta)=\phi\frac{\partial \mu}{\partial \theta}=\phi V(\mu)
-$$
-
-
-\item Para a Poisson:
-
-$$\theta = \log(\mu); \hspace{0.2cm} b(\theta)=\exp(\theta); \hspace{0.2cm} \phi=1; \hspace{0.2cm} V(\mu)=\mu.$$
-
-\end{itemize}
-\end{frame}
-
-
-%%%-----------------------------------------------------------------------------------------
-
-%%% Slide 27
-
-\begin{frame}{Modelo Linear Generalizado} 
-
-\begin{itemize}
-
-
- \item Definição do modelo:
-
-  \vspace{0,5cm}  
-  
-$$
-   g(\mu_{i})=\boldsymbol{x'_{i}\beta}=\beta_{0}+\beta_{1}x_{i1}+...+\beta_{p}x_{ip},
-$$
-
-  \vspace{0,5cm}  
-  
-sendo $g(\cdot)$ uma função real, monótona e diferenciável.
-
-  \vspace{0,5cm}  
-  
-\item Para a distribuição Poisson é usual considerar:
-
-$$
-   g(\mu_{i})= \log(\mu_i) = \boldsymbol{x'_{i}\beta}=\beta_{0}+\beta_{1}x_{i1}+...+\beta_{p}x_{ip}.
-$$
-
-\end{itemize}
-
-\end{frame}
-
-
-%%%-----------------------------------------------------------------------------------------
-
-
-\begin{frame}{Modelo Linear Generalizado} 
-
-\begin{itemize}
-
-
-\item Sejam $Y_{1},Y_{2},...,Y_{n}$ independentes, com distribuição expressa na forma exponencial linear. Temos a seguinte log-verossimilhança:
-
-$$
-    l(\boldsymbol{\beta })=\phi^{-1}\sum_{i=1}^{n}(y_{i}\theta_{i}-b(\theta_{i}))+\sum_{i=1}^{n}c(y_{i},\phi),
-$$
-
-sendo $\theta_i=q(\mu_i) \text{ e } g(\mu_i)=\eta_i=\beta_{0}+\beta_{1}x_{i1}+...+\beta_{p}x_{ip}.$
-
-
-\item Função escore:
-
-$$
-   S(\beta_j)=\phi^{-1}\sum_{i=1}^{n}\frac{y_{i}-\mu_{i}}{V(\mu_{i})} \frac{\partial \mu_{i}}{\partial \eta_{i}}x_{ij}, \hspace{0,3cm} j=0,1,2,...,p.
-$$
-
-
-
-
-\end{itemize}
-
-\end{frame}
-
-
-%%%-----------------------------------------------------------------------------------------
-
-%%% Slide 29
-
-\begin{frame}{Modelo Linear Generalizado} 
-
-\begin{itemize}
-
-
-\item A estimação via máxima verossimilhança de $\boldsymbol{\beta}$ se dá pela solução do sistema de equações $S_j=S(\beta_j)=0$, $j=0,1,2,...,p$.
-
-  \vspace{0,5cm}  
-
-
-\item Matriz de informação esperada (informação de Fisher):
-
-$$
-I(\boldsymbol{\beta})=-E
-\begin{bmatrix}
-\frac{\partial l^{2}(\boldsymbol{\beta , y})}{\partial \beta_{0}^{2}  } &
-\frac{\partial l^{2}(\boldsymbol{\beta , y})}{\partial \beta_{0} \partial \beta_{1}  } &
-\cdots  &  
-\frac{\partial l^{2}(\boldsymbol{\beta , y})}{\partial \beta_{0} \partial \beta_{p}  }\\ 
-\frac{\partial l^{2}(\boldsymbol{\beta , y})}{\partial \beta_{0} \partial \beta_{1}  } &  
-\frac{\partial l^{2}(\boldsymbol{\beta , y})}{\partial \beta_{1}^{2}  } &
-\cdots  &
-\frac{\partial l^{2}(\boldsymbol{\beta , y})}{\partial \beta_{1} \partial \beta_{p}  }
- \\ 
-\vdots & \vdots & \ddots & \vdots \\ 
-\frac{\partial l^{2}(\boldsymbol{\beta , y})}{\partial \beta_{0} \partial \beta_{p}  } &
-\frac{\partial l^{2}(\boldsymbol{\beta , y})}{\partial \beta_{1} \partial \beta_{p}  }  &
-\cdots  & 
-\frac{\partial l^{2}(\boldsymbol{\beta , y})}{\partial \beta_{p}^{2}  }
-\end{bmatrix}
-$$
-
-\end{itemize}
-\end{frame}
-
-
-%%%-----------------------------------------------------------------------------------------
-
-%%% Slide 30
-
-\begin{frame}{Modelo Linear Generalizado}
-
-\begin{itemize}
-
-     \item O termo característico da matriz informação esperada, $I_{jk}$, é dado por:
-     
-     $$
-         I_{jk}=\phi^{-1} \sum_{i=1}^{n}\omega_{i}x_{ij}x_{ik},
-     $$
-
-sendo 
-
-$$
-    \omega_{i}=V(\mu_{i})\left ( \frac{\partial \mu_{i}}{\partial \eta_{i}} \right )^{2}.
-$$
-
-     \item Matricialmente:
-     
-$$
-      \boldsymbol{I}=   \boldsymbol{I}(\boldsymbol{\beta})=\phi^{-1}\boldsymbol{X'WX},
-$$
-\end{itemize}
-
-sendo $\boldsymbol{X}$ a matriz do modelo e $\boldsymbol{W}$ a matriz diagonal com elementos $\{\omega_{1}, \omega_{2}, ..., \omega_{n}\}$.
-
-\end{frame}
-
-
-%%%-----------------------------------------------------------------------------------------
-
-%%% Slide 31
-
-\begin{frame}{Modelo Linear Generalizado} 
-
-\begin{itemize}
-
-\item Estimação dos parâmetros: algoritmo escore de Fiher (processo iterativo):
-
-  \vspace{0,5cm}
-
-$$
-    \boldsymbol{\beta}^{(m+1)}=\boldsymbol{\beta}^{(m)}+(\boldsymbol{I}^{(m)})^{-1}\boldsymbol{S^{(m)}},
-$$
-
-  \vspace{0,5cm}
-
-sendo $\boldsymbol{S^{(m)}}$ e $\boldsymbol{I}^{(m)}$ o vetor escore e a matriz informação avaliados no passo $m$.
-
-  \vspace{0,5cm}
-  
-\item Substituindo $\boldsymbol{S^{(m)}}$ e $\boldsymbol{I}^{(m)}$ pelas correspondentes expressões para um modelo linear generalizado, temos:
-
-$$
-    \boldsymbol{\beta}^{(m+1)}=(\boldsymbol{X'WX})^{-1}\boldsymbol{X'W^{(m)}z^{(m)}}
-$$
-
-
-\end{itemize}
-\end{frame}
-
-
-%%%-----------------------------------------------------------------------------------------
-
-%%% Slide 32
-
-\begin{frame}{Modelo Linear Generalizado} 
-
-\begin{itemize}
-
-\item Como resultado temos um processo iterativo de mínimos quadrados ponderados, em que $\boldsymbol{W}^{(m)}$ é a matriz de pesos, atualizados a cada passo do processo, e
-
-$$
-    \boldsymbol{z}^{(m+1)}=\boldsymbol{\eta}^{(m)}+\boldsymbol{G}^{(m)}\boldsymbol{(y-\mu^{(m)})},
-$$
-
-é a variável dependente ajustada, sendo $\boldsymbol{G}$ a matriz diagonal com elementos $\{d\eta_{1}/d\mu_{1},
-d\eta_{2}/d\mu_{2},...,d\eta_{n}/d\mu_{n}\}.$
-
-\item Assintoticamente,
-
-$$
-    \boldsymbol{\hat{\beta}}\overset{a}{\sim} N_{p+1}\left ( \boldsymbol{\beta}, \boldsymbol{I^{-1}\left ( \boldsymbol{\beta} \right )} \right ),
-$$
-
-com $\boldsymbol{I^{-1}(\boldsymbol{\beta})}=Var(\boldsymbol{\hat{\beta}})=\phi (\boldsymbol{X'WX})^{-1}$. 
-
-
-\end{itemize}
-
-\end{frame}
-
-
-
-%%%-----------------------------------------------------------------------------------------
-
-%%% Slide 32
-
-\begin{frame}{Modelo Linear Generalizado} 
-
-\begin{itemize}
-
-
-\item O parâmetro de dispersão, $\phi$, pode ser estimado usando o método de momentos, resultando em:
-
-\vspace{0.5cm}
-
-$$ \hat{\phi}=\frac{\sum_{i=1}^{n} (y_{i}-\hat{\mu}_{i})^{2}}{n-p}. $$
-
-\end{itemize}
-
-\end{frame}
-
-%%%-----------------------------------------------------------------------------------------
-
-
 
 
 %%% Slide 18
 
-\begin{frame}{Regressão Poisson} 
+\begin{frame}{Regressão Poisson - Estimação por máxima verossimilhança} 
 
 Para a regressão Poisson:
 
@@ -838,22 +587,22 @@ Para a regressão Poisson:
 
 \begin{itemize} 
 
-\item $l(\boldsymbol{\beta})=\sum_{i=1}^{n} \{ y_{i}\boldsymbol{x_{i}'\beta}-\exp{(\boldsymbol{x_{i}'\beta}}\}-\ln{y_{i}!});$
+\item Log-verossimilhança: $l(\boldsymbol{\beta})=\sum_{i=1}^{n} \{ y_{i}\boldsymbol{x_{i}'\beta}-\exp{(\boldsymbol{x_{i}'\beta}}\}-\ln{y_{i}!});$
 
 \vspace{0.5cm}
 
-\item $\boldsymbol{S}(\boldsymbol{\beta})=\frac{\partial l(\boldsymbol{\beta};\boldsymbol{y})}{\partial \boldsymbol{\beta}}=
+\item Vetir escore: $\boldsymbol{S}(\boldsymbol{\beta})=\frac{\partial l(\boldsymbol{\beta};\boldsymbol{y})}{\partial \boldsymbol{\beta}}=
               \sum_{i=1}^{n}(y_{i}-\exp(\boldsymbol{x_{i}'\beta}))\boldsymbol{x_{i}};$       
 \vspace{0.5cm}
   
-\item $
+\item Matriz Informação: $
 \boldsymbol{I({\beta})} = \sum_{i=1}^n \mu_i \boldsymbol{x_i x'_i}  = \exp{(\boldsymbol{x'_i \beta})\boldsymbol{x_i x'_i}}; 
 $
   
 \vspace{0.5cm}
   
-\item  $
-\boldsymbol{\hat{\beta}} \sim N \left ( \boldsymbol{\beta}, \left [ \sum_{i=1}^n \mu_i \boldsymbol{x_i x'_i} \right ]^{-1} \right ). 
+\item  Distribuição assintótica: $
+\boldsymbol{\hat{\beta}} \overset{a}{\sim} N \left ( \boldsymbol{\beta}, \left [ \sum_{i=1}^n \mu_i \boldsymbol{x_i x'_i} \right ]^{-1} \right ). 
 $ 
        
 \end{itemize}
@@ -866,22 +615,23 @@ $
 
 %%% Slide 34
 
-\begin{frame}{Modelo Linear Generalizado} 
+\begin{frame}{Regressão Poisson - Modelo Linear Generalizado} 
 
-Propriedades adicionais dos modelos lineares generalizados:
+
+A Regressão Poisson é um caso particular dos Modelos Lineares Generalizados (MLG). Algumas propriedades dessa classe de modelos:
 
 \begin{itemize}
 
-\item Os EMV's são consistentes ainda que a distribuição especificada seja incorreta, mas desde que a média condicional de $Y$ seja declarada corretamente;
+\item Os estimadores são consistentes ainda que a distribuição especificada seja incorreta, mas desde que a média condicional de $Y$ seja declarada corretamente;
 
 \item Os erros padrões, intervalos de confiança e testes de hipóteses, no entanto, ficam comprometidos;
 
-\item O ajuste de um MLG, no entanto, requer apenas a especificação:
+\item O ajuste de um MLG requer apenas a especificação:
 
 \begin{itemize}
 \item Da esperança de $Y$ condicional às covariáveis, mediante especificação do preditor linear e da função de ligação;
 
-\item Da variância condicional, mediante especificação da função de variância $V(\mu)$, possível inclusão do parâmetro de dispersão $(\phi)$, ou sua estimação por métodos robustos.
+\item Da variância condicional, mediante especificação da função de variância $V(\mu)$, possível inclusão do parâmetro de dispersão $(\phi)$, ou sua estimação por métodos robustos (abordagem de Quase-Verossimilhança).
 
 \end{itemize}
 
@@ -892,6 +642,32 @@ Propriedades adicionais dos modelos lineares generalizados:
 
 
 %%%-----------------------------------------------------------------------------------------
+
+
+\begin{frame}{Regressão Poisson - Quase-Verossimilhança} 
+
+\begin{itemize}
+    \item Para o ajuste de um modelo alternativo via Quase-Verossimilhança, definimos:
+
+\vspace{0.4cm}
+
+$$g(E(y_i|\boldsymbol{x_i}))=\boldsymbol{x'_i \beta};$$
+
+$$Var(y_i|\boldsymbol{x_i})=\phi V(\mu_i).$$
+
+\item A obtenção dos estimadores se dá pela maximização da função de quase-verossimilhança:
+
+$$ Q\left ( \mu \right )=\int _y^\mu \frac{y-t}{\phi V(t)}dt $$.
+
+
+\item As funções de quase-verossimilhança, quase-escore e quase-informação compartilham propriedades comuns às correspondentes funções no caso paramétrico, para MLGs.
+
+\end{itemize}
+
+
+
+\end{frame}
+
 
 
 
@@ -900,150 +676,29 @@ Propriedades adicionais dos modelos lineares generalizados:
 
 %%% Slide 39
 
-\begin{frame}{Modelo Linear Generalizado - Quase-Verossimilhança} 
+\begin{frame}{Estimação via Quase-Verossimilhança} 
 
 \begin{itemize}
-
-\item Considere a variável aleatória $Y$ com média $\mu$ e variância $\phi V(\mu)$. O método de quase-verossimilhança baseia-se na função quase-escore:
-
-$$ U(\mu) = \frac{y-\mu}{\phi V(\mu)}$$.
-
-\item Função de quase-verossimilhança:
-
-$$ Q\left ( \mu \right )=\int _y^\mu \frac{y-t}{\phi V(t)}dt $$.
-
-\end{itemize}
-
-\end{frame}
-
-
-%%%-----------------------------------------------------------------------------------------
-
-%%% Slide 40
-
-\begin{frame}{Modelo Linear Generalizado - Quase-Verossimilhança} 
-
-\begin{itemize}
-
-\item Propriedades:
-
-\vspace{0.5cm}
-
-\begin{itemize}
-
-\item $ E\left ( \frac{\partial Q(\mu)}{\partial \mu} \right ) = 0 $
-
-\vspace{0.5cm}
-
-\item $ E\left [ \left ( \frac{\partial Q(\mu)}{\partial \mu} \right )^2 \right ]=
--E\left [ \frac{\partial^2Q(\mu)}{\partial \mu^2} \right ] $
-
-\end{itemize}
-
-\vspace{0.5cm}
-
-\item A depender da especificação dos momentos, as equações de estimação são idênticas às obtidas mediante especificação completa da verossimilhança. 
-
-
-\end{itemize}
-
-\end{frame}
-
-
-%%%-----------------------------------------------------------------------------------------
-
-
-
-%%% Slide 41
-
-\begin{frame}{Modelo Linear Generalizado - Quase-Verossimilhança} 
-
-\begin{itemize}
-
-
-\item Os estimadores dos parâmetros de um MLG via quase-verossimilhança, $(\boldsymbol{\hat{\beta}_{QL}})$ são obtidos pela solução das equações quase-escore: 
-
-
-$$U(\boldsymbol{\boldsymbol{\beta}})=U(\boldsymbol{\mu}({\boldsymbol{\beta}}))=\frac{\partial{Q(\boldsymbol{\beta)}}}{\partial{\boldsymbol{\beta}}}= \frac{1}{\phi}\boldsymbol{D'V^{-1}(y-\mu)},$$
-
-em que $\boldsymbol{D}=\partial{\boldsymbol{\mu}}/\partial{\boldsymbol{\beta}}=\boldsymbol{W^{1/2}V^{1/2}X}$, $\boldsymbol{V}=diag(V_1,V_2,...,V_n)$, $\boldsymbol{W}=diag(W_1,W_2,...,W_n)$, com $\omega_i=(\partial{\mu_i}/\partial{\eta_i})^2 /V_i$.
-
-
-\item Matriz de quase-informação:
-
-$$-E\left [ \frac{\partial^2Q(\mu)}{\partial \mu^2} \right ] = \frac{1}{\phi}\boldsymbol{D'V^{-1}D}$$
-
-
-\end{itemize}
-
-\end{frame}
-
-
-%%%-----------------------------------------------------------------------------------------
-
-
-
-%%% Slide 41
-
-\begin{frame}{Modelo Linear Generalizado - Quase-Verossimilhança} 
-
-\begin{itemize}
-
-
-\item O algoritmo de estimação baseia-se na solução das equações quase-escore. $U(\boldsymbol{\boldsymbol{\beta}})=\boldsymbol{0}$, resultando no algoritmo:
-
-\vspace{0.5cm}
-
-$$\boldsymbol{\beta} ^{(m+1)} = \boldsymbol{\beta} ^{(m)} +
-\boldsymbol{(D'^{(m)}V^{-1(m)}D^{(m)})^{-1}}
-\boldsymbol{D'^{(m)}V^{-1(m)}(y-\mu^{(m)}})  
-$$ 
-
-\vspace{0.5cm}
 
 \item Distribuição assintótica:
 
 \vspace{0.3cm}
 
-$$ \boldsymbol{\hat{\beta}_{QL}} \overset{a}{\sim} N(\boldsymbol{\beta}, \phi \boldsymbol{(D'V^{-1}D)}^{-1} )$$
+$$ \boldsymbol{\hat{\beta}_{QL}} \overset{a}{\sim} N(\boldsymbol{\beta}, Var(\boldsymbol{\hat{\beta}_{QL}} ))$$
 
-\end{itemize}
+\vspace{0.8cm}
 
-\end{frame}
+\item Para o modelo Quase-Poisson, assume-se:
 
-
-%%%-----------------------------------------------------------------------------------------
-
-
-
-%%% Slide 41
-
-\begin{frame}{Modelo Linear Generalizado - Quase-Verossimilhança} 
-
-\begin{itemize}
+$$\ln(E(y_i|\boldsymbol{x_i}))=\boldsymbol{x'_i \beta};$$
 
 
 
-
-\item Adotando-se $V(\mu)=\mu$ temos as seguintes equações de estimação:
-
-
-
-$$U(\boldsymbol{\beta}) =\sum_{i=1}^{n}(y_{i}-exp(\boldsymbol{x'_{i}\beta}))\boldsymbol{x_{i}=0}.$$
-
-
-\vspace{0.5cm}
-
-\item As equações de estimação via quase-verossimilhança, neste caso, são idênticas às obtidas com base na verossimilhança da regressão Poisson.
-
-
-\item Como principais alternativas para definição de $V(\mu)$, podemos considerar proporcionalidade em relação a alguma potência de $\mu$, como $V(\mu) \text{ } \propto \text{ } \mu$ e $V(\mu)\text{ } \propto \text{ } \mu^2$.
 
 
 \end{itemize}
 
 \end{frame}
-
 
 
 
@@ -1051,11 +706,11 @@ $$U(\boldsymbol{\beta}) =\sum_{i=1}^{n}(y_{i}-exp(\boldsymbol{x'_{i}\beta}))\bol
 
 %%% Slide45
 
-\begin{frame}{Modelo Linear Generalizado - Quase Verossimilhança} 
+\begin{frame}{Estimação via Quase Verossimilhança} 
 
 \begin{itemize}
 
-\item Para a regressão Poisson:
+\item A matriz de covariâncias assintótica para $\boldsymbol{\hat{\beta}_{QL}}$ fica dada por:
 
 $$
 Var(\boldsymbol{\hat{\beta}_{QL}})=\left [ \sum_{i=1}^{n} \boldsymbol{x_{i}x'_{i}}\mu_{i} \right ]^{-1}
@@ -1066,7 +721,13 @@ com $\mu_{i}=exp({\boldsymbol{x'_{i}\beta}})$ e $\omega_{i}=Var(y_{i}|\boldsymbo
 
 \vspace{0.5cm}
 
-\item Podemos considerar $\omega_i=V(\mu_i;\phi)$, como $\omega_i \propto \mu_i$, $\omega_i \propto \mu_i^2$ ou, simplesmente, o estimador robusto, baseado em $\omega_i=(y_i-\mu_i)^2$.
+
+\item Podemos considerar $\omega_i=V(\mu_i;\phi)$, como $\omega_i =\phi \mu_i$, $\omega_i =\phi \mu_i^2$ ou, simplesmente, o estimador robusto, baseado em $\omega_i=(y_i-\mu_i)^2$.
+
+\item Um estimador para $\phi$:
+
+$$ \hat{\phi} = \frac{1}{n-p}\sum_{i=1}^n \frac{y_i-\hat{\mu}_i}{V(\hat{\mu}_i)}. $$
+
 
 \end{itemize}
 
@@ -1085,16 +746,16 @@ com $\mu_{i}=exp({\boldsymbol{x'_{i}\beta}})$ e $\omega_{i}=Var(y_{i}|\boldsymbo
 \item Função de probabilidades:
 
 $$
-P(Y=k)=\frac{\Gamma(\alpha+k)}{\Gamma(k+1)\Gamma(\alpha)}\left ( \frac{\mu}{\mu+\alpha} \right )^{k} \left( \frac{\alpha}{\mu+\alpha} \right )^{\alpha}, k=0,1,2,...; \alpha > 0, \mu>0
+P(Y=k)=\frac{\Gamma(\alpha+k)}{\Gamma(k+1)\Gamma(\alpha)}\left ( \frac{\lambda}{\lambda+\alpha} \right )^{k} \left( \frac{\alpha}{\lambda+\alpha} \right )^{\alpha}, k=0,1,2,...; \alpha > 0, \lambda>0
 $$
 
 \item Propriedades:
 
 $$
-E(Y)=\mu ; \quad Var(Y)= \mu+ \alpha^{-1} \mu^2
+E(Y)=\lambda ; \quad Var(Y)= \lambda+ \alpha^{-1} \lambda^2
 $$
 
-\item Assim, para qualquer $\alpha>0$, temos $Var(Y)>\mu$.
+\item Assim, para qualquer $\alpha>0$, temos $Var(Y)>\lambda$.
 
 \item A distribuição binomial negativa tem como caso limite distribuição Poisson, quando $\alpha \rightarrow \infty$.
 
@@ -1125,7 +786,7 @@ $$
 
 \vspace{0.5cm}
 
-sendo $r=\alpha$ e $p=\mu/(\mu+\alpha),$ com $0<p<1$ e $r>0$.  
+sendo $r=\alpha$ e $p=\lambda/(\lambda+\alpha),$ com $0<p<1$ e $r>0$.  
 \vspace{0.5cm}
 
 \item Modelagem do número de "sucessos" até o r-ésimo "fracasso" ($r = 1,2,3,...$), configurando uma generalização da distribuição geométrica (para $r=1$).
@@ -1171,11 +832,11 @@ com $E(\theta)=\theta=\alpha /\beta$ e variância $Var(\theta)=\alpha /\beta^2.$
 
 %%% Slide 50
 
-\begin{frame}{Ilustração}
+\begin{frame}{Distribuição binomial negativa para diferentes parâmetros}
     
     \begin{figure}[h]
-    \includegraphics[height=5.5cm,width=9cm]{images/graf2.pdf}
-    \caption{Distribuição binomial para $\mu=2$ e diferentes valores de $\alpha.}
+    \includegraphics[height=5.5cm,width=9cm]{images/Graf_BN.pdf}
+    \caption{Distribuição binomial negativa para $\lambda=2$ e diferentes valores de $\alpha.}
     \label{Fig1}
     \centering
     
@@ -1192,7 +853,7 @@ com $E(\theta)=\theta=\alpha /\beta$ e variância $Var(\theta)=\alpha /\beta^2.$
 
 \begin{itemize}
 
-\item O modelo de regressão com resposta binomial negativa pode ser especificado fazendo $\boldsymbol{\mu}=E(y|\boldsymbol{x})=exp(\boldsymbol{x'\beta}).$
+\item O modelo de regressão com resposta binomial negativa pode ser especificado fazendo $E(y|\boldsymbol{x})=exp(\boldsymbol{x'\beta}).$
 
 \vspace{0.5cm}
 
