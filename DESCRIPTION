@@ -47,6 +47,7 @@ Suggests:
     rmarkdown,
     shiny,
     rpanel,
-    testthat
+    testthat,
+    methods
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
