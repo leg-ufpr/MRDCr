@@ -6,7 +6,6 @@ source("_setup.R")
 # devtools::load_all("../")
 library(lattice)
 library(latticeExtra)
-library(rpanel)
 library(bbmle)
 library(corrplot)
 library(plyr)
@@ -16,34 +15,6 @@ library(multcomp)
 library(MRDCr)
 
 ## -----------------------------------------------------------------
-# Função densidade na parametrização original.
-dpgnz0 <- function(y, theta, gamma, m = 4) {
-    if (gamma < 0) {
-        m <- max(c(m, floor(-theta/gamma)))
-        if (gamma < max(c(-1, -theta/m))) {
-            m <- 0
-        } else {
-            m <- as.integer(y <= m)
-        }
-    } else {
-        m <- 1
-    }
-    z <- theta + gamma * y
-    k <- lfactorial(y)
-    # fy <- m * theta * z^(y - 1) * exp(-z)/exp(k)
-    fy <- m * exp(log(theta) + (y - 1) * log(z) - z - k)
-    return(fy)
-}
-
-# Caso Poisson (gamma == 0).
-y <- 0:30
-theta <- 10
-gamma <- 0
-
-fy <- dpgnz0(y = y, theta = theta, gamma = gamma)
-plot(fy ~ y, type = "h", xlab = "y", ylab = "f(y)")
-lines(y + 0.3, dpois(y, lambda = theta), type = "h", col = 2)
-
 grid <- expand.grid(lambda = c(2, 8, 15),
                     alpha = c(-0.05, 0, 0.05))
 y <- 0:35
@@ -74,146 +45,26 @@ useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
                    var.name = expression(alpha == ""),
                    sep = ""))
 
-## ---- eval=FALSE--------------------------------------------------
-#  react <- function(panel){
-#      with(panel,
-#      {
-#          m <- THETA/(1 - GAMMA)
-#          s <- sqrt(THETA/(1 - GAMMA)^3)
-#          from <- floor(max(c(0, m - 5 * s)))
-#          to <- ceiling(max(c(YMAX, m + 5 * s)))
-#          y <- from:to
-#          py <- dpgnz0(y = y, theta = THETA, gamma = GAMMA)
-#          if (POIS) {
-#              pz <- dpois(y, lambda = m)
-#          } else {
-#              pz <- 0
-#          }
-#          # Colocar 0 para valores não finitos (-Inf, Inf e NaN) para
-#          # fazer gráfico.
-#          py[!is.finite(py)] <- 0
-#          plot(py ~ y, type = "h",
-#               ylim = c(0, max(c(py, pz))),
-#               xlab = expression(y),
-#               ylab = expression(f(y)))
-#          mtext(side = 3,
-#                text = substitute(sum(f(y)) == s,
-#                                  list(s = round(sum(py), 5))))
-#          if (EX) {
-#              abline(v = m, col = 2)
-#          }
-#          if (POIS) {
-#              lines(y + 0.3, pz, type = "h", col = 3)
-#          }
-#      })
-#      panel
-#  }
-#  
-#  panel <- rp.control(title = "Poisson Generalizada",
-#                      size = c(300, 100), YMAX = 150, m = 4)
-#  rp.slider(panel = panel, action = react,
-#            variable = THETA, title = "theta",
-#            from = 0.1, to = 100,
-#            initval = 5, resolution = 0.1,
-#            showvalue = TRUE)
-#  rp.slider(panel = panel, action = react,
-#            variable = GAMMA, title = "gamma",
-#            from = -1, to = 0.99,
-#            initval = 0, resolution = 0.01,
-#            showvalue = TRUE)
-#  rp.checkbox(panel = panel,
-#              variable = EX, action = react, title = "E(Y)",
-#              labels = "Mostrar o valor esperado?")
-#  rp.checkbox(panel = panel,
-#              variable = POIS, action = react, title = "Poisson",
-#              labels = "Adicionar a distribução Poisson?")
-#  rp.do(panel = panel, action = react)
+#-----------------------------------------------------------------------
+# Relação média variância.
 
-## ---- eval=FALSE--------------------------------------------------
-#  # Função densidade na parametrização de modelo de regressão.
-#  MRDCr::dpgnz
-#  
-#  react <- function(panel){
-#      with(panel,
-#      {
-#          m <- LAMBDA
-#          s <- sqrt(LAMBDA) * (1 + ALPHA * LAMBDA)
-#          from <- floor(max(c(0, m - 5 * s)))
-#          to <- ceiling(max(c(YMAX, m + 5 * s)))
-#          y <- from:to
-#          py <- dpgnz(y = y, lambda = LAMBDA, alpha = ALPHA)
-#          if (POIS) {
-#              pz <- dpois(y, lambda = m)
-#          } else {
-#              pz <- 0
-#          }
-#          py[!is.finite(py)] <- 0
-#          plot(py ~ y, type = "h",
-#               ylim = c(0, max(c(py, pz))),
-#                   xlab = expression(y),
-#               ylab = expression(f(y)))
-#          mtext(side = 3,
-#                text = substitute(sum(f(y)) == s,
-#                                  list(s = round(sum(py), 5))))
-#          if (EX) {
-#              abline(v = m, col = 2)
-#          }
-#          if (POIS) {
-#              lines(y + 0.3, pz, type = "h", col = 3)
-#          }
-#      })
-#      panel
-#  }
-#  
-#  panel <- rp.control(title = "Poisson Generalizada",
-#                      size = c(300, 100), YMAX = 150)
-#  rp.slider(panel = panel, action = react,
-#            variable = LAMBDA, title = "lambda",
-#            from = 0.1, to = 100,
-#            initval = 5, resolution = 0.1,
-#            showvalue = TRUE)
-#  rp.slider(panel = panel, action = react,
-#            variable = ALPHA, title = "alpha",
-#            from = -0.1, to = 0.4,
-#            initval = 0, resolution = 0.01,
-#            showvalue = TRUE)
-#  rp.checkbox(panel = panel,
-#              variable = EX, action = react, title = "E(Y)",
-#              labels = "Mostrar o valor esperado?")
-#  rp.checkbox(panel = panel,
-#              variable = POIS, action = react, title = "Poisson",
-#              labels = "Adicionar a distribução Poisson?")
-#  rp.do(panel = panel, action = react)
+curve(lambda * (1 + 0 * lambda)^2,
+      from = 0, to = 10, xname = "lambda",
+      ylab = expression(lambda %.% (1 + alpha %.% lambda)^2),
+      xlab = expression(lambda))
+alpha <- seq(-0.25, 0.25, by = 0.025)
+col <- brewer.pal(n = 5, name = "Spectral")
+col <- colorRampPalette(colors = col)(length(alpha))
+for (a in seq_along(alpha)) {
+    curve(lambda * (1 + alpha[a] * lambda)^2,
+          add = TRUE, xname = "lambda", col = col[a], lwd = 2)
+}
 
 ## -----------------------------------------------------------------
 #-----------------------------------------------------------------------
-# Gráfico do espaço paramétrico de theta x gamma.
-
-fun <- Vectorize(vectorize.args = c("theta", "gamma"),
-                 FUN = function(theta, gamma) {
-                     sum(dpgnz0(y = y, theta = theta, gamma = gamma))
-                 })
-
-grid <- list(theta = seq(1, 50, by = 1),
-             gamma = seq(-0.5, 1, by = 0.05))
-str(grid)
-
-y <- 0:500
-my <- max(y)
-
-grid$sum <- with(grid, outer(theta, gamma, fun))
-grid <- with(grid,
-             cbind(expand.grid(theta = theta, gamma = gamma),
-                   data.frame(sum = c(sum))))
-
-levelplot(sum ~ theta + gamma,
-          data = subset(grid, round(sum, 3) == 1),
-          col.regions = gray.colors) +
-    layer(panel.abline(a = 0, b = -1/my)) +
-    layer(panel.abline(h = 0, lty = 2))
-
-#-----------------------------------------------------------------------
 # Gráfico do espaço paramétrico de lambda x alpha.
+
+y <- 0:400
 
 fun <- Vectorize(vectorize.args = c("lambda", "alpha"),
                  FUN = function(lambda, alpha) {
@@ -362,7 +213,7 @@ ai <- a == max(a)
 L <- t(replicate(sum(ai), rbind(coef(m3) * 0), simplify = "matrix"))
 L[, ai] <- diag(sum(ai))
 
-# Cáclculo da estatística Chi-quadrado.
+# Cálculo da estatística Chi-quadrado.
 # t(L %*% coef(m3)) %*%
 #     solve(L %*% vcov(m3) %*% t(L)) %*%
 #     (L %*% coef(m3))
@@ -388,9 +239,6 @@ pred <- transform(pred,
                   umid = factor(umid))
 pred <- list(pois = pred, pgen = pred)
 
-# Quantil normal.
-qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
-
 # Preditos pela Poisson.
 # aux <- predict(m0, newdata = pred$pois, se.fit = TRUE)
 # aux <- exp(aux$fit + outer(aux$se.fit, qn, FUN = "*"))
@@ -401,18 +249,10 @@ colnames(aux)[1] <- "fit"
 pred$pois <- cbind(pred$pois, exp(aux))
 str(pred$pois)
 
-# Matrix de covariância completa e sem o alpha (marginal).
-V <- vcov(m3)
-V <- V[-1, -1]
-U <- chol(V)
-aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-                  FUN = function(x) { sum(x^2) }))
-pred$pgen$eta <- c(X %*% coef(m3)[-1])
-pred$pgen <- cbind(pred$pgen,
-                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-                         FUN = function(x) {
-                             exp(pred$pgen$eta + x)
-                         }))
+# Predito para a Poisson Generalizada.
+aux <- predict(m3, newdata = X,
+               interval = "confidence", type = "response")
+pred$pgen <- cbind(pred$pgen, aux[, c(2, 1, 3)])
 
 pred <- ldply(pred, .id = "modelo")
 pred <- arrange(pred, umid, K, modelo)
@@ -526,9 +366,6 @@ pred <- transform(pred,
                   umid = factor(umid))
 pred <- list(pois = pred, quasi = pred, pgen = pred)
 
-# Quantil normal.
-qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
-
 # Preditos pela Poisson.
 aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
@@ -542,17 +379,9 @@ colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
 # Preditos pela Poisson Generalizada.
-V <- vcov(m3)
-V <- V[-1, -1]
-U <- chol(V)
-aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-                  FUN = function(x) { sum(x^2) }))
-pred$pgen$eta <- c(X %*% coef(m3)[-1])
-pred$pgen <- cbind(pred$pgen,
-                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-                         FUN = function(x) {
-                             exp(pred$pgen$eta + x)
-                         }))
+aux <- predict(m3, newdata = X,
+               interval = "confidence", type = "response")
+pred$pgen <- cbind(pred$pgen, aux[, c(2, 1, 3)])
 
 # Junta o resultado dos 3 modelos.
 pred <- ldply(pred, .id = "modelo")
@@ -688,9 +517,6 @@ head(X)
 
 pred <- list(pois = pred, quasi = pred, pgen = pred)
 
-# Quantil normal.
-qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
-
 # Preditos pela Poisson.
 aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
@@ -704,17 +530,9 @@ colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
 # Preditos pela Poisson Generalizada.
-V <- vcov(m3)
-V <- V[-1, -1]
-U <- chol(V)
-aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-                  FUN = function(x) { sum(x^2) }))
-pred$pgen$eta <- c(X %*% coef(m3)[-1])
-pred$pgen <- cbind(pred$pgen,
-                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-                         FUN = function(x) {
-                             exp(pred$pgen$eta + x)
-                         }))
+aux <- predict(m3, newdata = X,
+               interval = "confidence", type = "response")
+pred$pgen <- cbind(pred$pgen, aux[, c(2, 1, 3)])
 
 # Junta o resultado dos 3 modelos.
 pred <- ldply(pred, .id = "modelo")
@@ -834,9 +652,6 @@ pred <- with(capdesfo, expand.grid(est = levels(est),
 X <- model.matrix(formula(m0)[-2], data = pred)
 pred <- list(pois = pred, quasi = pred, pgen = pred)
 
-# Quantil normal.
-qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
-
 # Preditos pela Poisson.
 aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
@@ -850,17 +665,9 @@ colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
 # Preditos pela Poisson Generalizada.
-V <- vcov(m3)
-V <- V[-1, -1]
-U <- chol(V)
-aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-                  FUN = function(x) { sum(x^2) }))
-pred$pgen$eta <- c(X %*% coef(m3)[-1])
-pred$pgen <- cbind(pred$pgen,
-                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-                         FUN = function(x) {
-                             exp(pred$pgen$eta + x)
-                         }))
+aux <- predict(m3, newdata = X,
+               interval = "confidence", type = "response")
+pred$pgen <- cbind(pred$pgen, aux[, c(2, 1, 3)])
 
 pred <- ldply(pred, .id = "modelo")
 pred <- arrange(pred, est, des, modelo)
@@ -1001,9 +808,6 @@ X <- model.matrix(~cult, data = pred)
 
 pred <- list(pois = pred, quasi = pred, pgen = pred)
 
-# Quantil normal.
-qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
-
 # Preditos pela Poisson.
 aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
@@ -1017,17 +821,9 @@ colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
 # Preditos pela Poisson Generalizada.
-V <- vcov(m3)
-V <- V[-1, -1]
-U <- chol(V)
-aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-                  FUN = function(x) { sum(x^2) }))
-pred$pgen$eta <- c(X %*% coef(m3)[-1])
-pred$pgen <- cbind(pred$pgen,
-                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-                         FUN = function(x) {
-                             exp(pred$pgen$eta + x)
-                         }))
+aux <- predict(m3, newdata = X,
+               interval = "confidence", type = "response")
+pred$pgen <- cbind(pred$pgen, aux[, c(2, 1, 3)])
 
 pred <- ldply(pred, .id = "modelo")
 pred <- arrange(pred, cult, modelo)
@@ -1087,4 +883,9 @@ qqmath(~values | ind, data = rp,
            panel.qqmath(...)
        })
 
+
+## ---- echo=FALSE, results="hold"----------------------------------
+cat(format(Sys.time(),
+           format = "Atualizado em %d de %B de %Y.\n\n"))
+sessionInfo()
 
