@@ -76,7 +76,7 @@ set_parent("slides-mrdcr.Rnw")
     \framebreak
 
   \item A distribuição acumulada do tempo até $\vartheta_{n}$ é
-  \item $$F_n(T) = \Pr(\vartheta_n \leq T) = \int_{0}^{T}
+    $$F_n(T) = \Pr(\vartheta_n \leq T) = \int_{0}^{T}
     \frac{\beta^{n\alpha}}{\Gamma(n\alpha)}\cdot t^{n\alpha-1}\cdot
     \exp\{-\beta t\}\,\text{d}t.$$
   \item Seja $[0,T)$ um intervalo e $N_{T}$ a v.a. número de eventos
@@ -102,13 +102,48 @@ set_parent("slides-mrdcr.Rnw")
                  &= \left[ \int_{0}^{T}
                    \frac{\beta^{n\alpha}}{\Gamma(n\alpha)}
                    t^{n\alpha-1}\cdot
-                   \exp\{-\beta t\}\, \text{d}t \right] -
+                   \exp\{-\beta t\}\, \text{d}t \right] \\
+                 &\quad -
                    \left[ \int_{0}^{T}
                    \frac{\beta^{(n+1)\alpha}}{\Gamma((n+1)\alpha)}
                    t^{(n+1)\alpha-1}\cdot
                    \exp\{-\beta t\}\, \text{d}t \right]
     \end{align*}
   \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+<<fig.width = 9, fig.height = 4.5, out.width = "0.95\\textwidth">>=
+library(MRDCr)
+grid <- expand.grid(lambda = c(2, 8, 15),
+                    alpha = c(0.5, 1, 2.5))
+y <- 0:30
+py <- mapply(FUN = dgcnt,
+             lambda = grid$lambda,
+             alpha = grid$alpha,
+             MoreArgs = list(y = y), SIMPLIFY = FALSE)
+grid <- cbind(grid[rep(1:nrow(grid), each = length(y)), ],
+              y = y,
+              py = unlist(py))
+
+useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
+                      ylab = expression(f(y)),
+                      xlab = expression(y),
+                      data = grid, type = "h",
+                      panel = function(x, y, ...) {
+                          m <- sum(x * y)
+                          panel.xyplot(x, y, ...)
+                          panel.abline(v = m, lty = 2)
+                      }),
+               strip = strip.custom(
+                   strip.names = TRUE,
+                   var.name = expression(lambda == ""),
+                   sep = ""),
+               strip.left = strip.custom(
+                   strip.names = TRUE,
+                   var.name = expression(alpha == ""),
+                   sep = ""))
+@
 \end{frame}
 
 \begin{frame}[allowframebreaks]
@@ -167,39 +202,6 @@ llgcnt
 @
 \end{frame}
 
-\begin{frame}[fragile]
-<<fig.width = 9, fig.height = 4.5, out.width = "0.95\\textwidth">>=
-grid <- expand.grid(lambda = c(2, 8, 15),
-                    alpha = c(0.5, 1, 2.5))
-y <- 0:30
-py <- mapply(FUN = dgcnt,
-             lambda = grid$lambda,
-             alpha = grid$alpha,
-             MoreArgs = list(y = y), SIMPLIFY = FALSE)
-grid <- cbind(grid[rep(1:nrow(grid), each = length(y)), ],
-              y = y,
-              py = unlist(py))
-
-useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
-                      ylab = expression(f(y)),
-                      xlab = expression(y),
-                      data = grid, type = "h",
-                      panel = function(x, y, ...) {
-                          m <- sum(x * y)
-                          panel.xyplot(x, y, ...)
-                          panel.abline(v = m, lty = 2)
-                      }),
-               strip = strip.custom(
-                   strip.names = TRUE,
-                   var.name = expression(lambda == ""),
-                   sep = ""),
-               strip.left = strip.custom(
-                   strip.names = TRUE,
-                   var.name = expression(alpha == ""),
-                   sep = ""))
-@
-\end{frame}
-
 \begin{frame}{Estudos de caso}
   {\it Vignette} \href{run:../doc/v06_gamma_count.html}{\tt
     gamma\_count.html}
@@ -210,9 +212,4 @@ useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
     feijoeiro.
   \item[\tt cambras]: Gols do Campeonato Brasileiro de 2010.
   \end{description}
-\end{frame}
-
-\begin{frame}
-  \frametitle{Conclusões}
-  TODO
 \end{frame}
