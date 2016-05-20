@@ -239,6 +239,110 @@ dcmp <- function(y, lambda, nu, sumto) {
     })
 }
 
+#' @name calc_mean_cmp
+#' @author Eduardo E. R. Junior, \email{edujrrib@gmail.com}
+#' @export
+#' @title Calcula o Valor Esperado para a Distribuição
+#'     Conway-Maxwell-Poisson
+#' @description Função para calcular a média do tipo \eqn{E(Y) = \mu =
+#'     \sum y\cdot \Pr(y)} para uma variável aleatória COM-Poisson a
+#'     partir dos parâmetros \eqn{\lambda > 0} e \eqn{\nu \geq 0}.
+#' @param lambda Valor do parâmetro \eqn{\lambda} da distribuição
+#'     COM-Poisson. Quando \eqn{\nu = 1}, o parâmetro \eqn{\lambda =
+#'     E(Y)} é a média.
+#' @param nu Valor do parâmetro \eqn{\nu} da distribuição COM-Poisson.
+#' @param sumto Número de incrementos a serem considerados para a
+#'     cálculo da constante normalizadora Z.
+#' @param tol Tolerância para interromper a procura pelo valor de
+#'     \code{ymax}, valor cuja probabilidade correspondente é inferior a
+#'     \code{tol}, para valores os valores de \code{lambda} e
+#'     \code{nu} informados.
+#' @return Um vetor de tamanho igual ao do maior vetor, \code{lambda} ou
+#'     \code{nu} com os valores correspondentes de \eqn{\mu}.
+
+calc_mean_cmp <- function(lambda, nu, sumto, tol = 1e-5) {
+    ## Faz com que os parâmetros sejam vetores de mesmo tamanho.
+    names(lambda) <- NULL
+    names(nu) <- NULL
+    pars <- data.frame(lambda = lambda, nu = nu)
+    ## Calcula o ymax usando mu + 5 (sqrt(sigma))
+    sigma <- lambda^(1/nu)/nu - (nu - 1)/(2 * nu^2)
+    ymax <- with(pars, ceiling(max(lambda + 5 * sqrt(sigma))))
+    ## Agora verifica se a prob(ymax) é de fato pequena, se não, soma 1.
+    lambdamax <- max(pars$lambda)
+    numin <- min(pars$nu)
+    pmax <- dcmp(y = ymax, lambda = lambdamax, nu = numin, sumto)
+    while (pmax > tol) {
+        ymax <- ymax + 1
+        pmax <- dcmp(y = ymax, lambda = lambdamax, nu = numin, sumto)
+    }
+    ## Define o vetor onde avaliar a densidade COM-Poisson.
+    y <- 1:ymax
+    estmean <- mapply(lambda = pars$lambda,
+                      nu = pars$nu,
+                      MoreArgs = list(y = y, sumto = sumto),
+                      FUN = function(lambda, nu, y, sumto) {
+                          py <- dcmp(y, lambda, nu, sumto)
+                          sum(y * py)
+                      },
+                      SIMPLIFY = TRUE)
+    names(estmean) <- NULL
+    return(estmean)
+}
+
+#' @name calc_var_cmp
+#' @author Eduardo E. R. Junior, \email{edujrrib@gmail.com}
+#' @export
+#' @title Calcula o Valor da Variância para a Distribuição
+#'     Conway-Maxwell-Poisson
+#' @description Função para calcular a variância do tipo \eqn{V(Y) =
+#'     E(Y^2) - E^2(Y) = \sum y^2\cdot \Pr(y) - \left ( \sum y\cdot
+#'     \Pr(y) \right )^2} para uma variável aleatória COM-Poisson a
+#'     partir dos parâmetros \eqn{\lambda > 0} e \eqn{\nu \geq 0}.
+#' @param lambda Valor do parâmetro \eqn{\lambda} da distribuição
+#'     COM-Poisson. Quando \eqn{\nu = 1}, o parâmetro \eqn{\lambda =
+#'     E(Y)} é a média.
+#' @param nu Valor do parâmetro \eqn{\nu} da distribuição COM-Poisson.
+#' @param sumto Número de incrementos a serem considerados para a
+#'     cálculo da constante normalizadora Z.
+#' @param tol Tolerância para interromper a procura pelo valor de
+#'     \code{ymax}, valor cuja probabilidade correspondente é inferior a
+#'     \code{tol}, para valores os valores de \code{lambda} e \code{nu}
+#'     informados.
+#' @return Um vetor de tamanho igual ao do maior vetor, \code{lambda} ou
+#'     \code{nu} com os valores correspondentes de \eqn{\mu}.
+
+calc_var_cmp <- function(lambda, nu, sumto, tol = 1e-5) {
+    # Faz com que os parâmetros sejam vetores de mesmo tamanho.
+    names(lambda) <- NULL
+    names(nu) <- NULL
+    pars <- data.frame(lambda = lambda, nu = nu)
+    # Calcula o ymax usando mu + 5 (sqrt(sigma))
+    sigma <- lambda^(1/nu)/nu - (nu - 1)/(2 * nu^2)
+    ymax <- with(pars, ceiling(max(lambda + 5 * sqrt(sigma))))
+    # Agora verifica se a prob(ymax) é de fato pequena, se não, soma 1.
+    lambdamax <- max(pars$lambda)
+    numin <- min(pars$nu)
+    pmax <- dcmp(y = ymax, lambda = lambdamax, nu = numin, sumto)
+    while (pmax > tol) {
+        ymax <- ymax + 1
+        pmax <- dcmp(y = ymax, lambda = lambdamax, nu = numin, sumto)
+    }
+    # Define o vetor onde avaliar a densidade COM-Poisson.
+    y <- 1:ymax
+    esty2 <- mapply(lambda = pars$lambda,
+                      nu = pars$nu,
+                      MoreArgs = list(y = y, sumto = sumto),
+                      FUN = function(lambda, nu, y, sumto) {
+                          py <- dcmp(y, lambda, nu, sumto)
+                          c(sum(y * py)^2, sum(y^2 * py))
+                      },
+                      SIMPLIFY = TRUE)
+    estvar <- diff(esty2)
+    names(estvar) <- NULL
+    return(estvar)
+}
+
 #' @title Ajuste do Modelo Conway-Maxwell-Poisson
 #' @author Eduardo E. R. Junior, \email{edujrrib@gmail.com}
 #' @export
