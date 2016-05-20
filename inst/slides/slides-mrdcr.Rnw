@@ -51,6 +51,9 @@
 \setbeamercolor{footlinecolor}{fg=white,bg=teal}
 \setbeamercolor{caption name}{fg=teal}
 
+% \setbeamertemplate{frametitle continuation}{[\insertcontinuationcount]}
+\setbeamertemplate{frametitle continuation}{}
+
 %% Slide Inicial
 \setbeamertemplate{title page}[default]
 \setbeamercolor{title}{fg=teal}
