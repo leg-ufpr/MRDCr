@@ -1,21 +1,24 @@
 #' @importFrom stats qnorm
 NULL
 
-# @author Walmes Zeviani, \email{walmes@@ufpr.br}.
-# @description Função para calcular a média do tipo \eqn{E(Y) = \mu =
-#     \sum y\cdot \Pr(y)} para uma variável aleatória Gamma Count a
-#     partir dos parâmetros \eqn{\lambda > 0} e \eqn{\alpha > 0}.
-# @param lambda Parâmetro de locação da distribuição Gamma Count,
-#     \eqn{\lambda > 0}. Quando \eqn{\alpha = 1}, o parâmetro
-#     \eqn{\lambda = E(Y)} é a média.
-# @param lambda Parâmetro de dispersão da distribuição Gamma Count,
-#     \eqn{\alpha > 0}.
-# @param tol Tolerância para interromper a procura pelo valor de
-#     \code{ymax}, valor cuja probabilidade correspondente é inferior a
-#     \code{tol}, para valores os valores de \code{lambda} e
-#     \code{alpha} informados.
-# @return Um vetor de tamanho igual ao do maior vetor, \code{lambda} ou
-#     \code{alpha} com os valores correspondentes de \eqn{\mu}.
+#' @name calc_mean_gcnt
+#' @author Walmes Zeviani, \email{walmes@@ufpr.br}.
+#' @export
+#' @title Calcula o Valor Esperado para a Distribuição Gamma Count
+#' @description Função para calcular a média do tipo \eqn{E(Y) = \mu =
+#'     \sum y\cdot \Pr(y)} para uma variável aleatória Gamma Count a
+#'     partir dos parâmetros \eqn{\lambda > 0} e \eqn{\alpha > 0}.
+#' @param lambda Parâmetro de locação da distribuição Gamma Count,
+#'     \eqn{\lambda > 0}. Quando \eqn{\alpha = 1}, o parâmetro
+#'     \eqn{\lambda = E(Y)} é a média.
+#' @param alpha Parâmetro de dispersão da distribuição Gamma Count,
+#'     \eqn{\alpha > 0}.
+#' @param tol Tolerância para interromper a procura pelo valor de
+#'     \code{ymax}, valor cuja probabilidade correspondente é inferior a
+#'     \code{tol}, para valores os valores de \code{lambda} e
+#'     \code{alpha} informados.
+#' @return Um vetor de tamanho igual ao do maior vetor, \code{lambda} ou
+#'     \code{alpha} com os valores correspondentes de \eqn{\mu}.
 calc_mean_gcnt <- function(lambda, alpha, tol = 1e-5) {
     # Faz com que os parâmetros sejam vetores de mesmo tamanho.
     names(lambda) <- NULL
