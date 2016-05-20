@@ -6,9 +6,6 @@ source("_setup.R")
 library(lattice)
 library(latticeExtra)
 library(grid)
-# library(rpanel)
-# library(bbmle)
-# library(corrplot)
 library(plyr)
 library(car)
 library(doBy)
@@ -277,4 +274,9 @@ xyplot(fit ~ idade | modelo, groups = resfr, data = pred,
        panel = panel.superpose) +
     as.layer(xyplot(nap ~ idade, groups = resfr, data = confterm))
 
+
+## ---- echo=FALSE, results="hold"----------------------------------
+cat(format(Sys.time(),
+           format = "Atualizado em %d de %B de %Y.\n\n"))
+sessionInfo()
 

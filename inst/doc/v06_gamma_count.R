@@ -6,7 +6,6 @@ source("_setup.R")
 library(lattice)
 library(latticeExtra)
 library(grid)
-library(rpanel)
 library(bbmle)
 library(corrplot)
 library(plyr)
@@ -37,10 +36,6 @@ useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
                           m <- sum(x * y)
                           panel.xyplot(x, y, ...)
                           panel.abline(v = m, lty = 2)
-                          # grid.text(label = sprintf("%0.1f", m),
-                          #           x = unit(0.95, "npc"),
-                          #           y = unit(0.9, "npc"),
-                          #           hjust = 1)
                       }),
                strip = strip.custom(
                    strip.names = TRUE,
@@ -51,132 +46,7 @@ useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
                    var.name = expression(alpha == ""),
                    sep = ""))
 
-## ---- eval=FALSE--------------------------------------------------
-#  # Função densidade na parametrização de modelo de regressão.
-#  MRDCr::dgcnt
-#  
-#  react <- function(panel){
-#      with(panel,
-#      {
-#          m <- LAMBDA
-#          s <- sqrt(LAMBDA/exp(ALPHA))
-#          y <- 0:max(c(YMAX, ceiling(m + 5 * s)))
-#          py <- dgcnt(y = y, lambda = LAMBDA, alpha = exp(ALPHA))
-#          if (POIS) {
-#              pz <- dpois(y, lambda = m)
-#          } else {
-#              pz <- 0
-#          }
-#          py[!is.finite(py)] <- 0
-#          plot(py ~ y, type = "h",
-#               ylim = c(0, max(c(py, pz))),
-#                   xlab = expression(y),
-#               ylab = expression(f(y)))
-#          mtext(side = 3,
-#                text = substitute(sum(f(y)) == s,
-#                                  list(s = round(sum(py), 5))))
-#          if (EX) {
-#              m <- sum(y * py)
-#              # v <- sum((y - m)^2 * py)
-#              legend("topright", bty = "n",
-#                     legend = substitute(E(Y) == mu,
-#                                         list(mu = m)))
-#              abline(v = m, col = 2)
-#          }
-#          if (POIS) {
-#              lines(y + 0.3, pz, type = "h", col = 3)
-#          }
-#      })
-#      panel
-#  }
-#  
-#  panel <- rp.control(title = "Gamma Count",
-#                      size = c(300, 100), YMAX = 50)
-#  rp.slider(panel = panel, action = react,
-#            variable = LAMBDA, title = "lambda",
-#            from = 1, to = 0.75 * panel$YMAX,
-#            initval = 5, resolution = 0.1,
-#            showvalue = TRUE)
-#  rp.slider(panel = panel, action = react,
-#            variable = ALPHA, title = "alpha",
-#            from = -5, to = 5,
-#            initval = 0, resolution = 0.02,
-#            showvalue = TRUE)
-#  rp.checkbox(panel = panel,
-#              variable = EX, action = react, title = "E(Y)",
-#              labels = "Mostrar o valor esperado?")
-#  rp.checkbox(panel = panel,
-#              variable = POIS, action = react, title = "Poisson",
-#              labels = "Adicionar a distribução Poisson?")
-#  rp.do(panel = panel, action = react)
-
 ## -----------------------------------------------------------------
-#-----------------------------------------------------------------------
-# Função de log-Verossimilhança da Poisson Generalizada na
-# parametrização de modelo de regressão.
-
-MRDCr::llgcnt
-
-#-----------------------------------------------------------------------
-# Gerando uma amostra aleatória da Poisson, para teste.
-
-# Offset = 2, lambda = 3.
-y <- rpois(100, lambda = 2 * 3)
-
-L <- list(y = y,
-          offset = rep(2, length(y)),
-          X = cbind(rep(1, length(y))))
-
-start <- c(alpha = 0, lambda = 1)
-parnames(llgcnt) <- names(start)
-
-# Como \alpha foi fixado em 1, essa ll corresponde à Poisson.
-n0 <- mle2(minuslogl = llgcnt,
-           start = start, data = L,
-           fixed = list(alpha = 0), vecpar = TRUE)
-
-# Para conferir.
-c(coef(n0)["lambda"],
-  coef(glm(y ~ offset(log(L$offset)), family = poisson)))
-
-# Estimando o \alpha.
-n1 <- mle2(llgcnt, start = start, data = L, vecpar = TRUE)
-coef(n1)
-
-# Perfil de verossimilhança dos parâmetros.
-plot(profile(n1))
-
-# Covariância.
-V <- cov2cor(vcov(n1))
-corrplot.mixed(V, lower = "number", upper = "ellipse",
-               diag = "l", tl.pos = "lt", tl.col = "black",
-               tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
-dev.off()
-
-## -----------------------------------------------------------------
-# TODO documentar no pacote.
-fitted.gcnt <- function(lambda, alpha, offset = NULL, ymax = 40) {
-    if (is.null(offset)) {
-        offset <- 1
-    }
-    pars <- cbind(lambda, alpha, offset)
-    y <- 1:ymax
-    py <- apply(pars, MARGIN = 1,
-                FUN = function(p) {
-                    sum(pgamma(p[3],
-                               shape = p[2] * y,
-                               rate = p[2] * p[1]))
-                    # sum(y * dgcnt(y = y, lambda = p[1], alpha = p[2]))
-                })
-    names(py) <- NULL
-    return(py)
-}
-
-mean(y)
-fitted.gcnt(lambda = exp(coef(n1)[2]),
-            alpha = exp(coef(n1)[1]),
-            offset = 2)
-
 #-----------------------------------------------------------------------
 # A média da Gamma-Count.
 
@@ -188,7 +58,8 @@ n1 <- mle2(llgcnt, start = start, data = L, vecpar = TRUE)
 
 c(mean(y),
   exp(coef(n1)[2]),
-  fitted.gcnt(lambda = exp(coef(n1)[2]), alpha = exp(coef(n1)[1])))
+  calc_mean_gcnt(lambda = exp(coef(n1)[2]),
+                 alpha = exp(coef(n1)[1])))
 
 y <- rpois(500, lambda = 50)
 L <- list(y = y, X = cbind(rep(1, length(y))))
@@ -198,8 +69,8 @@ n1 <- mle2(llgcnt, start = start, data = L, vecpar = TRUE)
 
 c(mean(y),
   exp(coef(n1)[2]),
-  fitted.gcnt(lambda = exp(coef(n1)[2]),
-              alpha = exp(coef(n1)[1]), ymax = 100))
+  calc_mean_gcnt(lambda = exp(coef(n1)[2]),
+               alpha = exp(coef(n1)[1])))
 
 #-----------------------------------------------------------------------
 # A E(y) por sum(y * p(py)) e por lambda como função de alpha.
@@ -247,6 +118,84 @@ xyplot(m ~ lambda, groups = alpha, type = "l",
     layer(panel.abline(a = 0, b = 1, lty = 2)) +
     layer(panel.abline(a = -0.5, b = 1, lty = 2)) +
     layer(panel.abline(a = 1, b = 1, lty = 2))
+
+## -----------------------------------------------------------------
+h <- function(...) {
+    dgamma(...)/(1 - pgamma(...))
+}
+
+shape <- seq(0.5, 1.5, by = 0.1)
+
+col <- brewer.pal(n = 5, name = "Spectral")
+col <- colorRampPalette(colors = col)(length(shape))
+
+curve(dgamma(x, shape = shape[1], rate = 1),
+      from = 0, to = 5, col = col[1], lwd = 2,
+      xlab = expression(tau),
+      ylab = expression(f(tau)))
+for (s in 2:length(shape)) {
+    curve(dgamma(x, shape = shape[s], rate = 1),
+          add = TRUE, col = col[s], lwd = 2)
+}
+legend("topright", legend = sprintf("%0.3f", shape),
+       col = col, lty = 1, lwd = 2, bty = "n",
+       title = expression(alpha))
+
+curve(h(x, shape = shape[1], rate = 1),
+      from = 0, to = 10, col = col[1], lwd = 2,
+      ylim = c(0, 2.5),
+      xlab = expression(tau),
+      ylab = expression(f(tau)/(1 - F(tau))))
+for (s in 2:length(shape)) {
+    curve(h(x, shape = shape[s], rate = 1), add = TRUE,
+          col = col[s], lwd = 2)
+}
+legend("topright", legend = sprintf("%0.3f", shape),
+       col = col, lty = 1, lwd = 2, bty = "n",
+       title = expression(alpha))
+
+## -----------------------------------------------------------------
+#-----------------------------------------------------------------------
+# Função de log-Verossimilhança da Poisson Generalizada na
+# parametrização de modelo de regressão.
+
+MRDCr::llgcnt
+
+#-----------------------------------------------------------------------
+# Gerando uma amostra aleatória da Poisson, para teste.
+
+# Offset = 2, lambda = 3.
+y <- rpois(100, lambda = 2 * 3)
+
+L <- list(y = y,
+          offset = rep(2, length(y)),
+          X = cbind(rep(1, length(y))))
+
+start <- c(alpha = 0, lambda = 1)
+parnames(llgcnt) <- names(start)
+
+# Como \alpha foi fixado em 1, essa ll corresponde à Poisson.
+n0 <- mle2(minuslogl = llgcnt,
+           start = start, data = L,
+           fixed = list(alpha = 0), vecpar = TRUE)
+
+# Para conferir.
+c(coef(n0)["lambda"],
+  coef(glm(y ~ offset(log(L$offset)), family = poisson)))
+
+# Estimando o \alpha.
+n1 <- mle2(llgcnt, start = start, data = L, vecpar = TRUE)
+coef(n1)
+
+# Perfil de verossimilhança dos parâmetros.
+plot(profile(n1))
+
+# Covariância.
+V <- cov2cor(vcov(n1))
+corrplot.mixed(V, lower = "number", upper = "ellipse",
+               diag = "l", tl.pos = "lt", tl.col = "black",
+               tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
+dev.off()
 
 ## -----------------------------------------------------------------
 #-----------------------------------------------------------------------
@@ -360,9 +309,6 @@ pred <- transform(pred,
                   umid = factor(umid))
 pred <- list(pois = pred, quasi = pred, gcnt = pred)
 
-# Quantil normal.
-qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
-
 # Preditos pela Poisson.
 aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
@@ -375,23 +321,10 @@ aux <- confint(glht(m0, linfct = X),
 colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
-# Matrix de covariância completa e sem o alpha (marginal).
-V <- vcov(m3)
-V <- V[-1, -1]
-U <- chol(V)
-aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-                  FUN = function(x) { sum(x^2) }))
-pred$gcnt$eta <- c(X %*% coef(m3)[-1])
-pred$gcnt <- cbind(pred$gcnt,
-                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-                         FUN = function(x) {
-                             # exp(pred$gcnt$eta + x)
-                             fitted.gcnt(
-                                 lambda = exp(pred$gcnt$eta + x),
-                                 alpha = exp(coef(m3)["alpha"]),
-                                 ymax = 300)
-                         }))
-pred$gcnt$eta <- NULL
+# Preditos pela Gamma-Count.
+aux <- predict(m3, newdata = X,
+               interval = "confidence", type = "link")
+pred$gcnt <- cbind(pred$gcnt, exp(aux[, c(2, 1, 3)]))
 
 pred <- ldply(pred, .id = "modelo")
 pred <- arrange(pred, umid, K, modelo)
@@ -530,9 +463,6 @@ pred <- transform(pred,
                   umid = factor(umid))
 pred <- list(pois = pred, quasi = pred, gcnt = pred)
 
-# Quantil normal.
-qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
-
 # Preditos pela Poisson.
 aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
@@ -545,23 +475,10 @@ aux <- confint(glht(m1, linfct = X),
 colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
-# Matrix de covariância completa e sem o alpha (marginal).
-V <- vcov(m3)
-V <- V[-1, -1]
-U <- chol(V)
-aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-                  FUN = function(x) { sum(x^2) }))
-pred$gcnt$eta <- c(X %*% coef(m3)[-1])
-pred$gcnt <- cbind(pred$gcnt,
-                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-                         FUN = function(x) {
-                             exp(pred$gcnt$eta + x)
-                             # fitted.gcnt(
-                             #     lambda = exp(pred$gcnt$eta + x),
-                             #     alpha = exp(coef(m3)["alpha"]),
-                             #     ymax = 100)
-                         }))
-pred$gcnt$eta <- NULL
+# Preditos pela Gamma-Count.
+aux <- predict(m3, newdata = X,
+               interval = "confidence", type = "link")
+pred$gcnt <- cbind(pred$gcnt, exp(aux[, c(2, 1, 3)]))
 
 # Junta o resultado dos 3 modelos.
 pred <- ldply(pred, .id = "modelo")
@@ -676,26 +593,6 @@ linearHypothesis(model = m0,
                  coef. = coef(m3))
 
 #-----------------------------------------------------------------------
-
-# X <- model.matrix(m0)
-# soja$nvag
-#
-# cbind(y = soja$ngra,
-#       Pois = soja$nvag * exp(X %*% coef(m0)),
-#       Quas = soja$nvag * exp(X %*% coef(m1)),
-#       Gcnt = exp(X %*% coef(m3)[-1]))
-#
-# cbind(y = soja$ngra/soja$nvag,
-#       Pois = exp(X %*% coef(m0)),
-#       Quas = exp(X %*% coef(m1)),
-#       Gcnt = exp(X %*% coef(m3)[-1]))
-#
-# fitted.gcnt(lambda = 1, alpha = 1)
-# fitted.gcnt(lambda = 2, alpha = 1)
-# fitted.gcnt(lambda = 2, alpha = 0.4)
-# fitted.gcnt(lambda = 2, alpha = 3.1)
-
-#-----------------------------------------------------------------------
 # Predição com bandas de confiança.
 
 # Por causa do offset, não tem como usar a LSmatrix.
@@ -710,9 +607,6 @@ head(X)
 
 pred <- list(pois = pred, quasi = pred, gcnt = pred)
 
-# Quantil normal.
-qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
-
 # Preditos pela Poisson.
 aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
@@ -725,35 +619,15 @@ aux <- confint(glht(m1, linfct = X),
 colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
-# # TODO
-# m3 <- m2
-
-# Matrix de covariância completa e sem o alpha (marginal).
-V <- vcov(m3)
-V <- V[-1, -1]
-U <- chol(V)
-aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-                  FUN = function(x) { sum(x^2) }))
-pred$gcnt$eta <- c(X %*% coef(m3)[-1])
-
 # Comparando as estimativas de média para contagem.
-c(Pois = pred$pois$fit[1],
-  Gcnt1 = exp(pred$gcnt$eta)[1],
-  GCnt2 = fitted.gcnt(
-      lambda = exp(pred$gcnt$eta)[1],
-      alpha = exp(coef(m3)["alpha"]),
-      ymax = 80))
+cbind(Pois = pred$pois$fit,
+      Gcnt1 = c(exp(predict(m3, newdata = X))),
+      GCnt2 = c(predict(m3, newdata = X, type = "response")))
 
-pred$gcnt <- cbind(pred$gcnt,
-                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-                         FUN = function(x) {
-                             exp(pred$gcnt$eta + x)
-                             # fitted.gcnt(
-                             #     lambda = exp(pred$gcnt$eta + x),
-                             #     alpha = exp(coef(m3)["alpha"]),
-                             #     ymax = 50)
-                         }))
-pred$gcnt$eta <- NULL
+# Preditos pela Gamma-Count.
+aux <- predict(m3, newdata = X,
+               interval = "confidence", type = "link")
+pred$gcnt <- cbind(pred$gcnt, exp(aux[, c(2, 1, 3)]))
 
 # Junta o resultado dos 3 modelos.
 pred <- ldply(pred, .id = "modelo")
@@ -883,9 +757,6 @@ pred <- with(capdesfo, expand.grid(est = levels(est),
 X <- model.matrix(formula(m0)[-2], data = pred)
 pred <- list(pois = pred, quasi = pred, gcnt = pred)
 
-# Quantil normal.
-qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
-
 # Preditos pela Poisson.
 aux <- confint(glht(m0, linfct = X),
                calpha = univariate_calpha())$confint
@@ -898,31 +769,15 @@ aux <- confint(glht(m1, linfct = X),
 colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
-# Preditos pela Poisson Generalizada.
-V <- vcov(m3)
-V <- V[-1, -1]
-U <- chol(V)
-aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-                  FUN = function(x) { sum(x^2) }))
-pred$gcnt$eta <- c(X %*% coef(m3)[-1])
-
 # Comparando as estimativas de média para contagem.
-c(Pois = pred$pois$fit[1],
-  Gcnt1 = exp(pred$gcnt$eta)[1],
-  GCnt2 = fitted.gcnt(
-      lambda = exp(pred$gcnt$eta)[1],
-      alpha = exp(coef(m3)["alpha"]),
-      ymax = 30))
+cbind(Pois = pred$pois$fit,
+      Gcnt1 = c(exp(predict(m3, newdata = X))),
+      GCnt2 = c(predict(m3, newdata = X, type = "response")))[1:10, ]
 
-pred$gcnt <- cbind(pred$gcnt,
-                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-                         FUN = function(x) {
-                             # exp(pred$gcnt$eta + x)
-                             fitted.gcnt(
-                                 lambda = exp(pred$gcnt$eta + x),
-                                 alpha = exp(coef(m3)["alpha"]),
-                                 ymax = 50)
-                         }))
+# Preditos pela Gamma-Count.
+aux <- predict(m3, newdata = X,
+               interval = "confidence", type = "response")
+pred$gcnt <- cbind(pred$gcnt, aux[, c(2, 1, 3)])
 
 pred <- ldply(pred, .id = "modelo")
 pred <- arrange(pred, est, des, modelo)
@@ -1025,21 +880,13 @@ dev.off()
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
-# Gráfico das estimativas.
-pars <- data.frame(Pois = c(0, coef(m0)), Gcnt = coef(m3))
-xyplot(Gcnt ~ Pois, data = pars, aspect = "iso", grid = TRUE) +
-    layer(panel.abline(a = 0, b = 1, lty = 2))
-
 #-----------------------------------------------------------------------
 # Predição com intervalos de confiança.
 
 pred <- unique(subset(nematoide, select = cult))
 X <- model.matrix(~cult, data = pred)
 
-pred <- list(pois = pred, quasi = pred, gcnt = pred)
-
-# Quantil normal.
-qn <- qnorm(0.975) * c(lwr = -1, fit = 0, upr = 1)
+pred <- list(pois = pred, quasi = pred, gcnt1 = pred, gcnt2 = pred)
 
 # Preditos pela Poisson.
 aux <- confint(glht(m0, linfct = X),
@@ -1053,31 +900,13 @@ aux <- confint(glht(m1, linfct = X),
 colnames(aux)[1] <- "fit"
 pred$quasi <- cbind(pred$quasi, exp(aux))
 
-# Preditos pela Poisson Generalizada.
-V <- vcov(m3)
-V <- V[-1, -1]
-U <- chol(V)
-aux <- sqrt(apply(X %*% t(U), MARGIN = 1,
-                  FUN = function(x) { sum(x^2) }))
-pred$gcnt$eta <- c(X %*% coef(m3)[-1])
-
-# Comparando as estimativas de média para contagem.
-c(Pois = pred$pois$fit[1],
-  Gcnt1 = exp(pred$gcnt$eta)[1],
-  GCnt2 = fitted.gcnt(
-      lambda = exp(pred$gcnt$eta)[1],
-      alpha = exp(coef(m3)["alpha"]),
-      ymax = 500))
-
-pred$gcnt <- cbind(pred$gcnt,
-                   apply(outer(aux, qn, FUN = "*"), MARGIN = 2,
-                         FUN = function(x) {
-                             # exp(pred$gcnt$eta + x)
-                             fitted.gcnt(
-                                 lambda = exp(pred$gcnt$eta + x),
-                                 alpha = exp(coef(m3)["alpha"]),
-                                 ymax = 500)
-                         }))
+# Preditos pela Gamma-Count.
+aux <- predict(m3, newdata = X,
+               interval = "confidence", type = "link")
+pred$gcnt1 <- cbind(pred$gcnt1, exp(aux[, c(2, 1, 3)]))
+aux <- predict(m3, newdata = X,
+               interval = "confidence", type = "response")
+pred$gcnt2 <- cbind(pred$gcnt2, aux[, c(2, 1, 3)])
 
 pred <- ldply(pred, .id = "modelo")
 pred <- arrange(pred, cult, modelo)
@@ -1086,7 +915,7 @@ key <- list(type = "o", divide = 1,
             lines = list(pch = 1:nlevels(pred$modelo),
                          lty = 1, col = 1),
             text = list(c("Poisson", "Quasi-Poisson",
-                          "Gamma-Count")))
+                          "Gamma-Count 1", "Gamma-Count 2")))
 
 xyplot(nema/off ~ cult, data = nematoide,
        key = key,
@@ -1098,7 +927,7 @@ xyplot(nema/off ~ cult, data = nematoide,
                ly = pred$lwr, uy = pred$upr,
                cty = "bars", length = 0,
                prepanel = prepanel.cbH,
-               desloc = 0.25 * scale(as.integer(pred$modelo),
+               desloc = 0.15 * scale(as.integer(pred$modelo),
                                     scale = FALSE),
                panel = panel.cbH))
 
@@ -1180,6 +1009,7 @@ names(start) <- c(paste0("att", 1:20),
                   "hfa", "alpha")
 parnames(llgols) <- names(start)
 
+# Ajuste da Poisson, pois log(alpha) fixo em 0.
 m0 <- mle2(minuslogl = llgols,
            start = start,
            data = list(gh = db$h, ga = db$a, Xh = Xh, Xa = Xa),
@@ -1190,6 +1020,7 @@ m0 <- mle2(minuslogl = llgols,
 start <- coef(m0)
 parnames(llgols) <- names(start)
 
+# Ajuste da Gamma-Count, alpha será estimado.
 m2 <- mle2(minuslogl = llgols,
            start = start,
            data = list(gh = db$h, ga = db$a, Xh = Xh, Xa = Xa),
@@ -1201,7 +1032,6 @@ m2 <- mle2(minuslogl = llgols,
 # Estimativas dos parâmetros.
 c0 <- data.frame(Pois = coef(m0),
                  GCnt = coef(m2))
-c0
 
 xyplot(GCnt ~ Pois, data = c0, aspect = "iso",
        groups = gsub(x = rownames(c0), "\\d", ""),
@@ -1211,15 +1041,15 @@ xyplot(GCnt ~ Pois, data = c0, aspect = "iso",
 # Teste para o parâmetro de dispersão.
 anova(m0, m2)
 
-# plot(profile(m1, which = "alpha"))
-# plot(profile(m2, which = "alpha"))
-
 # Função de risco.
 al <- exp(coef(m2)[42])
 curve(dgamma(x, al, 1)/(1 - pgamma(x, al, 1)),
       from = 0, to = 2,
       xlab = "t",
       ylab = expression(h(t) == f(t)/(1 - F(t))))
+
+#-----------------------------------------------------------------------
+# Estimativas intervalares.
 
 ci <- rbind(cbind(1, coef(m0)[-42], confint(m0, method = "quad")),
             cbind(2, coef(m2), confint(m2, method = "quad")))
@@ -1249,6 +1079,20 @@ segplot(team ~ lwr + upr | model,
         xlab = "Estimativa do parâmetro",
         panel = panel.groups.segplot)
 
+ci <- arrange(ci, par, team, model)
+segplot(team ~ lwr + upr | par,
+        centers = est, data = subset(ci, par %in% c("att", "def")),
+        draw = FALSE, groups = model, gap = 0.2,
+        pch = as.integer(ci$model),
+        key = list(title = "Modelo", cex.title = 1.1,
+                   type = "o", divide = 1,
+                   text = list(c("Poisson", "Gamma-Count")),
+                   lines = list(pch = 2:1)),
+        ylab = "Times (ordenados pelo ataque)",
+        xlab = "Estimativa do parâmetro",
+        panel = panel.groups.segplot)
+
+
 #-----------------------------------------------------------------------
 # Gols observados e preditos dos times mandantes e desafiantes nestas
 # rodadas.
@@ -1261,17 +1105,17 @@ rbind(
                        coef(m0)[1:40] + coef(m0)["hfa"])),
           GCnt1 = c(exp(cbind(Xh, -Xa) %*%
                         coef(m2)[1:40] + coef(m2)["hfa"])),
-          GCnt2 = fitted.gcnt(lambda = exp(cbind(Xh, -Xa) %*%
-                                           coef(m2)[1:40] +
-                                           coef(m2)["hfa"]),
-                              alpha = exp(coef(m2)["alpha"]))),
+          GCnt2 = calc_mean_gcnt(lambda = exp(cbind(Xh, -Xa) %*%
+                                              coef(m2)[1:40] +
+                                              coef(m2)["hfa"]),
+                                 alpha = exp(coef(m2)["alpha"]))),
     cbind(x = 2,
           y = db$a,
           Pois = c(exp(cbind(Xa, -Xh) %*% coef(m0)[1:40])),
           GCnt1 = c(exp(cbind(Xa, -Xh) %*% coef(m2)[1:40])),
-          GCnt2 = fitted.gcnt(lambda = exp(cbind(Xa, -Xh) %*%
-                                           coef(m2)[1:40]),
-                              alpha = exp(coef(m2)["alpha"]))))
+          GCnt2 = calc_mean_gcnt(lambda = exp(cbind(Xa, -Xh) %*%
+                                              coef(m2)[1:40]),
+                                 alpha = exp(coef(m2)["alpha"]))))
 
 # Comparação de observado com predito.
 splom(gg[, -1], groups = gg[, 1]) +
@@ -1295,8 +1139,10 @@ levels(db$home)[i]
 # AwayAttack - HomeDefense
 alp <- exp(coef(m2)[42])
 beta <- exp(coef(m2)[i] - rev(coef(m2)[20 + i]))
+names(beta) <- levels(db$home)[i]
 beta
 
+# Tempo médio entre Gols.
 exp(-beta)
 
 # Probabilidade dos placares de 0x0, 0x1, ..., 6x6.
@@ -1329,6 +1175,8 @@ colnames(dwl) <- sprintf(paste(levels(db$home)[i], collapse = " %s "),
                          c("=", ">", "<"))
 t(dwl)
 
-## ---- eval=FALSE, include=FALSE-----------------------------------
-#  opts_chunk$set(eval = FALSE)
+## ---- echo=FALSE, results="hold"----------------------------------
+cat(format(Sys.time(),
+           format = "Atualizado em %d de %B de %Y.\n\n"))
+sessionInfo()
 
