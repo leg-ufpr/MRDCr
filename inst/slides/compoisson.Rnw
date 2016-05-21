@@ -1,5 +1,16 @@
+<<setup-child, include=FALSE>>=
+set_parent("slides-mrdcr.Rnw")
 
-\begin{frame}[allowframebreaks]{Distribuiçao COM-Poisson}
+## Pacotes utilizados nesta seção
+## library(MRDCr)
+devtools::load_all()
+library(latticeExtra)
+library(grid)
+library(plyr)
+
+@
+
+\begin{frame}[allowframebreaks]{Distribuição COM-Poisson}
 
 \begin{itemize}
     \item Nome COM-Poisson, advém de seus autores {\bf CO}nway e
@@ -7,19 +18,16 @@
     Conway-Maxwell-Poisson).
     \item Proposta em um contexto de filas \cite{Conway1962},
     essa distribuição generaliza a Poisson com a adição de um parâmetro.
+    \item Modifica a relação entre probabilidades consecutivas.
+    \begin{multicols}{2}
+        \begin{itemize}
+            \item {\bf Distribuição Poisson}\\
+            $$\frac{P(Y = y-1)}{P(Y = y)} = \frac{y}{\lambda}$$
+            \item {\bf Distribuição COM-Poisson}\\
+            $$\frac{P(Y = y-1)}{P(Y = y)} = \frac{y^\nu}{\lambda}$$
+        \end{itemize}
+    \end{multicols}   
 \end{itemize}
-
-\begin{block}{Razão de probabilidades consecutivas}
-
-\begin{multicols}{2}
-    \begin{itemize}
-        \item {\bf Distribuição Poisson}\\
-        $$\frac{P(Y = y-1)}{P(Y = y)} = \frac{y}{\lambda}$$
-        \item {\bf Distribuição COM-Poisson}\\
-        $$\frac{P(Y = y-1)}{P(Y = y)} = \frac{y^\nu}{\lambda}$$
-    \end{itemize}
-\end{multicols}
-\end{block}
 
 \framebreak
 
@@ -34,19 +42,6 @@
 \end{center}
 \end{block}
 
-\begin{columns}[t,onlytextwidth]
-
-\column{.48\textwidth}
-\begin{block}{Propriedades}
-\begin{itemize}
-    \itemsep7.5pt\parskip0pt\parsep0pt
-    \item $\frac{P(Y = y - 1)}{P(Y = y)} = \frac{y^\nu}{\lambda}$
-    \item $E(Y) \approx \lambda ^ \frac{1}{\nu} - \frac{\nu - 1}{2\nu}$
-    \item $V(Y) \approx \frac{1}{\nu}E(Y)$
-    \end{itemize}
-\end{block}
-
-\column{.48\textwidth}
 \begin{block}{Casos particulares}
 \begin{itemize}
 	\item Distribuição Poisson, quando $\nu = 1$
@@ -55,69 +50,9 @@
 \end{itemize}
 \end{block}
 
-\end{columns}
-
-\framebreak
-
-<<>>=
-
-library(latticeExtra)
-library(grid)
-library(compoisson)
-
-cols <- c(4, 1)
-## Parametros da distribuição
-lambdas <- c(1.36, 8, 915); nus <- c(0.4, 1, 2.5)
-medias <- mapply(com.mean, lambda = lambdas, nu = nus)
-variancias <- mapply(com.var, lambda = lambdas, nu = nus)
-
-## Calculando as probabilidades
-y <- 0:30; yy <- rep(y, 3)
-py.com <- py.pois <- NULL
-for(i in 1:3) py.com <- c(py.com, dcom(y, lambdas[i], nus[i]))
-for(i in 1:3) py.pois <- c(py.pois, dpois(y, medias[i]))
-
-## Criando categorias para split da lattice
-caso <- rep(c("1", "2", "3"), each = length(y))
-fl <- expression(lambda == 1.36~","~nu == 0.4,
-                 lambda == 8~","~nu == 1,
-                 lambda == 915~","~nu == 2.5)
-
-xyplot(py.com ~ c(yy - 0.14) | caso, type = c("h", "g"),
-       lwd = 2.5, xlab = "y", ylab = expression(P(Y == y)),
-       col = cols[2], ylim = c(-0.040, 0.25), xlim = extendrange(y),
-       key = list(
-           columns = 2,
-           lines = list(lty=1, col = c(cols[1], cols[2]), lwd = 3),
-           text = list(c("Poisson", "COM-Poisson"))),
-       layout = c(NA, 1),
-       between = list(x = 0.2, y = 0.3),
-       strip = strip.custom(factor.levels = fl)) + 
-    as.layer(xyplot(py.pois ~ c(yy + 0.14) | caso, 
-                    lwd = 2.5, col = cols[1],
-                    type = "h"))
-for(i in 1:3){
-  trellis.focus("panel", i, 1, highlight=FALSE)
-  grid.text(label = sprintf("E[Y]:  %.1f\nV[Y]:  %.1f",
-                            medias[i], variancias[i]),
-            x = .62, y = 0.02, 
-            default.units = "npc",
-            gp = gpar(col = cols[2]),
-            just = c("left", "bottom"))
-  grid.text(label = sprintf("E[Y]:  %.1f\nV[Y]:  %.1f",
-                            medias[i], medias[i]),
-            x = .08, y = 0.02, 
-            default.units = "npc",
-            gp = gpar(col = cols[1]),
-            just = c("left", "bottom"))
-}
-trellis.unfocus()
-
-@
-
 \end{frame}
 
-\begin{frame}{Casos Particulares}
+\begin{frame}{Distribuição COM-Poisson}
 
 \begin{columns}[t]
 \begin{column}{.3\textwidth}
@@ -136,13 +71,12 @@ trellis.unfocus()
   \only<1>{
   \vspace{-1.1cm}
   
-<<fig.height=5, fig.width=7>>=
+<<fig.width=7, out.width="0.9\\textwidth">>=
 
 ##-------------------------------------------
 ## Poisson
-rm(list = ls())
 y <- 0:10
-py <- dcom(y, 5, 1)
+py <- dcmp(y, 5, 1, sumto = 30)
 xyplot(py ~ y, type = c("h", "g"),
        lwd = 4, xlab = "y", ylab = "",
        main = expression(~"COM-Poisson"~(~lambda==5~","~nu==1)))
@@ -151,13 +85,12 @@ xyplot(py ~ y, type = c("h", "g"),
 }
   \only<2>{
   \vspace{-1.1cm}
-<<fig.height=5, fig.width=7>>=
+<<fig.width=7, out.width="0.9\\textwidth">>=
 
 ##-------------------------------------------
 ## Bernoulli
-rm(list = ls())
 y <- 0:2
-py <- dcom(y, 3, 20)
+py <- dcmp(y, 3, 20, sumto = 30)
 xyplot(py ~ y, type = c("h", "g"),
        lwd = 4, xlab = "y", ylab = "",
        main = expression(~"COM-Poisson"~(~lambda==3~","~nu==20)))
@@ -166,13 +99,12 @@ xyplot(py ~ y, type = c("h", "g"),
 }
   \only<3>{
     \vspace{-1.1cm}
-<<fig.height=5, fig.width=7>>=
+<<fig.width=7, out.width="0.9\\textwidth">>=
 
 ##-------------------------------------------
 ## Geometrica
-rm(list = ls())
 y <- 0:6
-py <- dcom(y, 0.5, 0)
+py <- dcmp(y, 0.5, 0, sumto = 30)
 xyplot(py ~ y, type = c("h", "g"),
        lwd = 4, xlab = "y", ylab = "",
        main = expression(~"COM-Poisson"~(~lambda==0.5~","~nu==0)))
@@ -180,6 +112,191 @@ xyplot(py ~ y, type = c("h", "g"),
 }
   \end{column}
 \end{columns}
+
+\end{frame}
+
+\begin{frame}
+
+<<fig.height=4.5>>=
+
+## Parametros da distribuição
+lambdas <- c(1.36, 8, 915); nus <- c(0.4, 1, 2.5)
+medias <- mapply(calc_mean_cmp, lambda = lambdas, nu = nus, sumto = 50)
+variancias <- mapply(calc_var_cmp, lambda = lambdas, nu = nus, sumto = 50)
+
+## Calculando as probabilidades
+y <- 0:30; yy <- rep(y, 3)
+py.com <- py.pois <- NULL
+for(i in 1:3) py.com <- c(py.com, dcmp(y, lambdas[i], nus[i], sumto = 50))
+for(i in 1:3) py.pois <- c(py.pois, dpois(y, medias[i]))
+
+## Criando categorias para split da lattice
+caso <- rep(c("1", "2", "3"), each = length(y))
+fl <- expression(lambda == 1.36~","~nu == 0.4,
+                 lambda == 8~","~nu == 1,
+                 lambda == 915~","~nu == 2.5)
+
+cols <- c(trellis.par.get("dot.symbol")$col,
+          trellis.par.get("superpose.line")$col[2])
+xyplot(py.com ~ c(yy - 0.15) | caso, type = c("h", "g"),
+       lwd = 1, xlab = "", ylab = expression(P(Y == y)),
+       col = cols[1], ylim = c(-0.07, 0.25), xlim = extendrange(y),
+       scales = list(y = list(at = seq(0, 0.2, 0.05))),
+       key = list(
+           columns = 2,
+           lines = list(lty = 1, col = c(cols[1], cols[2]), lwd = 1),
+           text = list(c("COM-Poisson", "Poisson"))),
+       layout = c(NA, 1),
+       between = list(x = 0.2, y = 0.3),
+       strip = strip.custom(factor.levels = fl)) + 
+    as.layer(xyplot(py.pois ~ c(yy + 0.15) | caso, 
+                    lwd = 2, col = cols[2],
+                    type = "h"))
+for(i in 1:3){
+  trellis.focus("panel", i, 1, highlight=FALSE)
+  grid.text(label = sprintf("E[Y]:  %.1f\nV[Y]:  %.1f",
+                            medias[i], variancias[i]),
+            x = .62, y = 0.05, 
+            default.units = "npc",
+            gp = gpar(col = cols[1]),
+            just = c("left", "bottom"))
+  grid.text(label = sprintf("E[Y]:  %.1f\nV[Y]:  %.1f",
+                            medias[i], medias[i]),
+            x = .08, y = 0.05, 
+            default.units = "npc",
+            gp = gpar(col = cols[2]),
+            just = c("left", "bottom"))
+}
+trellis.unfocus()
+
+@
+
+\end{frame}
+
+\begin{frame}{Assintocidade da função Z}
+
+$$ Z(\lambda, \nu) = \sum_{j=0}^\infty \frac{\lambda^j}{(j!)^\nu} $$
+
+<<fig.height=3, fig.width=9>>=
+
+##-------------------------------------------
+## Calcula Z para um c(lambda, phi)
+funZ <- function(lambda, nu, maxit = 500, tol = 1e-5) {
+    z <- rep(NA, maxit)
+    j = 1
+    ##
+    z[j] <- exp(j * log(lambda) - nu * lfactorial(j))
+    ##
+    while (abs(z[j] - 0) > tol && j <= maxit) {
+        j = j + 1
+        z[j] <- exp(j * log(lambda) - nu * lfactorial(j))
+    }
+    return(cbind("j" = 0:j, "z" = c(1, z[!is.na(z)])))
+}
+
+params <- list(c("lambda" = 1.36, "nu" = 0.4),
+               c("lambda" = 8, "nu" = 1),
+               c("lambda" = 915, "nu" = 2.5))
+
+zs <- sapply(params, function(x) funZ(x["lambda"], x["nu"]),
+           simplify = FALSE)
+names(zs) <- seq_along(zs)
+da <- ldply(zs)
+
+xyplot(z ~ j | .id, data = da,
+       type = c("b", "g"), pch = 19,
+       scales = "free",
+       ylab = list(
+           expression(frac(lambda^j, "(j!)"^nu)),
+           rot = 0),
+       strip = strip.custom(factor.levels = fl))
+
+@
+
+\end{frame}
+
+\begin{frame}{Momentos da distribuição}
+
+\begin{columns}[t,onlytextwidth]
+
+\column{.48\textwidth}
+Não tem expressão analítica, calculamos utilizando a definição de média e
+variância;
+\begin{itemize}
+  \itemsep7.5pt\parskip0pt\parsep0pt
+  \item E(Y) = $\begin{aligned} 
+            &\sum_{y = 0}^{\infty} y \cdot p(y)&
+        \end{aligned}
+        $
+  \item V(Y) = $\begin{aligned} 
+            &\sum_{y = 0}^{\infty} y^2 \cdot p(y) - E^2(Y)&
+        \end{aligned}
+        $
+\end{itemize}
+
+\column{.48\textwidth}
+Aproximação proposta por \cite{Shimueli2005}, boa aproximação para $\nu 
+\leq 1$ ou $\lambda > 10^\nu$ \\[0.2cm]
+\begin{itemize}
+  \itemsep7.5pt\parskip0pt\parsep0pt
+  \item E(Y) $\approx$ $\begin{aligned} 
+            &\lambda ^ \frac{1}{\nu} - \frac{\nu - 1}{2\nu}&
+        \end{aligned}
+        $ 
+  \item V(Y) $\approx$ $\begin{aligned} 
+            &\frac{1}{\nu}\cdot E(Y)&
+        \end{aligned}
+        $
+\end{itemize}
+
+\end{columns}
+
+\end{frame}
+
+\begin{frame}
+
+<<fig.width = 9, fig.height = 4.5, out.width = "0.95\\textwidth">>=
+
+## densidade sob parametrização da média
+dcmp.mean <- function (y, mu, nu, sumto) {
+    sapply(y, function(yi) {
+        loglambda <- nu * log(mu + (nu - 1) / (2 * nu))
+        exp(-llcmp(c(log(nu), loglambda), 
+                   y = yi, X = 1, sumto = sumto))
+    })
+}
+
+
+grid <- expand.grid(mu = c(2, 8, 15), nu = c(0.5, 1, 2.5))
+y <- 0:30
+
+py <- mapply(FUN = dcmp.mean,
+             mu = grid$mu,
+             nu = grid$nu,
+             MoreArgs = list(y = y, sumto = 100),
+             SIMPLIFY = FALSE)
+grid <- cbind(grid[rep(1:nrow(grid), each = length(y)), ],
+              y = y,
+              py = unlist(py))
+
+useOuterStrips(xyplot(py ~ y | factor(mu) + factor(nu),
+                      ylab = expression(P(Y==y)),
+                      xlab = expression(y),
+                      data = grid, type = "h",
+                      panel = function(x, y, ...) {
+                          m <- sum(x * y)
+                          panel.xyplot(x, y, ...)
+                          panel.abline(v = m, lty = 2)
+                      }),
+               strip = strip.custom(
+                   strip.names = TRUE,
+                   var.name = expression(mu == ""),
+                   sep = ""),
+               strip.left = strip.custom(
+                   strip.names = TRUE,
+                   var.name = expression(nu == ""),
+                   sep = ""))
+@
 
 \end{frame}
 
@@ -196,7 +313,7 @@ xyplot(py ~ y, type = c("h", "g"),
 
 \begin{block}{Função de verossimilhança}
     \begin{align*}
-        L(\lambda, \nu ; \underline{y}) &= \prod_i^n \left (
+        L(\beta, \nu ; \underline{y}) &= \prod_i^n \left (
         \frac{\lambda_i^{y_i}}{(y_i !)^\nu} Z(\lambda_i, \nu)^{-1}
         \right ) \\
         &= \lambda_i^{\sum_i^n y_i}\prod_i^n 
@@ -208,7 +325,7 @@ xyplot(py ~ y, type = c("h", "g"),
 
 \begin{block}{Função de log-verossimilhança}
     \begin{align*}
-        l(\lambda, \nu, \underline{y}) &= \log \left ( 
+        \ell(\beta, \nu, \underline{y}) &= \log \left ( 
         \lambda_i^{\sum_i^n y_i}\prod_i^n 
         \frac{Z(\lambda_i, \nu)^{-1}}{(y_i !)^\nu} \right ) \\
         &= \sum_i^n y_i \log(\lambda_i) - \nu \sum_i^n \log(y!) -
@@ -223,9 +340,10 @@ xyplot(py ~ y, type = c("h", "g"),
 
 {\it Vignette} \href{run:../doc/v01_poisson.html}{\tt compoisson.html}
 \begin{description}
-    \item[\tt capdesfo]: número de capulhos sob efeito de desfolha (sub)
-    \item[\tt capmosca]: número de capulhos sob exposição à mosca branca (sub)
-    \item[\tt ninfas]: número de ninfas de mosca branca em plantas de soja (super)
+    \item[\tt capdesfo]: Número de capulhos em algodão sob efeito de desfolha (sub)
+    \item[\tt capmosca]: Número de capulhos em algodão sob exposição à mosca branca (sub)
+    \item[\tt ninfas]: Número de ninfas de mosca branca em plantas de soja (super)
+    \item[\tt soja]: Número de vagens, de grãos por planta (equi e super).
 \end{description}
 
 \end{frame}
