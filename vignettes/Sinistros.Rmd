@@ -21,10 +21,8 @@ seguintes variáveis:
 
 * **Sinistros**: Número de sinistros registrados;
 * **Exposicao**: Período de cobertura do cliente durante o ano sob análise;
-* **Tipo**: Tipo de veículo (hatch, monobloco, picape, sedan, wagon e suv);
 * **Idade**: Idade do cliente (em anos);
 * **Sexo**: M para masculino e F para feminino;
-* **Civil**: Estado civil (Solteiro, Casado, Divorciado e Viuvo);
 * **Valor**: Valor do veículo segurado (em reais).
 
 
@@ -42,12 +40,8 @@ options(scipen = 3) ### Era zero.
 
 ##### Preparando os dados.
 names(dados) <- c('Bonus','Tipo','Estado','Idade','Sexo','Civil','Valor','Exposicao','Sinistros')
-dados <- dados[,c('Tipo','Idade','Sexo','Civil','Valor','Exposicao','Sinistros')]
-levels(dados$Tipo) <- c('outros','outros','outros','outros','hatch','outros','mono','picape','picape','picape','sedan','wagon','suv')
-dados <- dados[-which(dados$Tipo=='outros'),]
-dados$Tipo <- factor(dados$Tipo)
+dados <- dados[,c('Idade','Sexo','Valor','Exposicao','Sinistros')]
 dados <- dados[which(dados$Valor != 0),]
-dados$Civil <- relevel(dados$Civil, ref = 'Solteiro')
 dados$lexpo <- log(dados$Exposicao)
 dados$Valor <- dados$Valor/1000
 
@@ -85,30 +79,19 @@ tabidsex <- cbind(tabidsex, taxa)
 ### Distribuição do número de sinistros por idade e sexo.
 kable(tabidsex, align = 'c', caption = '**Taxa de sinistros segundo Sexo e Idade**')
 
-tab <- aggregate(cbind(Exposicao, Sinistros) ~ Tipo, data = dados, sum)
-taxa <- with(tab, Sinistros/Exposicao)
-tab <- cbind(tab, taxa)
-### Distribuição do número de sinistros por tipo de veículo.
-kable(tab, align = 'c', caption = '**Taxa de sinistros segundo Tipo de Veículo**')
-
 ```
 
 ## Regressão usando o modelo log-linear poisson.
 
 ```{r}
 dados <- na.omit(dados)
-ajusteps <- glm(Sinistros ~ Tipo+Sexo+Idade+I(Idade**2)+Valor+Civil+offset(log(Exposicao)), data = dados, family=poisson)
+ajusteps <- glm(Sinistros ~ Sexo+Idade+I(Idade**2)+Valor+offset(log(Exposicao)), data = dados, family=poisson)
 summary(ajusteps)
-
-### Modelo sem as variáveis não significativas.
-
-ajusteps2 <- glm(Sinistros ~ Sexo+Idade+I(Idade**2)+Valor+offset(log(Exposicao)), data = dados, family=poisson)
-anova(ajusteps2,ajusteps,test='Chisq')
 
 ### Estimação do parâmetro de dispersão. 
 
-X2 <- sum(resid(ajusteps2,type='pearson')**2)
-phichap <- X2/ajusteps2$df.residual
+X2 <- sum(resid(ajusteps,type='pearson')**2)
+phichap <- X2/ajusteps$df.residual
 phichap ### Indicador de superdispersão.
 ```
 
@@ -147,19 +130,19 @@ envelope=function(modelo){
 ```{r}
 ##### Diagnóstico do modelo - gráficos.
 par(mfrow=c(2,2))
-plot(ajusteps2)
+plot(ajusteps)
 
 par(mfrow=c(1,1))
-envelope(ajusteps2)
+envelope(ajusteps)
 ```
 
 
 ### Ajuste do modelo associando um parâmetro ao termo offset (log-exposicao)
 
 ```{r}
-ajusteps3 <- glm(Sinistros ~ Sexo + Idade +I(Idade**2) + Valor + log(Exposicao), data = dados, family=poisson)
-summary(ajusteps3)
-anova(ajusteps2, ajusteps3, test = 'Chisq')
+ajusteps2 <- glm(Sinistros ~ Sexo + Idade +I(Idade**2) + Valor + log(Exposicao), data = dados, family=poisson)
+summary(ajusteps2)
+anova(ajusteps, ajusteps2, test = 'Chisq')
 ```
 
 
@@ -289,7 +272,7 @@ freqps <- round(n*dpois(0:10,mediasin))
 
 
 ### Poisson com covariaveis
-pred1 <- predict(ajusteps,type='response')
+pred1 <- predict(ajusteps2,type='response')
 intervalo <- 0:10
 matprob <- matrix(0, nrow=nrow(dados), ncol=length(intervalo))
 probpois <- function(interv, taxa)
