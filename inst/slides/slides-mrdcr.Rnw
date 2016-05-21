@@ -10,18 +10,12 @@
 
 %% ======================================================================
 %% Fontes
-\usepackage{palatino}
-\usepackage{eulervm}
-\usepackage[none]{ubuntu}
+\usepackage{mathpazo}
+\usepackage{inconsolata}
 \usepackage{verbatim}
 
 \usefonttheme{professionalfonts}
 \usefonttheme{serif}
-\renewcommand{\ttdefault}{ubuntumono}
-\renewcommand{\ttfamily}{\fontUbuntuMono}
-\makeatletter
-\def\verbatim@font{\normalsize\fontUbuntuMono}
-\makeatother
 
 %% ======================================================================
 %% Cores para links
@@ -54,6 +48,9 @@
 \setbeamercolor{palette tertiary}{bg=teal, fg=white}
 \setbeamercolor{footlinecolor}{fg=white,bg=teal}
 \setbeamercolor{caption name}{fg=teal}
+
+% \setbeamertemplate{frametitle continuation}{[\insertcontinuationcount]}
+\setbeamertemplate{frametitle continuation}{}
 
 %% Slide Inicial
 \setbeamertemplate{title page}[default]
