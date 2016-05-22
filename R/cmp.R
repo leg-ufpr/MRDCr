@@ -266,8 +266,9 @@ calc_mean_cmp <- function(lambda, nu, sumto, tol = 1e-5) {
     names(nu) <- NULL
     pars <- data.frame(lambda = lambda, nu = nu)
     ## Calcula o ymax usando mu + 5 (sqrt(sigma))
-    sigma <- lambda^(1/nu)/nu - (nu - 1)/(2 * nu^2)
-    ymax <- with(pars, ceiling(max(lambda + 5 * sqrt(sigma))))
+    approxmu <- lambda^(1/nu) - (nu - 1)/(2 * nu)
+    sigma <- (1/nu) * approxmu
+    ymax <- with(pars, ceiling(max(approxmu + 5 * sqrt(sigma))))
     ## Agora verifica se a prob(ymax) é de fato pequena, se não, soma 1.
     lambdamax <- max(pars$lambda)
     numin <- min(pars$nu)
@@ -317,9 +318,10 @@ calc_var_cmp <- function(lambda, nu, sumto, tol = 1e-5) {
     names(lambda) <- NULL
     names(nu) <- NULL
     pars <- data.frame(lambda = lambda, nu = nu)
-    # Calcula o ymax usando mu + 5 (sqrt(sigma))
-    sigma <- lambda^(1/nu)/nu - (nu - 1)/(2 * nu^2)
-    ymax <- with(pars, ceiling(max(lambda + 5 * sqrt(sigma))))
+    ## Calcula o ymax usando mu + 5 (sqrt(sigma))
+    approxmu <- lambda^(1/nu) - (nu - 1)/(2 * nu)
+    sigma <- (1/nu) * approxmu
+    ymax <- with(pars, ceiling(max(approxmu + 5 * sqrt(sigma))))
     # Agora verifica se a prob(ymax) é de fato pequena, se não, soma 1.
     lambdamax <- max(pars$lambda)
     numin <- min(pars$nu)
