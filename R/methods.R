@@ -191,6 +191,22 @@ predict.mle2 <- function(object, newdata,
                                     MARGIN = 2,
                                     FUN = calc_mean_gcnt,
                                     alpha = exp(coef(object)[1]))})
+               },
+               "llcmp" = {
+                   V <- vcov(object)
+                   Vc <- V[-1, -1] - V[-1, 1] %*%
+                       solve(V[1, 1]) %*% V[1, -1]
+                   eta <- cholV_eta(Vc, X,
+                                    b = coef(object)[-1],
+                                    qn = qn)
+                   switch(type,
+                          "link" = eta,
+                          "response" = {
+                              apply(exp(as.matrix(eta)),
+                                    MARGIN = 2,
+                                    FUN = calc_mean_cmp,
+                                    nu = exp(coef(object)[1]),
+                                    sumto = object@data$sumto)})
                })
     pred <- cbind(pred)
     colnames(pred) <- names(qn)
