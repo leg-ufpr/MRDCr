@@ -2,6 +2,7 @@
 
 export(apc)
 export(calc_mean_cmp)
+export(calc_mean_gcnt)
 export(calc_var_cmp)
 export(cmp)
 export(convergencez)
@@ -23,3 +24,4 @@ importFrom(stats,model.matrix)
 importFrom(stats,model.offset)
 importFrom(stats,model.response)
 importFrom(stats,poisson)
+importFrom(stats,qnorm)
