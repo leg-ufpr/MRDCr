@@ -463,7 +463,11 @@ A Regressão Poisson é um caso particular dos Modelos Lineares Generalizados (M
 
 \end{frame}
 
+\begin{frame}{Estudos de caso}
 
+{\it Vignette} \href{run:../doc/v01_poisson.html}{\tt v01\_poisson.html}
+
+\end{frame}
 
 %%%-----------------------------------------------------------------------------------------
 \section{Estimação via Quase-Verossimilhança}
@@ -558,6 +562,11 @@ $$ \hat{\phi} = \frac{1}{n-p}\sum_{i=1}^n \frac{y_i-\hat{\mu}_i}{V(\hat{\mu}_i)}
 
 \end{frame}
 
+\begin{frame}{Estudos de caso}
+
+{\it Vignette} \href{run:../doc/Ovelhas.html}{\tt Ovelhas.html}
+
+\end{frame}
 
 
 %%%-----------------------------------------------------------------------------------------
@@ -693,5 +702,12 @@ com $E(\theta)=\theta=\alpha /\beta$ e variância $Var(\theta)=\alpha /\beta^2.$
 \item A estimação dos parâmetros do modelo se dá numericamente, segundo um algoritmo em duas etapas, em que $\alpha$ e $\boldsymbol{\beta}$ são estimados condicionalmente até convergência.
 
 \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Estudos de caso}
+
+{\it Vignette} \href{run:../doc/Sinistros.html}{\tt Sinistros.html}
 
 \end{frame}
