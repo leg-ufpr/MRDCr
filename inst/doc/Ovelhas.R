@@ -1,32 +1,7 @@
----
-title: "Análise de Contagens - Quase-Verossimilhança"
-author: >
-  Walmes M. Zeviani,
-  Eduardo E. Ribeiro Jr &
-  Cesar A. Taconeli
-vignette: >
-  %\VignetteIndexEntry{Análise de Contagens - Quase-Verossimilhança}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r setup, include=FALSE}
+## ----setup, include=FALSE------------------------------------------------
 source("_setup.R")
-```
 
-Dados referentes a um experimento realizado com o objetivo de 
-investigar o efeito de uma intervenção, por parte do cuidador, no 
-comportamento de ovelhas. 
-
-Para isso, foram consideradas ovelhas de duas 
-linhagens distintas (pouco ou muito reativas), submetidas a dois tipos 
-diferentes de intervenção (observação ou observação + intervenção).
-
-A variável resposta aqui considerada é o número de mudanças na postura
-corporal do animal ao longo do período de observação (3 minutos).
-
-
-```{r, echo = FALSE, include=FALSE}
+## ---- echo = FALSE, include=FALSE----------------------------------------
 ##### Carregamento e tratamento inicial dos dados
 
 dados <- read.csv('../data-raw/Dadoscomp.csv',sep=',')
@@ -61,21 +36,12 @@ require('sandwich')
 require('hnp')
 require('knitr')
 
-```
 
-
-### Verificação do conteúdo e a estrutura dos dados.
-
-```{r}
+## ------------------------------------------------------------------------
 str(datapost4)
 summary(datapost4)
-```
 
-
-
-### Análise descritiva
-
-```{r}
+## ------------------------------------------------------------------------
 tab <- data.frame(with(datapost4, table(tratamento, Nposturas)))
 
 myColours <- brewer.pal(2,"Blues")
@@ -96,12 +62,8 @@ bwplot(Nposturas ~ linhagem | tratamento,
 mdp <- aggregate(Nposturas ~ tratamento:linhagem, datapost4, function(x) c(mean = mean(x), var = var(x)))
 mdp
 
-```
 
-
-### Regressão poisson com estimação por máxima verossimilhança.
-
-```{r}
+## ------------------------------------------------------------------------
 ajusteps <- glm(Nposturas ~ tratamento + linhagem, data=datapost4, family=poisson)
 summary(ajusteps)
 
@@ -117,17 +79,13 @@ exp(coef(ajusteps)[2])
 X2 <- sum(resid(ajusteps,type='pearson')**2)
 phichap <- X2/ajusteps$df.residual
 phichap
-```
 
-### Diagnóstico do ajuste (gráficos).
-
-```{r}
+## ------------------------------------------------------------------------
 ##### Diagnóstico do modelo - gráficos padrão do R.
 par(mfrow=c(2,2))
 plot(ajusteps, pch = 20, cex = 1.25)
-```
 
-```{r, echo = FALSE}
+## ---- echo = FALSE-------------------------------------------------------
 envelope=function(modelo){
   dados=na.omit(modelo$data)
   nsim=100
@@ -155,18 +113,13 @@ envelope=function(modelo){
   points(quantis,r1,pch=16,cex=0.75)
 }
 
-```
 
-```{r}
+## ------------------------------------------------------------------------
 ##### Gráfico quantil-quantil com envelopes simulados.
 par(mfrow=c(1,1))
 envelope(ajusteps)
-```
 
-
-### Ajustando modelos por quase-verossimilhança.
-
-```{r}
+## ------------------------------------------------------------------------
 
 ### Modelo quasi poisson (V(mu) = mu).
 ajuste12 <- glm(r4 ~ tratamento+linhagem, data=datapost4, family = 'quasipoisson')
@@ -190,12 +143,8 @@ qqnorm(resid(ajusteps,type='deviance'), pch = 20, main = 'Poisson', las = 1)
 qqline(resid(ajusteps,type='deviance'))
 qqnorm(resid(ajuste14,type='deviance'), pch = 20, main = 'QL', las = 1)
 qqline(resid(ajuste14,type='deviance'))
-```
 
-
-### Usando estimação robusta e bootstrap.
-
-```{r}
+## ------------------------------------------------------------------------
 
 estrb <- coeftest(ajusteps, vcov=sandwich) ### Estimador sanduíche
 estrb ### Estimação robusta.
@@ -205,12 +154,8 @@ ajusteboot <- Boot(ajusteps)
 summary(ajusteboot) ### Resultados obtidos via bootstrap.
 
 
-```
 
-
-### Resumo geral dos resultados.
-
-```{r}
+## ------------------------------------------------------------------------
 
 erroz <- rbind(summary(ajusteps)$coefficients[2,2:3], summary(ajuste13)$coefficients[2,2:3], 
                summary(ajuste14)$coefficients[2,2:3], estrb[2,2:3], c(summary(ajusteboot)[2,4],
@@ -226,11 +171,8 @@ rownames(quadres) <- c('Poisson', 'Quasi(mu)', 'Quasi(mu^2)', 'Robusto (sanduich
 ### Quadro resumo para as estimativas produzidas pelos quatro modelos para o efeito de intervenção.
 kable(quadres, format = "markdown", caption = "Comparativo dos modelos ajustados")
 
-```
 
-### Verificando efeito das observações com maiores resíduos na análise.
-
-```{r}
+## ------------------------------------------------------------------------
 dadosexclud <- datapost4[-c(8,18,28),]
 
 ### Ajustando o modelo Poisson sem as três observações.
@@ -259,7 +201,5 @@ kable(round(c1,3), align = 'c')
 exp(coef(ajusteexcludpoi)[2])
 
 ### O efeito de intervenção aumenta, e torna-se mais significativo, mediante exclusão dos outliers.
-
-``` 
 
 

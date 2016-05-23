@@ -1,33 +1,7 @@
----
-title: "Análise de Contagens - Poisson e Binomial Negativa"
-author: >
-  Walmes M. Zeviani,
-  Eduardo E. Ribeiro Jr &
-  Cesar A. Taconeli
-vignette: >
-  %\VignetteIndexEntry{Análise de Contagens - Poisson e Binomial Negativa}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r setup, include=FALSE}
+## ----setup, include=FALSE------------------------------------------------
 source("_setup.R")
-```
 
-
-Dados referentes ao número de sinistros registrados por 16483 clientes de
-uma seguradora de automóveis ao longo de um ano, contemplando as 
-seguintes variáveis:
-
-* **Sinistros**: Número de sinistros registrados;
-* **Exposicao**: Período de cobertura do cliente durante o ano sob análise;
-* **Idade**: Idade do cliente (em anos);
-* **Sexo**: M para masculino e F para feminino;
-* **Valor**: Valor do veículo segurado (em reais).
-
-
-
-```{r, echo = FALSE, include=FALSE}
+## ---- echo = FALSE, include=FALSE----------------------------------------
 
 require(lattice)
 require(MASS)
@@ -45,18 +19,12 @@ dados <- dados[which(dados$Valor != 0),]
 dados$lexpo <- log(dados$Exposicao)
 dados$Valor <- dados$Valor/1000
 
-```
 
-### Verificação do conteúdo e a estrutura dos dados
-
-```{r}
+## ------------------------------------------------------------------------
 head(dados, 10) ### Dez primeiras linhas da base.
 str(dados)
-```
 
-### Análise descritiva da distribuição do número de sinistros
-
-```{r}
+## ------------------------------------------------------------------------
 table(dados$Sinistros) ### Distribuição do números de sinistros.
 taxageral <- sum(dados$Sinistros)/sum(dados$Exposicao); taxageral ### Taxa de sinistros na amostra.
 
@@ -79,11 +47,8 @@ tabidsex <- cbind(tabidsex, taxa)
 ### Distribuição do número de sinistros por idade e sexo.
 kable(tabidsex, align = 'c', caption = '**Taxa de sinistros segundo Sexo e Idade**')
 
-```
 
-## Regressão usando o modelo log-linear poisson
-
-```{r}
+## ------------------------------------------------------------------------
 dados <- na.omit(dados)
 ajusteps <- glm(Sinistros ~ Sexo+Idade+I(Idade**2)+Valor+offset(log(Exposicao)), data = dados, family=poisson)
 summary(ajusteps)
@@ -93,9 +58,8 @@ summary(ajusteps)
 X2 <- sum(resid(ajusteps,type='pearson')**2)
 phichap <- X2/ajusteps$df.residual
 phichap ### Indicador de superdispersão.
-```
 
-```{r, echo = FALSE}
+## ---- echo = FALSE-------------------------------------------------------
 envelope=function(modelo){
   dados=na.omit(modelo$data)
   nsim=100
@@ -122,49 +86,31 @@ envelope=function(modelo){
   lines(quantis,ls,type='l')
   points(quantis,r1,pch=16,cex=0.75)
 }
-```
 
-
-### Diagnóstico do ajuste (gráficos)
-
-```{r}
+## ------------------------------------------------------------------------
 ##### Diagnóstico do modelo - gráficos.
 par(mfrow=c(2,2))
 plot(ajusteps)
 
 par(mfrow=c(1,1))
 envelope(ajusteps)
-```
 
-
-### Ajuste do modelo associando um parâmetro ao termo offset (log-exposicao)
-
-```{r}
+## ------------------------------------------------------------------------
 ajusteps2 <- glm(Sinistros ~ Sexo + Idade +I(Idade**2) + Valor + log(Exposicao), data = dados, family=poisson)
 summary(ajusteps2)
 anova(ajusteps, ajusteps2, test = 'Chisq')
-```
 
-
-## Regressão usando a distribuição binomial negativa
-
-```{r}
+## ------------------------------------------------------------------------
 ajustenb2 <- glm.nb(Sinistros ~ Sexo+Idade+I(Idade**2)+Valor+log(Exposicao),data= dados)
 summary(ajustenb2) 
 
-```
 
-
-### Diagnóstico do ajuste (gráficos)
-
-```{r}
+## ------------------------------------------------------------------------
 ##### Diagnóstico do modelo - gráficos.
 par(mfrow=c(2,2))
 plot(ajustenb2)
-```
 
-
-```{r, echo = FALSE}
+## ---- echo = FALSE-------------------------------------------------------
 dadosnb3 <- dados[,c('Sexo','Idade','Valor','Exposicao','Sinistros')]
 dadosnb3$lexpo <- log(dados$Exposicao)
 ajustenb2 <- glm.nb(Sinistros ~ Sexo+Idade+I(Idade**2)+Valor+lexpo,data= dadosnb3)
@@ -194,34 +140,23 @@ envelope=function(modelo){
   lines(quantis,ls,type='l')
   points(quantis,r1,pch=16,cex=0.75)
 }
-```
 
-
-```{r}
+## ------------------------------------------------------------------------
 par(mfrow=c(1,1))
 envelope(ajustenb2)
-```
 
-
-### Explorando os efeitos das covariáveis. Estimativas pontuais e ICs (95%)
-
-```{r}
+## ------------------------------------------------------------------------
 intervalos <- confint(ajustenb2)
 estimat <- cbind(ajustenb2$coefficients, intervalos)
 colnames(estimat)[1] <- 'Estimativa pontual'
 
 ### Quadro de estimativas
 kable(round(estimat, 5), align = 'c', caption = '**Estimativas pontuais e intervalos de confiança - Modelo Binomial Negativo**')
-```
+
+## ---- echo = FALSE-------------------------------------------------------
 
 
-### Gráficos de efeitos
-
-```{r, echo = FALSE}
-
-```
-
-```{r}
+## ------------------------------------------------------------------------
 
 efeitos <- allEffects(ajustenb2, given.values=c(lexpo=0))
 trellis.par.set(list(axis.text = list(cex = 1.2))) 
@@ -256,12 +191,8 @@ plot(efeitos[[4]], type='response',main=list(
         label="Taxa de sinistros",
         cex=1.5))
 
-```
 
-
-
-
-```{r, echo = FALSE, include=F}
+## ---- echo = FALSE, include=F--------------------------------------------
 
 ## Frequências ajustadas pelas duas distribuições, com e sem covariaveis.
 
@@ -308,11 +239,7 @@ matfreq <- rbind(ams, freqps, freqpsaj, freqbn, frebnaj)
 colnames(matfreq) <- 0:10
 rownames(matfreq) <- c('Amostra', 'Poisson não ajustada por covariáveis', 'Poisson ajustada por covariáveis', 
                        'BN não ajustada por covariáveis', 'BN ajustada por covariáveis')
-```
 
-
-## Comparação dos ajustes
-
-```{r, results = 'markup'}
+## ---- results = 'markup'-------------------------------------------------
 kable(matfreq, format = "markdown", caption = "Frequências amostrais e frequências ajustadas para o número de sinistros")
-```
+
