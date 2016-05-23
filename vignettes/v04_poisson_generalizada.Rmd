@@ -31,29 +31,33 @@ library(MRDCr)
 ## Função Densidade ##
 
 Se uma variável aleatória $Y$ tem distribuição de probabilidades Poisson
-generalizada, então sua função de probabilidade é
+generalizada, então sua função de probabilidade, na parametrização de
+média, é
 
 $$
-f(y) =
-\begin{cases}
-  \theta (\theta + \gamma y)^{y - 1}
-  \exp\{-(\theta + \gamma y)\}, &
-  y = 0, 1, 2, \ldots \\
-  0, &
-  y > m \text{ quando } \gamma < 0
-\end{cases}
+f(y) = \left( \dfrac{\lambda}{1+\alpha\lambda} \right)^{y}
+    \frac{(1+\alpha y)^{y-1}}{y!}
+    \exp\left\{-\lambda \frac{(1+\alpha y)}{(1+\alpha \lambda)}\right\},
 $$
+em que $\lambda$ é a média da distribuição e $\alpha$ é a o parâmetro de
+dispersão. Nessa parametrização, tem-se
 
-  - $\theta > 0$;
-  - $m$ é maior inteiro positivo para o qual $\theta + m\gamma > 0$
-    quando $\gamma$ é negativo. A literatura recomenda usar $m \geq 4$
-    para se ter pelo menos 4 pontos no suporte com probabilidade não
-    nula (verificar).
-  - $\max\{-1, -\theta/m\} < \gamma < 1$;
-  - Resolvendo a iniqualdade, tem-se que $m = \left\lfloor
-    \frac{-\theta}{\gamma} \right\rfloor$ quando $\gamma < 0$;
-  - *Note que o espaço paramétrico de $\gamma$ é dependente do
-    parâmetro $\theta$*.
+  - $\text{E}(y) = \lambda$,
+  - $\text{V}(y) = \lambda (1+\alpha \lambda)^2$.
+  - Superdispersa se $\alpha > 0$,
+  - Subdispersa se $\alpha < 0$,
+  - Poisson se $\alpha = 0$,
+  - $\lambda > 0$, $1+\alpha\lambda > 0$ e $1+\alpha y > 0$.
+
+A função de log-verossimilhança é
+$$
+\ell(y; \lambda, \alpha) =
+    \sum_{i=1}^{n} y_{i}\ln(\lambda)-
+    \ln(1+\alpha\lambda)+
+    (y_{i}-1)\ln(1+\alpha y)-
+    \lambda\frac{(1+\alpha y_{i})}{(1+\alpha\lambda)}-
+    \ln(y_{i}!).
+$$
 
 ```{r}
 grid <- expand.grid(lambda = c(2, 8, 15),
