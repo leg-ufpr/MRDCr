@@ -191,30 +191,8 @@ predP <- cbind(pred, aux)
 f3; f3[-2]
 X <- model.matrix(f3[-2], data = pred)
 
-## Obtendo os parâmetros da distribuição (lambdas e phi)
-betas <- coef(m3C)[-1]
-phi <- coef(m3C)[1]
-loglambdas <- X %*% betas
-
-## Obtendo os erros padrão das estimativas
-##   Obs.: Deve-se usar a matriz de variâncias e covariâncias
-##   condicional, pois os parâmetros de locação (betas) e dispersão
-##   (phi) não são ortogonais.
-Vc <- Vcov[-1, -1] - Vcov[-1, 1] %*% solve(Vcov[1, 1]) %*% Vcov[1, -1]
-U <- chol(Vc)
-se <- sqrt(apply(X %*% t(U), MARGIN = 1, FUN = function(x) {
-    sum(x^2)
-}))
-
-aux <- c(loglambdas) + outer(se, qn, FUN = "*")
-aux <- apply(aux, MARGIN = 2,
-             FUN = function(col) {
-                 sapply(col, FUN = function(p) {
-                     y <- 0:30
-                     py <- dcmp(y, exp(p), exp(phi), sumto = 50)
-                     sum(y*py)
-                 })
-             })
+aux <- predict(m3C, newdata = X, type = "response",
+               interval = "confidence")
 aux <- data.frame(modelo = "COM-Poisson", aux)
 predC <- cbind(pred, aux)
 
@@ -537,63 +515,15 @@ predP.ng <- cbind(pred, aux)
 ##----------------------------------------------------------------------
 ## Considerando a COM-Poisson
 
-##-------------------------------------------
 ## No modelo para o número de vagens
-## Obtendo os parâmetros da distribuição (lambdas e phi)
-betas <- coef(m2C.nv)[-1]
-phi <- coef(m2C.nv)[1]
-loglambdas <- X2 %*% betas
-
-## Obtendo os erros padrão das estimativas
-##   Obs.: Deve-se usar a matriz de variâncias e covariâncias
-##   condicional, pois os parâmetros de locação (betas) e dispersão
-##   (phi) não são ortogonais.
-Vc <- Vcov.nv[-1, -1] - Vcov.nv[-1, 1] %*%
-    solve(Vcov.nv[1, 1]) %*% Vcov.nv[1, -1]
-U <- chol(Vc)
-se <- sqrt(apply(X2 %*% t(U), MARGIN = 1, FUN = function(x) {
-    sum(x^2)
-}))
-
-aux <- c(loglambdas) + outer(se, qn, FUN = "*")
-aux <- apply(aux, MARGIN = 2,
-             FUN = function(col) {
-                 sapply(col, FUN = function(p) {
-                     y <- 0:200
-                     py <- dcmp(y, exp(p), exp(phi), sumto = 300)
-                     sum(y*py)
-                 })
-             })
+aux <- predict(m2C.nv, newdata = X2, type = "response",
+               interval = "confidence")
 aux <- data.frame(modelo = "COM-Poisson", aux)
 predC.nv <- cbind(pred, aux)
 
-##-------------------------------------------
 ## No modelo para o número de grãos por parcela
-## Obtendo os parâmetros da distribuição (lambdas e phi)
-betas <- coef(m2C.ng)[-1]
-phi <- coef(m2C.ng)[1]
-loglambdas <- X2 %*% betas
-
-## Obtendo os erros padrão das estimativas
-##   Obs.: Deve-se usar a matriz de variâncias e covariâncias
-##   condicional, pois os parâmetros de locação (betas) e dispersão
-##   (phi) não são ortogonais.
-Vc <- Vcov.ng[-1, -1] - Vcov.ng[-1, 1] %*%
-    solve(Vcov.ng[1, 1]) %*% Vcov.ng[1, -1]
-U <- chol(Vc)
-se <- sqrt(apply(X2 %*% t(U), MARGIN = 1, FUN = function(x) {
-    sum(x^2)
-}))
-
-aux <- c(loglambdas) + outer(se, qn, FUN = "*")
-aux <- apply(aux, MARGIN = 2,
-             FUN = function(col) {
-                 sapply(col, FUN = function(p) {
-                     y <- 0:350
-                     py <- dcmp(y, exp(p), exp(phi), sumto = 700)
-                     sum(y*py)
-                 })
-             })
+aux <- predict(m2C.ng, newdata = X2, type = "response",
+               interval = "confidence")
 aux <- data.frame(modelo = "COM-Poisson", aux)
 predC.ng <- cbind(pred, aux)
 
@@ -806,30 +736,8 @@ predP <- cbind(pred, aux)
 f4; f4[-2]
 X <- model.matrix(f4[-2], data = pred)
 
-## Obtendo os parâmetros da distribuição (lambdas e phi)
-betas <- coef(m4C)[-1]
-phi <- coef(m4C)[1]
-loglambdas <- X %*% betas
-
-## Obtendo os erros padrão das estimativas
-##   Obs.: Deve-se usar a matriz de variâncias e covariâncias
-##   condicional, pois os parâmetros de locação (betas) e dispersão
-##   (phi) não são ortogonais.
-Vc <- Vcov[-1, -1] - Vcov[-1, 1] %*% solve(Vcov[1, 1]) %*% Vcov[1, -1]
-U <- chol(Vc)
-se <- sqrt(apply(X %*% t(U), MARGIN = 1, FUN = function(x) {
-    sum(x^2)
-}))
-
-aux <- c(loglambdas) + outer(se, qn, FUN = "*")
-aux <- apply(aux, MARGIN = 2,
-             FUN = function(col) {
-                 sapply(col, FUN = function(p) {
-                     y <- 0:50
-                     py <- dcmp(y, exp(p), exp(phi), sumto = 100)
-                     sum(y*py)
-                 })
-             })
+aux <- predict(m4C, newdata = X, type = "response",
+               interval = "confidence")
 aux <- data.frame(modelo = "COM-Poisson", aux)
 predC <- cbind(pred, aux)
 
@@ -1141,31 +1049,8 @@ predP <- cbind(pred, aux)
 
 ##-------------------------------------------
 ## Considerando a COM-Poisson
-
-## Obtendo os parâmetros da distribuição (lambdas e phi)
-betas <- coef(m1C)[-1]
-phi <- coef(m1C)[1]
-loglambdas <- X %*% betas
-
-## Obtendo os erros padrão das estimativas
-##   Obs.: Deve-se usar a matriz de variâncias e covariâncias
-##   condicional, pois os parâmetros de locação (betas) e dispersão
-##   (phi) não são ortogonais.
-Vc <- Vcov[-1, -1] - Vcov[-1, 1] %*% solve(Vcov[1, 1]) %*% Vcov[1, -1]
-U <- chol(Vc)
-se <- sqrt(apply(X %*% t(U), MARGIN = 1, FUN = function(x) {
-    sum(x^2)
-}))
-
-aux <- c(loglambdas) + outer(se, qn, FUN = "*")
-aux <- apply(aux, MARGIN = 2,
-             FUN = function(col) {
-                 sapply(col, FUN = function(p) {
-                     y <- 0:400
-                     py <- dcmp(y, exp(p), exp(phi), sumto = 600)
-                     sum(y*py)
-                 })
-             })
+aux <- predict(m1C, newdata = X, type = "response",
+               interval = "confidence")
 aux <- data.frame(modelo = "COM-Poisson", aux)
 predC <- cbind(pred, aux)
 
