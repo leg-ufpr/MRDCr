@@ -200,24 +200,7 @@ source("_setup.R")
 \end{multicols}
 \end{frame}
 
-
-
-\subsection{Modelo Poisson-Generalizada}
-\label{sec-poisson-generalizada}
-
-<<pgnz, child = "poisson_generalizada.Rnw">>=
-@
-
-\subsection{Modelo COM-Poisson}
-\label{sec-com-poisson}
-
-<<compoisson, child = "compoisson.Rnw">>=
-@
-
-\subsection{Modelo Gamma-Count}
-\label{sec-gamma-count}
-
-<<gcnt, child = "gamma_count.Rnw">>=
+<<pois_bineg, child = "pois_bineg.Rnw">>=
 @
 
 \section{Modelos para Excesso de Zeros}
@@ -236,6 +219,27 @@ source("_setup.R")
 \label{sec-zeroinfl}
 
 <<zeroinfl, child = "zeroinfl.Rnw">>=
+@
+
+\section{Modelos Paramétricos Alternativos}
+\label{sec-modelos-parametricos}
+
+\subsection{Modelo Poisson-Generalizada}
+\label{sec-poisson-generalizada}
+
+<<pgnz, child = "poisson_generalizada.Rnw">>=
+@
+
+\subsection{Modelo COM-Poisson}
+\label{sec-com-poisson}
+
+<<compoisson, child = "compoisson.Rnw">>=
+@
+
+\subsection{Modelo Gamma-Count}
+\label{sec-gamma-count}
+
+<<gcnt, child = "gamma_count.Rnw">>=
 @
 
 \section{Modelos com Efeitos Aleatórios}
