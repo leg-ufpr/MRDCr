@@ -28,13 +28,13 @@ BugReports: https://gitlab.c3sl.ufpr.br/leg/MRDCr/issues
 LazyData: true
 Encoding: UTF-8
 Depends:
-    R (>= 3.2.3)
+    R (>= 3.2.3),
+    bbmle
 Imports:
     lattice,
     latticeExtra,
     doBy,
-    multcomp,
-    bbmle
+    multcomp
 Suggests:
     MASS,
     car,
