@@ -102,7 +102,7 @@ print(xy2, split = c(2, 1, 2, 1), more = FALSE)
 
 \end{frame}
 
-\begin{frame}{Gerador de excesso de zeros}
+\begin{frame}[allowframebreaks]{Gerador de excesso de zeros}
 
 \begin{itemize}
     \item Uma limitação das abordagens estudadas é que as contagens nulas
@@ -118,6 +118,20 @@ print(xy2, split = c(2, 1, 2, 1), more = FALSE)
         característica da população.
     \end{itemize}
 \end{itemize}
+
+\framebreak
+
+Exemplo. Um estudo que visa avaliar a quantidade de produtos comprados 
+em um mercado por uma família na última semana. A variável de interesse é
+o número de itens comprados.
+
+\vspace{0.5cm}
+
+\textit{zeros estruturais}: Se a família não foi ao mercado na última
+semana. Inevitavelmente o número de produtos será 0.
+
+\textit{zeros amostrais}: A família foi ao mercado, porém não adquiriu
+nenhum produto.
 
 \end{frame}
 
