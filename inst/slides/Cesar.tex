@@ -1,0 +1,870 @@
+\documentclass[10pt, aspectratio=169]{beamer}
+
+\usepackage[brazil]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{multicol}
+\usepackage{tikz}
+
+
+
+%% ======================================================================
+%% Cores para links
+\definecolor{url}{HTML}{000080}
+\definecolor{run}{HTML}{4A0082}
+\hypersetup{colorlinks, allcolors=., urlcolor=url, runcolor=run}
+
+\setbeamercolor{bibliography entry author}{fg=black}
+
+
+%% ======================================================================
+%% Tema e cores do documento
+\usetheme{CambridgeUS}
+\setbeamertemplate{itemize items}[triangle]
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamertemplate{frametitle}{
+  \nointerlineskip
+  \begin{beamercolorbox}[sep=0.3cm, ht=1.8em,
+    wd=\paperwidth]{frametitle}
+    \vbox{}\vskip-2ex%
+    \strut\hspace*{3ex}\Large\bfseries\insertframetitle\strut
+    \vskip-0.8ex%
+  \end{beamercolorbox}
+}
+
+%% Slides em geral
+\setbeamercolor{frametitle}{bg=white, fg=teal}
+\setbeamercolor{structure}{fg=teal}
+\setbeamercolor{palette primary}{bg=gray!30, fg=teal}
+\setbeamercolor{palette tertiary}{bg=teal, fg=white}
+\setbeamercolor{footlinecolor}{fg=white,bg=teal}
+\setbeamercolor{caption name}{fg=teal}
+
+%% Slide Inicial
+\setbeamertemplate{title page}[default]
+\setbeamercolor{title}{fg=teal}
+\setbeamercolor{author}{fg=black!70}
+\setbeamercolor{institute}{fg=black!70}
+\setbeamercolor{date}{fg=black!70}
+\setbeamerfont{title}{series=\bfseries, size=\Large}
+
+%% ======================================================================
+%% Definição do cabeçalho e rodapé
+\setbeamerfont{headline}{size=\fontsize{6}{5}\selectfont}
+\setbeamertemplate{headline}{\bfseries
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.5\paperwidth, ht=2.2ex, dp=1ex, right, 
+      rightskip=1em]{section in head/foot}
+      \hspace*{2ex}\insertsectionhead
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.5\paperwidth, ht=2.2ex, dp=1ex, left,
+      leftskip=1em]{subsection in head/foot}
+      \insertsubsectionhead\hspace*{2ex}
+    \end{beamercolorbox}}
+  \vskip0pt
+}
+
+\setbeamerfont{footline}{size=\fontsize{6}{5}\selectfont}
+\makeatletter
+\setbeamertemplate{footline}{\ttfamily\bfseries
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.35\paperwidth, ht=2.4ex, dp=1ex, right, 
+      rightskip=1em]{footlinecolor}
+      \insertshortauthor%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.55\paperwidth, ht=2.4ex, dp=1ex, left,
+      leftskip=1em]{footlinecolor}
+      \hfill\insertshorttitle%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.1\paperwidth, ht=2.4ex, dp=1ex, left,
+      leftskip=1em]{footlinecolor}
+      Slide \insertframenumber
+    \end{beamercolorbox}}
+  \vskip0pt
+}
+\makeatother
+
+%% ======================================================================
+%% Layout do tableofcontents
+\setbeamertemplate{section in toc}{
+  {\color{teal} \bfseries\inserttocsectionnumber.}~
+  {\leftskip=0.5em\color{black}\inserttocsection\par}
+}
+
+\setbeamertemplate{subsection in toc}{
+  {\color{teal!80} 
+  \bfseries\inserttocsectionnumber.\inserttocsubsectionnumber}~
+  \leftskip=2em{\color{black}\inserttocsubsection\par}
+}
+
+%% ======================================================================
+%% Formatando slides para seções e subseções
+\AtBeginSection[]{
+  \begin{frame}[c, allowframebreaks]
+    \begin{center}
+      \textcolor{teal}{\thesection} \\ \vspace{0.3cm}
+      \parbox{0.6\textwidth}{
+        \centering \textcolor{teal}{\LARGE \bf \insertsection}}\\
+    \end{center}
+  \end{frame}
+}
+
+\AtBeginSubsection{
+  \begin{frame}[c, allowframebreaks]
+    \begin{center}
+      \textcolor{teal}{\thesection.\thesubsection} \\ \vspace{0.3cm}
+      \parbox{0.6\textwidth}{
+        \centering \textcolor{teal!80}{\large \insertsection}\\
+        \centering \textcolor{teal}{\Large \bf \insertsubsection}}\\
+    \end{center}
+  \end{frame}
+}
+
+%% ======================================================================
+%% Metadados do documento
+\title{Modelos de Regressão para Dados de Contagem com R}
+\author[Walmes Zeviani, Eduardo Jr \& Cesar Taconelli]{
+  Prof. Dr. Walmes M. Zeviani\\
+  Eduardo E. Ribeiro Jr\\ 
+  Prof. Dr. Cesar A. Taconelli
+}
+\institute[UFPR]{
+  Laboratório de Estatística e Geoinformação \\
+  Departamento de Estatística \\
+  Universidade Federal do Paraná}
+\date{\today \\[0.1cm] \url{edujrrib@gmail.com}}
+%\titlegraphic{\includegraphics[width=2cm]{images/MRDCr_logo}}
+
+%% ======================================================================
+
+%% Inicia o documento
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+
+\begin{frame}{Conteúdo}
+
+\begin{multicols}{2}
+
+\begin{enumerate}
+    \item Introdução
+    \item Modelos Lineares Generalizados
+    \item Modelo de Regressão Poisson
+    \item Modelo de Quase-Verossimilhança
+    \item Modelos Paramétricos Alternativos
+    
+    \begin{enumerate}
+        \item Modelo Binomial Negativo
+        \item Modelo Poisson Generalizado
+        \item Modelo COM-Poisson
+        \item Modelo Gamma-Count
+    \end{enumerate}
+    \item Modelos para Excesso de Zeros
+    \begin{enumerate}
+        \item Modelos de Barreira (Hurdle)
+        \item Modelos de Mistura (Zero Inflated)
+    \end{enumerate}
+    \item Modelos com Efeitos Aleatórios
+\end{enumerate}
+
+\end{multicols}
+
+\end{frame}
+
+
+
+
+%%%-----------------------------------------------------------------------------------------
+
+
+%%% Slide 2
+
+\begin{frame}\frametitle{Dados de contagens}
+Alguns exemplos de problemas envolvendo contagens:
+
+\vspace{0,2cm}
+\begin{itemize}
+\item Número de acidentes em uma rodovia por semana;
+\item Número de automóveis vendidos por dia;
+\item Número de gols marcados por times de futebol por partida;
+\item Número de falhas por metro de fio de cobre produzido;
+\item Número de colônias de bactérias por $0,01mm^{2}$ de uma dada cultura...
+\end{itemize}
+\end{frame}
+
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 3
+
+\begin{frame}\frametitle{Modelos probabilísticos para dados de contagens}
+
+\begin{itemize}
+    \item Modelos probabilísticos para variáveis aleatórias discretas, com suporte no conjunto de números inteiros não-negativos, são potenciais candidatos para a análise de dados de contagens.
+    
+\vspace{0.5cm}    
+    
+    \item Algumas alternativas: Distribuição Binomial, Poisson e generalizações; distribuições geradas por misturas, como a beta-binomial, binomial negativa; distribuições fundamentadas na modelagem do tempo entre eventos, na razão de probabilidades sucessivas...
+    
+   
+\end{itemize}
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 4
+
+\begin{frame}\frametitle{Regressão para dados de contagens}
+
+\begin{itemize}
+
+\item Modelos de regressão são utilizados para modelar a distribuição de uma variável aleatória $Y$ condicional aos valores de um conjunto de variáveis explicativas $x_{1},x_{2},...,x_{p}$.
+
+\vspace{0,5cm}
+
+\item Métodos para inferência e modelos de regressão para dados de contagem estão bem
+aquém, em quantidade e diversidade, em relação ao verificado para dados contínuos.
+
+\vspace{0,5cm}
+
+\item A aplicação de modelos de regressão com erros normais na análise de contagens, embora frequente, em geral é desaconselhável.
+
+\end{itemize}
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 5
+
+\begin{frame}{Regressão com erros normais na análise de dados de contagens}
+    
+    \vspace{0,5cm}
+    
+    \begin{itemize}
+        \item O modelo linear com erros normais não considera a natureza discreta dos dados;
+        
+        \vspace{0,5cm}
+        
+        \item Associa probabilidade nula a qualquer possível contagem;
+        
+        \vspace{0,5cm}
+        
+        \item Admite probabilidades não nulas a valores negativos da variável;
+       
+    \end{itemize}
+    
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 6
+
+
+\begin{frame}{Regressão com erros normais na análise de dados de contagens}
+    
+    
+    \vspace{0,2cm}
+    
+    \begin{itemize}
+ 
+        \item O uso de transformações dificulta a interpretação dos resultados;
+        
+        \vspace{0,5cm}
+        
+        \item O uso da transformação logarítmica apresenta problemas para contagens iguais a zero;
+        
+        \vspace{0,5cm}
+        
+        \item Não se contempla a relação não constante entre variância e média, característica de  dados de contagens.
+        
+        
+    \end{itemize}
+    
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 7
+
+\begin{frame}{A distribuição de Poisson}
+    
+    \begin{itemize}
+        \item A distribuição de Poisson é a principal referência para a análise de dados de contagens.
+ \vspace{0,3cm}       
+        \item Função de probabilidades:
+
+        
+$$
+    P\left ( Y=k \right )=\frac{e^{-\lambda}\lambda^{k}}{k!},\hspace{5mm}k=0,1,2,...; \lambda>0.
+$$
+ 
+   \vspace{0,2cm}    
+   
+       \item Se os eventos sob contagem  ocorrem independentemente e sujeitos a uma taxa constante $\lambda >0$, sob o modelo Poisson,  para um intervalo de exposição de tamanho $t$ tem-se: 
+  
+$$
+    P\left ( Y_t=k \right )=\frac{e^{-\lambda t}(\lambda t)^{k}}{k!},\hspace{5mm}k=0,1,2,....
+$$
+        \end{itemize}
+        
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 11
+
+\begin{frame}{Propriedades da distribuição de Poisson}
+
+Dentre as principais propriedades da distribuição de Poisson, tem-se:
+
+\vspace{0,3cm}
+
+\begin{itemize}
+
+    \item Média: $E(Y)= \lambda$;
+    \vspace{0,5cm}
+    
+    \item Variância: $Var(Y)=\lambda$ (equidispersão);
+    \vspace{0,5cm}
+    
+    \item Razão de probabilidades sucessivas: $\frac{P\left ( X=k \right )}{P\left ( X=k-1 \right )}=\frac{\lambda}{k},$ gerando a relação de recorrência:
+    
+    $$
+        P(Y=k)k=P(Y=k-1)\lambda;
+    $$
+    
+    \item Se $Y_{1},Y_{2},...,Y_{n}$ são v.a.s independentes com $Y_{i}\sim Poisson(\lambda_{i})$, e $\sum\lambda_{i}<\infty$, então $\sum Y_{i}\sim Poisson(\sum\lambda_{i})$.
+    
+    \end{itemize}
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 13
+
+\begin{frame}{Distribuição Poisson para diferentes valores de $\lambda$}
+    
+    \begin{figure}[h]
+    \includegraphics[height=6cm,width=9cm]{images/Graf_Poisson.pdf}
+    \caption{Distribuição de Poisson para diferentes valores de $\lambda$}
+    \label{Fig1}
+    \centering
+    
+\end{figure}
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+
+%%% Slide 8
+
+\begin{frame}{Motivações para a distribuição de Poisson}
+    
+
+
+    \vspace{0,5cm}
+    
+    \begin{itemize}
+        \item Caso limite da distribuição binomial$(n, \pi)$ quando $n\rightarrow \infty$ e $\pi\rightarrow 0$, fixado $\lambda=n\pi$, ou seja:
+
+\vspace{0.4cm}
+
+$$
+     \underset{n \to \infty  \pi \to 0 }{lim}
+\left [ \begin{pmatrix}
+ n\\k 
+\end{pmatrix} \left ( \frac{\lambda}{n} \right )^{k}\left ( 1-\frac{\lambda}{n} \right )^{n-k}\right ]=\frac{e^{-\lambda}\lambda^{k}}{k!}.
+$$
+
+    \vspace{0,5cm}
+
+        \item Resultado do processo estocástico de Poisson, em que os eventos contados ocorrem \textbf{aleatoriamente} ao longo do tempo, espaço,...
+
+    \end{itemize}
+    
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 9
+
+\begin{frame}{Motivações para a distribuição de Poisson}
+
+\begin{itemize}
+    
+
+        \item Se o tempo decorrido entre sucessivos eventos é uma variável aleatória com distribuição exponencial de média $\mu=1/\lambda$, então o número de eventos ocorridos em um intervalo t de tempo tem distribuição de Poisson com média $\lambda t$.
+        
+         \vspace{0,3cm}
+         
+\begin{itemize}    
+        
+        \item A dualidade entre as distribuições Poisson e exponencial implica que a taxa de ocorrência do evento, definida por:
+        
+        
+\end{itemize}
+
+    
+$$
+    \lambda (t) =\lim_{\Delta t\rightarrow 0}\frac{P\left \{ \text{evento ocorrer em} \left ( t,t+\Delta t \right ) \right \}}{\Delta t},
+$$  
+
+     \vspace{0,3cm}
+     
+dado que o evento não ocorreu até o tempo $t$, \textbf{é constante} para todo $t>0$.
+
+        
+         \end{itemize}
+    
+\end{frame}   
+
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 13
+
+\begin{frame}{Diferentes comportamentos para $\lambda (t)$}
+    \vspace{-1.5cm}
+    \begin{figure}[h]
+    \includegraphics[height=8cm,width=10cm]{images/Graf_Risco.pdf}
+    \vspace{-0.8cm}
+    \caption{Diferentes comportamentos para $\lambda (t)$}
+    \label{Fig1}
+    \centering
+    
+\end{figure}
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+
+%%% Slide 10
+
+\begin{frame}{O processo de Poisson}
+    
+    O Processo de Poisson configura um processo de contagem em que $Y(t),t\geqslant 0$, representa o número de eventos que ocorrem até $t$, satisfazendo:
+    
+    \vspace{0,5cm}
+    
+    \begin{enumerate}
+        \item $Y(t)$ é inteiro e não negativo;
+        \item Para $s<t$, $Y(s)\leq Y(t)$;
+        \item $Y(t)-Y(s)$ é o número de eventos que ocorrem no intervalo $(s,t]$;
+        \item O processo é estacionário:
+        
+        $$
+            Y(t_{2}+s)-Y(t_{1}+s) \overset{i.d. }{\sim}Y(t_{2})-Y(t_{1}), \forall s>0
+       $$
+        
+        \item O processo tem incrementos independentes, ou seja, os números de eventos verificados em intervalos disjuntos são independentes.
+    \end{enumerate}
+
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+
+%%% Slide 14
+
+\begin{frame}{Diferentes padrões em processos de contagens}
+    
+\begin{figure}[h]
+    \includegraphics[scale=0.6]{images/processos14.pdf}
+    \caption{Ilustração de diferentes tipos de processos pontuais}
+    \label{Fig2}
+    \centering
+    
+\end{figure}
+\end{frame}
+
+
+
+%%% Slide 15
+
+\begin{frame}{Regressão Poisson} 
+
+\begin{itemize}
+    \item O modelo de regressão Poisson (ou modelo log linear de Poisson) é o mais usado para a análise de dados de contagens.
+    
+    \vspace{0,5cm}
+    
+    \item A regressão Poisson baseia-se nos pressupostos inerentes ao processo e à distribuição de Poisson.
+    
+    \vspace{0,5cm}
+    
+    \item Caso tais pressupostos não sejam atendidos, a regressão Poisson ainda pode ser uma alternativa apropriada, desde que usada com os cuidados necessários.
+    
+\end{itemize}
+
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 16
+
+\begin{frame}{Regressão Poisson - Especificação do modelo} 
+
+\begin{itemize}
+    \item Sejam $Y_{1},Y_{2},...,Y_{n}$ variáveis aleatórias condicionalmente independentes, dado o vetor de covariáveis ${\boldsymbol{x_{i}}}'=(x_{i1},x_{i2},...,x_{ip}), i=1,2,...,n$. A regressão Poisson é definida pela distribuição de Poisson:
+
+
+$$
+   f(y_{i}|\boldsymbol{x_{i}})=\frac{e^{-\mu_{i}}(\mu_{i})^{y_{i}}}{y_{i}!},\hspace{5mm}y=0,1,2,...,
+$$
+
+\vspace{0,2cm}
+ 
+sendo as covariáveis inseridas ao modelo por:
+
+$$
+\ln(\mu _{i})=\boldsymbol{x_{i}'} \boldsymbol{\beta},
+$$
+
+\vspace{0,2cm}
+ 
+em que ${\boldsymbol{\beta }}$ é o vetor de parâmetros de regressão.
+ 
+
+\end{itemize}
+
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+
+%%% Slide 17
+
+\begin{frame}{Regressão Poisson - Propriedades} 
+
+
+\vspace{0,8cm}  
+    
+    \begin{itemize}
+        
+        \item $f(y_{i}|\boldsymbol{x_{i}})=\frac{e^{-exp(\boldsymbol{x'_i\beta})}{exp({\boldsymbol{x'_i\beta}})}^{y_i}}{y_i!}$
+        
+
+  
+  \vspace{0,8cm}  
+
+        
+        \item $E\left [ y_{i}|\boldsymbol{x_{i}} \right ]= \mu_{i}=exp\left ( \boldsymbol{x'_{i}\beta} \right );$
+
+\vspace{0,8cm}  
+   
+        \item $Var\left [ y_{i}|\mathbf{x_{i}} \right ]= \mu_{i}=exp\left ( \boldsymbol{x'_{i}\beta} \right ).$
+    
+
+    
+    
+\end{itemize}
+
+\end{frame}
+
+%%%-----------------------------------------------------------------------------------------
+
+
+
+
+
+%%% Slide 18
+
+\begin{frame}{Regressão Poisson - Estimação por máxima verossimilhança} 
+
+Para a regressão Poisson:
+
+\vspace{0.5cm}
+
+\begin{itemize} 
+
+\item Log-verossimilhança: $l(\boldsymbol{\beta})=\sum_{i=1}^{n} \{ y_{i}\boldsymbol{x_{i}'\beta}-\exp{(\boldsymbol{x_{i}'\beta}}\}-\ln{y_{i}!});$
+
+\vspace{0.5cm}
+
+\item Vetir escore: $\boldsymbol{S}(\boldsymbol{\beta})=\frac{\partial l(\boldsymbol{\beta};\boldsymbol{y})}{\partial \boldsymbol{\beta}}=
+              \sum_{i=1}^{n}(y_{i}-\exp(\boldsymbol{x_{i}'\beta}))\boldsymbol{x_{i}};$       
+\vspace{0.5cm}
+  
+\item Matriz Informação: $
+\boldsymbol{I({\beta})} = \sum_{i=1}^n \mu_i \boldsymbol{x_i x'_i}  = \exp{(\boldsymbol{x'_i \beta})\boldsymbol{x_i x'_i}}; 
+$
+  
+\vspace{0.5cm}
+  
+\item  Distribuição assintótica: $
+\boldsymbol{\hat{\beta}} \overset{a}{\sim} N \left ( \boldsymbol{\beta}, \left [ \sum_{i=1}^n \mu_i \boldsymbol{x_i x'_i} \right ]^{-1} \right ). 
+$ 
+       
+\end{itemize}
+
+\end{frame}
+
+
+%%%-----------------------------------------------------------------------------------------
+
+
+%%% Slide 34
+
+\begin{frame}{Regressão Poisson - Modelo Linear Generalizado} 
+
+
+A Regressão Poisson é um caso particular dos Modelos Lineares Generalizados (MLG). Algumas propriedades dessa classe de modelos:
+
+\begin{itemize}
+
+\item Os estimadores são consistentes ainda que a distribuição especificada seja incorreta, mas desde que a média condicional de $Y$ seja declarada corretamente;
+
+\item Os erros padrões, intervalos de confiança e testes de hipóteses, no entanto, ficam comprometidos;
+
+\item O ajuste de um MLG requer apenas a especificação:
+
+\begin{itemize}
+\item Da esperança de $Y$ condicional às covariáveis, mediante especificação do preditor linear e da função de ligação;
+
+\item Da variância condicional, mediante especificação da função de variância $V(\mu)$, possível inclusão do parâmetro de dispersão $(\phi)$, ou sua estimação por métodos robustos (abordagem de Quase-Verossimilhança).
+
+\end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+
+
+%%%-----------------------------------------------------------------------------------------
+
+
+\begin{frame}{Regressão Poisson - Quase-Verossimilhança} 
+
+\begin{itemize}
+    \item Para o ajuste de um modelo alternativo via Quase-Verossimilhança, definimos:
+
+\vspace{0.4cm}
+
+$$g(E(y_i|\boldsymbol{x_i}))=\boldsymbol{x'_i \beta};$$
+
+$$Var(y_i|\boldsymbol{x_i})=\phi V(\mu_i).$$
+
+\item A obtenção dos estimadores se dá pela maximização da função de quase-verossimilhança:
+
+$$ Q\left ( \mu \right )=\int _y^\mu \frac{y-t}{\phi V(t)}dt $$.
+
+
+\item As funções de quase-verossimilhança, quase-escore e quase-informação compartilham propriedades comuns às correspondentes funções no caso paramétrico, para MLGs.
+
+\end{itemize}
+
+
+
+\end{frame}
+
+
+
+
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 39
+
+\begin{frame}{Estimação via Quase-Verossimilhança} 
+
+\begin{itemize}
+
+\item Distribuição assintótica:
+
+\vspace{0.3cm}
+
+$$ \boldsymbol{\hat{\beta}_{QL}} \overset{a}{\sim} N(\boldsymbol{\beta}, Var(\boldsymbol{\hat{\beta}_{QL}} ))$$
+
+\vspace{0.8cm}
+
+\item Para o modelo Quase-Poisson, assume-se:
+
+$$\ln(E(y_i|\boldsymbol{x_i}))=\boldsymbol{x'_i \beta};$$
+
+
+
+
+
+\end{itemize}
+
+\end{frame}
+
+
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide45
+
+\begin{frame}{Estimação via Quase Verossimilhança} 
+
+\begin{itemize}
+
+\item A matriz de covariâncias assintótica para $\boldsymbol{\hat{\beta}_{QL}}$ fica dada por:
+
+$$
+Var(\boldsymbol{\hat{\beta}_{QL}})=\left [ \sum_{i=1}^{n} \boldsymbol{x_{i}x'_{i}}\mu_{i} \right ]^{-1}
+\sum_{i=1}^{n} \boldsymbol{x_{i}x'_{i}} \omega_{i} \left [ \sum_{i=1}^{n} \boldsymbol{x_{i}x'_{i}}\mu_{i} \right ]^{-1},
+$$
+
+com $\mu_{i}=exp({\boldsymbol{x'_{i}\beta}})$ e $\omega_{i}=Var(y_{i}|\boldsymbol{x_{i}})$.
+
+\vspace{0.5cm}
+
+
+\item Podemos considerar $\omega_i=V(\mu_i;\phi)$, como $\omega_i =\phi \mu_i$, $\omega_i =\phi \mu_i^2$ ou, simplesmente, o estimador robusto, baseado em $\omega_i=(y_i-\mu_i)^2$.
+
+\item Um estimador para $\phi$:
+
+$$ \hat{\phi} = \frac{1}{n-p}\sum_{i=1}^n \frac{y_i-\hat{\mu}_i}{V(\hat{\mu}_i)}. $$
+
+
+\end{itemize}
+
+\end{frame}
+
+
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 47
+
+\begin{frame}{Distribuição binomial negativa} 
+
+\begin{itemize}
+
+\item Função de probabilidades:
+
+$$
+P(Y=k)=\frac{\Gamma(\alpha+k)}{\Gamma(k+1)\Gamma(\alpha)}\left ( \frac{\lambda}{\lambda+\alpha} \right )^{k} \left( \frac{\alpha}{\lambda+\alpha} \right )^{\alpha}, k=0,1,2,...; \alpha > 0, \lambda>0
+$$
+
+\item Propriedades:
+
+$$
+E(Y)=\lambda ; \quad Var(Y)= \lambda+ \alpha^{-1} \lambda^2
+$$
+
+\item Assim, para qualquer $\alpha>0$, temos $Var(Y)>\lambda$.
+
+\item A distribuição binomial negativa tem como caso limite distribuição Poisson, quando $\alpha \rightarrow \infty$.
+
+
+\end{itemize}
+
+\end{frame}
+
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 48
+
+\begin{frame}{Distribuição binomial negativa} 
+
+\begin{itemize}
+
+\item Uma parametrização alternativa:
+
+\vspace{0.5cm}
+
+$$
+P(Y=k) = \left ( \begin{matrix}
+r+k-1\\ 
+r-1
+\end{matrix} \right ) (1-p)^rp^k, \hspace{0,5cm} k=0,1,2,...,
+$$
+
+\vspace{0.5cm}
+
+sendo $r=\alpha$ e $p=\lambda/(\lambda+\alpha),$ com $0<p<1$ e $r>0$.  
+\vspace{0.5cm}
+
+\item Modelagem do número de "sucessos" até o r-ésimo "fracasso" ($r = 1,2,3,...$), configurando uma generalização da distribuição geométrica (para $r=1$).
+
+\vspace{0.5cm}
+
+\item Modelagem de alguns tipos de processos pontuais envolvendo contágio.
+
+\end{itemize}
+
+\end{frame}
+
+
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 48
+
+\begin{frame}{Distribuição binomial negativa} 
+
+\begin{itemize}
+
+\item A principal motivação para a distribuição binomial negativa baseia-se num processo de contagem heterogêneo, em que $Y \sim Poisson( \theta)$ e $\theta$ tem distribuição $Gama(\alpha, \beta):$
+
+$$
+g\left ( \theta;\alpha,\beta \right )=\frac{\beta^{\alpha}}{\Gamma\left ( \alpha \right )}\theta^{\alpha-1}e^{-\beta \theta},\quad \alpha, \beta, \nu>0,
+$$
+
+com $E(\theta)=\theta=\alpha /\beta$ e variância $Var(\theta)=\alpha /\beta^2.$
+
+\vspace{0.5cm}
+
+\item Como resultado, temos uma mistura Poisson-Gamma, resultando, marginalmente (em relação a $\theta$), na distribuição binomial negativa.
+
+
+\end{itemize}
+
+\end{frame}
+
+
+%%%-----------------------------------------------------------------------------------------
+
+
+%%% Slide 50
+
+\begin{frame}{Distribuição binomial negativa para diferentes parâmetros}
+    
+    \begin{figure}[h]
+    \includegraphics[height=5.5cm,width=9cm]{images/Graf_BN.pdf}
+    \caption{Distribuição binomial negativa para $\lambda=2$ e diferentes valores de $\alpha.}
+    \label{Fig1}
+    \centering
+    
+\end{figure}
+\end{frame}
+
+
+
+%%%-----------------------------------------------------------------------------------------
+
+%%% Slide 51
+
+\begin{frame}{Distribuição binomial negativa} 
+
+\begin{itemize}
+
+\item O modelo de regressão com resposta binomial negativa pode ser especificado fazendo $E(y|\boldsymbol{x})=exp(\boldsymbol{x'\beta}).$
+
+\vspace{0.5cm}
+
+\item Para valores fixados de $\alpha$, a distribuição binomial negativa fica expressa na forma da família exponencial linear, contemplada pela teoria de MLG.
+
+\vspace{0.5cm}
+
+\item A estimação dos parâmetros do modelo se dá numericamente, segundo um algoritmo em duas etapas, em que $\alpha$ e $\boldsymbol{\beta}$ são estimados condicionalmente até convergência.
+
+\end{itemize}
+
+\end{frame}
+
+\end{document}
