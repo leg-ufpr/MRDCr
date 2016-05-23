@@ -9,8 +9,16 @@
 #'     aves por calor. Nesse experimento, o sistema só foi utilizado a
 #'     partir dos 21 dias de idade. A cada dia foi contado o número de
 #'     aves encontradas mortas no aviário.
-#' @format Um \code{data.frame} com 176 observações e 4 variáveis, em
-#'     que
+#'
+#' Fora dos galpões, um sistema de monitoramento das variáveis
+#'     ambientais registrou, em intervalos de 1 hora dos 21 aos 39 dias
+#'     de idade, as variáveis para que fossem determinados: a entalpia
+#'     específica do ar (H), a carga térmica de radiação (CTR) e o
+#'     índice de temperatura de globo negro e umidade (ITGU). Essas
+#'     variáveis tem a finalidade de explicar a variação da mortalidade
+#'     das aves nos sistemas de resfriamento ao longo dos dias.
+#' @format \code{confterm} é um \code{data.frame} com 176 observações e
+#'     4 variáveis, em que
 #'
 #' \describe{
 #'
@@ -27,6 +35,26 @@
 #' \item{\code{nap}}{Número de aves perdidas (ou mortas) por dia.}
 #'
 #' }
+#'
+#' \code{conftemp} é um \code{data.frame} com 456 observações e 6
+#'     variáveis, em que
+#'
+#' \describe{
+#'
+#' \item{\code{hora}}{As horas em cada dia, retomando do 0 em cada novo
+#'     dia.}
+#'
+#' \item{\code{hr}}{As horas a partir o primeiro dia continuamente.}
+#'
+#' \item{\code{idade}}{A idade dos animais, em dias.}
+#'
+#' \item{\code{h}}{Entalpia específica do ar.}
+#'
+#' \item{\code{ctr}}{Carga térmica de radiação.}
+#'
+#' \item{\code{itgu}}{Índice de temperatura de globo negro e umidade.}
+#'
+#' }
 #' @source MACHADO, N. S.; TINÔCO, I. D. F. F.; ZOLNIER, S.; MOGAMI,
 #'     C. A.; DAMASCENO, F. A.; ZEVIANI, W. M. Resfriamento da cobertura
 #'     de aviários e seus efeitos na mortalidade e nos índices de
@@ -35,9 +63,14 @@
 #'     \url{http://www.ufv.br/dea/ambiagro/gallery/publicações/Artigo5.pdf}.
 #' @examples
 #'
+#' #-----------------------------------------
+#' # Gráfico da mortalidade das aves.
+#'
 #' library(lattice)
+#' library(latticeExtra)
 #'
 #' str(confterm)
+#' summary(confterm)
 #'
 #' xtabs(~idade + resfr, data = confterm)
 #'
@@ -50,4 +83,48 @@
 #'                                 "Sem sistema de resfriamento")),
 #'        auto.key = list(corner = c(0.05, 0.9)))
 #'
+#' #-----------------------------------------
+#' # Gráfico das variáveis térmicas.
+#'
+#' # Amplitude estendida das variáveis.
+#' lim <- with(conftemp, apply(cbind(h, ctr, itgu), MARGIN = 2,
+#'                             FUN = extendrange, f = 0.2))
+#'
+#' # Anotação da eixo x do gráfico.
+#' scales <- list(
+#'     y = list(relation = "free"),
+#'     x = list(at = seq(from = 1,
+#'                       to = ceiling(max(conftemp$hr/24)) * 24,
+#'                       by = 24)))
+#' scales$x$labels <- seq_along(scales$x$at)
+#'
+#' xyplot(h + ctr + itgu ~ hr, data = conftemp,
+#'        outer = TRUE, type = "l", layout = c(1, NA),
+#'        scales = scales, xlim = range(scales$x$at),
+#'        xlab = "Dias",
+#'        ylab = "Variáveis térmicas",
+#'        panel = function(y, subscripts, ...) {
+#'            wp <- which.packet()
+#'            r <- lim[, wp[1]]
+#'            panel.rect(10.5 + 24 * (scales$x$labels - 1), r[1],
+#'                       20 + 24 * (scales$x$labels - 1), r[2],
+#'                       col = "blue",
+#'                       border = "transparent",
+#'                       alpha = 0.25)
+#'            panel.xyplot(y = y, subscripts = subscripts, ...)
+#'        })
+#'
+#' # Valores máximos do dia.
+#' tempdia <- aggregate(cbind(hm = h, cm = ctr, im = itgu) ~ idade,
+#'                      data = conftemp, FUN = max)
+#'
+#' splom(tempdia[, -1])
+#'
+#' confterm <- merge(confterm, tempdia, by = "idade")
+#' str(confterm)
+#'
+NULL
+
+#' @name conftemp
+#' @rdname confterm
 NULL

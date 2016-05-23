@@ -7,8 +7,6 @@
 #' @description Essa função permite representar intervalos de confiança
 #'     e bandas de confiança em gráficos do pacote lattice.
 #'
-#' @param y Valor central ou estimativa pontual.
-#'
 #' @param ly Limite inferior do intervalo/banda de confiança.
 #'
 #' @param uy Limite superior do intervalo/banda de confiança.
@@ -21,7 +19,7 @@
 #'     quantidades a somar/subtrair dos valores de \code{x} para não
 #'     sobrepor intervalos. Com esse argumento pode-se representar mais
 #'     de um intervalor por valor de \code{x}. Não é usado quando
-#'     \code{cty = "bands"}
+#'     \code{cty = "bands"}.
 #'
 #' @param fill Uma representação de cor para preencher o interior das
 #'     bandas de confiança. Não é usado quando \code{cty = "bars"}.
@@ -34,8 +32,9 @@
 #'     formam o "T". O valor default é 0.05. Não é usado quando
 #'     \code{cty = "bands"}.
 #'
-#' @param x,subscripts,col.line,lwd,... Argumentos passados para a
-#'     função \code{\link[lattice]{xyplot}}.
+#' @param x,y,subscripts,col.line,lwd,... Argumentos passados para a
+#'     \code{\link[lattice]{panel.xyplot}} pela função
+#'     \code{\link[lattice]{xyplot}}.
 #'
 #' @return São usadas dentro de funções do pacote \pkg{lattice}.
 #'
@@ -127,7 +126,6 @@ panel.cbH <- function(x, y, ly, uy,
 
 #' @name prepanel.cbH
 #' @rdname panel.cbH
-#' @author Walmes Zeviani baseado na lista de discussão R-help.
 #' @export
 prepanel.cbH <- function(y, ly, uy, subscripts){
     ly <- as.numeric(ly[subscripts])

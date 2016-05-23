@@ -12,10 +12,9 @@ panel.cbH(x, y, ly, uy, subscripts, cty, col.line = plot.line$col,
 prepanel.cbH(y, ly, uy, subscripts)
 }
 \arguments{
-\item{x, subscripts, col.line, lwd, ...}{Argumentos passados para a
-função \code{\link[lattice]{xyplot}}.}
-
-\item{y}{Valor central ou estimativa pontual.}
+\item{x, y, subscripts, col.line, lwd, ...}{Argumentos passados para a
+\code{\link[lattice]{panel.xyplot}} pela função
+\code{\link[lattice]{xyplot}}.}
 
 \item{ly}{Limite inferior do intervalo/banda de confiança.}
 
@@ -29,7 +28,7 @@ e \code{"bands"} para bandas de confiança.}
 quantidades a somar/subtrair dos valores de \code{x} para não
 sobrepor intervalos. Com esse argumento pode-se representar mais
 de um intervalor por valor de \code{x}. Não é usado quando
-\code{cty = "bands"}}
+\code{cty = "bands"}.}
 
 \item{fill}{Uma representação de cor para preencher o interior das
 bandas de confiança. Não é usado quando \code{cty = "bars"}.}
@@ -102,8 +101,6 @@ xyplot(y ~ x, groups = trt, data = da) +
 
 }
 \author{
-Walmes Zeviani baseado na lista de discussão R-help.
-
 Walmes Zeviani baseado na lista de discussão R-help.
 }
 \seealso{

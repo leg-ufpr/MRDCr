@@ -38,6 +38,7 @@ Imports:
 Suggests:
     MASS,
     car,
+    corrplot,
     plyr,
     ggplot2,
     reshape,
@@ -45,6 +46,8 @@ Suggests:
     knitr,
     rmarkdown,
     shiny,
-    corrplot
+    rpanel,
+    testthat,
+    methods
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1

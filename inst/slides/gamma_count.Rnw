@@ -1,0 +1,215 @@
+<<setup-child, eval=FALSE, include=FALSE>>=
+set_parent("slides-mrdcr.Rnw")
+@
+
+\begin{frame}
+  \begin{center}
+    \includegraphics[width=11cm]{images/winkelman95.jpeg}
+  \end{center}
+  \begin{thebibliography}{99}
+  \bibitem{Winkelmann1995}
+    \MakeUppercase{Winkelmann, R.}
+    \newblock{Duration Dependence and Dispersion in Count-Data Models}.
+    \textbf{Journal of Business \& Economic Statistics}, v.13, n.4,
+    p.467--474, 1995.
+  \end{thebibliography}
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+  \frametitle{Duração dependência}
+  \begin{itemize}
+  \item Considere um processo estocástico definido pela sequência da
+    v.a. $\tau_i$, intervalo de tempo entre eventos.
+  \item Se $\{\tau_1, \tau_2,\ldots\}$ são independentes e identicamente
+    distribuídos, todos com densidade $f(\tau)$, esse processo é chamado
+    de \emph{renewal process}.
+  \item Defina a variável de contagem $N_T$ como o número de eventos no
+    intervalo $[0,T)$.
+  \item Defina $\vartheta_n = \sum_{i=1}^{n} \tau_i$ o tempo até o
+    $n$-ésimo evento.
+  \item A distribuição de $\vartheta_n$ determina a distribuição de
+    $N_T$, mas é baseada em covolução.
+  \item São distribuições fechadas para covolução: normal, Poisson,
+    binomial e gama.
+  \item Destas, apenas a gama é contínua e positiva.
+
+    \framebreak
+
+  \item Denote $\text{E}(\tau) = \mu$, $\text{V}(\tau) = \sigma^2$ e
+    $\text{CV}(\tau) = \sigma/\mu$.
+  \item Defina $\lambda(\tau) = \frac{f(\tau)}{1-F(\tau)}$ como a função
+    de risco e assuma que é monótona.
+  \item Existe relação entre o tipo de duração dependência e o
+    coeficiente de variância
+    \begin{equation}
+      \frac{\text{d}\lambda(t)}{\text{d}t} \left.\begin{matrix}
+          < \\
+          = \\
+          >
+        \end{matrix}\right\} 0 \Rightarrow
+      \upsilon \left.\begin{matrix}
+          < \\
+          = \\
+          >
+        \end{matrix}\right\} 1
+    \end{equation}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+  \frametitle{Relação entre número de eventos e intervalo entre eventos}
+  \begin{itemize}
+  \item Intervalos entre tempo $\tau \sim \text{Gama}(\alpha,\beta)$,
+    $$f(\tau, \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)}
+    \cdot \tau^{\alpha-1}\cdot \exp\{-\beta\tau\},$$
+    $$ \text{E}(\tau) = \frac{\alpha}{\beta}, \quad
+    \text{V}(\tau) = \frac{\alpha}{\beta^2}.$$
+  \item Tempo até o $n$-ésimo evento
+    $$\vartheta_n = \tau_1+\cdots+\tau_n ~ \sim
+    \text{Gama}(n\alpha, \beta),$$
+    $$f_n(\vartheta, \alpha, \beta) =
+    \frac{\beta^{n\alpha}}{\Gamma(n\alpha)}\cdot
+    \vartheta^{n\alpha-1}\cdot \exp\{-\beta\vartheta\},$$
+    $$ \text{E}(\vartheta) = \frac{n\alpha}{\beta}, \quad
+    \text{V}(\vartheta) = \frac{n\alpha}{\beta^2}.$$
+
+    \framebreak
+
+  \item A distribuição acumulada do tempo até $\vartheta_{n}$ é
+    $$F_n(T) = \Pr(\vartheta_n \leq T) = \int_{0}^{T}
+    \frac{\beta^{n\alpha}}{\Gamma(n\alpha)}\cdot t^{n\alpha-1}\cdot
+    \exp\{-\beta t\}\,\text{d}t.$$
+  \item Seja $[0,T)$ um intervalo e $N_{T}$ a v.a. número de eventos
+    neste intervalo.
+  \item Segue que $N_T < n$ se e somente se $\vartheta_n \geq
+    T$. Assim
+    $$\Pr(N_T<n) = \Pr(\vartheta_n \geq T) = 1-F_n(T);$$
+  \item Já que $\Pr(N_T = n) = \Pr(N_T < n+1) - \Pr(N_T < n)$, então
+    $$\Pr(N_T = n) = F_n(T) - F_{n+1}(T).$$
+
+    \framebreak
+
+  \item Portanto, distribuição de $N_T$ é resultado da diferença de
+    acumuladas da distribuição Gama, pois
+    \begin{equation}
+      F_n(T) = G(n\alpha, \beta T) =
+      \int_{0}^{T} \frac{\beta^{n\alpha}}{\Gamma(n\alpha)}
+      t^{n\alpha-1}\cdot\exp\{-\beta t\}\, \text{d}t.
+    \end{equation}
+  \item Assim
+    \begin{align*}
+      \Pr(N_T=n) &= G(n\alpha, \beta T) - G((n+1)\alpha, \beta T) \\
+                 &= \left[ \int_{0}^{T}
+                   \frac{\beta^{n\alpha}}{\Gamma(n\alpha)}
+                   t^{n\alpha-1}\cdot
+                   \exp\{-\beta t\}\, \text{d}t \right] \\
+                 &\quad -
+                   \left[ \int_{0}^{T}
+                   \frac{\beta^{(n+1)\alpha}}{\Gamma((n+1)\alpha)}
+                   t^{(n+1)\alpha-1}\cdot
+                   \exp\{-\beta t\}\, \text{d}t \right]
+    \end{align*}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+<<fig.width = 9, fig.height = 4.5, out.width = "0.95\\textwidth">>=
+library(MRDCr)
+grid <- expand.grid(lambda = c(2, 8, 15),
+                    alpha = c(0.5, 1, 2.5))
+y <- 0:30
+py <- mapply(FUN = dgcnt,
+             lambda = grid$lambda,
+             alpha = grid$alpha,
+             MoreArgs = list(y = y), SIMPLIFY = FALSE)
+grid <- cbind(grid[rep(1:nrow(grid), each = length(y)), ],
+              y = y,
+              py = unlist(py))
+
+useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
+                      ylab = expression(f(y)),
+                      xlab = expression(y),
+                      data = grid, type = "h",
+                      panel = function(x, y, ...) {
+                          m <- sum(x * y)
+                          panel.xyplot(x, y, ...)
+                          panel.abline(v = m, lty = 2)
+                      }),
+               strip = strip.custom(
+                   strip.names = TRUE,
+                   var.name = expression(lambda == ""),
+                   sep = ""),
+               strip.left = strip.custom(
+                   strip.names = TRUE,
+                   var.name = expression(alpha == ""),
+                   sep = ""))
+@
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+  \frametitle{Parametrização para modelo de regressão}
+  \begin{itemize}
+  \item A média da variável aleatória $N_T$ é resultado de
+    \begin{align*}
+      E(N) &= \sum_{i=0}^{\infty} i\cdot \Pr(i) \\
+           &= \sum_{i=1}^{\infty} i\cdot \Pr(i)\\
+           &= \sum_{i=1}^{\infty} G(i\alpha, \beta T).\\
+    \end{align*}
+  \item Para um $T$ cada vez maior, tem-se que
+    \begin{equation*}
+      N(T)\; \dot{\sim}\; \text{Normal}\left(
+        \frac{\beta}{\alpha},
+        \frac{\beta}{\alpha^2}\right).
+    \end{equation*}
+  \item Considere que
+    $$\frac{\beta}{\alpha} = \exp\{x^{\top}\theta\} \Rightarrow
+    \beta = \alpha \exp\{x^{\top}\theta\}.$$
+    Essa parametrização produz um modelo de regressão para a média
+    do tempo entre eventos definida por
+    $$\text{E}(\tau|x) = \frac{\alpha}{\beta} =
+    \exp\{-x^{\top}\theta\}.$$
+  \item O modelo de regressão é para o tempo entre eventos ($\tau$)
+    e não diretamente para contagem porque, a menos que
+    $\alpha = 1$, não é certo que
+    $\text{E}(N_i|x_i) = [\text{E}(\tau_i|x_i)]^{-1}$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Função de log-verossimilhança}
+  Considerando uma amostra aleatória $y_i, i=1,2,\ldots,n$, a
+  verossimilhança é
+  \begin{equation}
+    L(y; \alpha, \beta) =
+    \prod_{i=1}^{n} \left(
+      G(y_i\alpha, \beta) -
+      G((y_i+1)\alpha, \beta) \right)
+  \end{equation}
+  e a função de log-verossimilhança é
+  \begin{equation}
+    \ell(y; \alpha, \beta) =
+    \sum_{i=1}^{n} \ln\left(
+      G(y_i\alpha, \beta) -
+      G((y_i+1)\alpha, \beta) \right)
+  \end{equation}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Implementação da log-verossimilhança}
+<<echo = TRUE>>=
+library(MRDCr)
+llgcnt
+@
+\end{frame}
+
+\begin{frame}{Estudos de caso}
+  {\it Vignette} \href{run:../doc/v06_gamma_count.html}{\tt
+    gamma\_count.html}
+  \begin{description}
+  \item[\tt soja]: Número de vagens, de grãos e de grãos por vagem.
+  \item[\tt capdesfo]: Número de capulhos produzidos em algodão.
+  \item[\tt nematoide]: Número de nematoides em raízes de linhagens de
+    feijoeiro.
+  \item[\tt cambras]: Gols do Campeonato Brasileiro de 2010.
+  \end{description}
+\end{frame}

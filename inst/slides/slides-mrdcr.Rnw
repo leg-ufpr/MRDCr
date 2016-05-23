@@ -1,6 +1,7 @@
 \documentclass[10pt, aspectratio=169]{beamer}
 
 \usepackage[brazil]{babel}
+\usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
 \usepackage{multicol}
@@ -66,7 +67,7 @@
 \setbeamertemplate{headline}{\bfseries
   \leavevmode%
   \hbox{%
-    \begin{beamercolorbox}[wd=.5\paperwidth, ht=2.2ex, dp=1ex, right, 
+    \begin{beamercolorbox}[wd=.5\paperwidth, ht=2.2ex, dp=1ex, right,
       rightskip=1em]{section in head/foot}
       \hspace*{2ex}\insertsectionhead
     \end{beamercolorbox}%
@@ -82,7 +83,7 @@
 \setbeamertemplate{footline}{\ttfamily\bfseries
   \leavevmode%
   \hbox{%
-    \begin{beamercolorbox}[wd=.35\paperwidth, ht=2.4ex, dp=1ex, right, 
+    \begin{beamercolorbox}[wd=.35\paperwidth, ht=2.4ex, dp=1ex, right,
       rightskip=1em]{footlinecolor}
       \insertshortauthor%
     \end{beamercolorbox}%
@@ -106,7 +107,7 @@
 }
 
 \setbeamertemplate{subsection in toc}{
-  {\color{teal!80} 
+  {\color{teal!80}
   \bfseries\inserttocsectionnumber.\inserttocsubsectionnumber}~
   \leftskip=2em{\color{black}\inserttocsubsection\par}
 }
@@ -204,6 +205,9 @@ source("_setup.R")
 \subsection{Modelo Poisson-Generalizada}
 \label{sec-poisson-generalizada}
 
+<<pgnz, child = "poisson_generalizada.Rnw">>=
+@
+
 \subsection{Modelo COM-Poisson}
 \label{sec-com-poisson}
 
@@ -212,6 +216,9 @@ source("_setup.R")
 
 \subsection{Modelo Gamma-Count}
 \label{sec-gamma-count}
+
+<<gcnt, child = "gamma_count.Rnw">>=
+@
 
 \section{Modelos para Excesso de Zeros}
 \label{sec-excesso-zeros}
@@ -257,6 +264,35 @@ Software}, 27(8), 1 - 25.
 
 \bibitem{Winkelmann2008} Winkelmann, R. (2008). {\em Econometric analysis
 of count data} (5th Ed.). Springer Science \& Business Media.
+
+\bibitem{silva2012}
+\MakeUppercase{Silva, A. M.; Degrande, P. E.; Suekane, R.; Fernandes,
+  M. G.; Zeviani, W. M.}
+\newblock{Impacto de diferentes níveis de desfolha artificial nos
+  estádios fenológicos do algodoeiro}.
+\newblock \textbf{Revista de Ciências Agrárias}, v.35, n.1, 2012 (prelo).
+
+\bibitem{Winkelmann1994}
+\MakeUppercase{Winkelmann, R.; Zimmermann, K.}
+\newblock {Count data models for demographic data}.
+\newblock \textbf{Mathematical Population Studies}, v.4, n.3, p.205--221, 1994.
+
+\bibitem{Winkelmann1995}
+\MakeUppercase{Winkelmann, R.}
+\newblock{Duration dependence and dispersion in count-data models}.
+\newblock \textbf{Journal of Business \& Economic Statistics}, v.13, n.4,
+  p.467--474, 1995.
+
+\bibitem{ConsulJain1997}
+\MakeUppercase{Consul, P. C. and G. C. Jain}
+\newblock{A generalization of the Poisson distribution}.
+\textbf{Technometrics}, v.15, n.4, p.791--799, 1973.
+
+\bibitem{Consul1989}
+\MakeUppercase{Consul, P. C}
+\newblock{Generalized Poisson Distributions: Properties and
+Applications}. \textbf{Statistics: Textbooks and Monographs}, New
+York: Marcel Dekker Inc. 1989.
 
 \end{thebibliography}
 \end{frame}
