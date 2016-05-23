@@ -1,6 +1,12 @@
+<<setup-child, include=FALSE>>=
+set_parent("slides-mrdcr.Rnw")
 
+## Pacotes utilizados nesta seção
+## library(MRDCr)
+devtools::load_all()
+library(lattice)
 
-
+@
 
 \begin{frame}[allowframebreaks]{Excesso de Zeros}
 
@@ -18,8 +24,6 @@
 
 
 <<fig.width=10, fig.height=4, out.width="1.0\\textwidth">>=
-
-library(MRDCr)
 
 set.seed(100)
 n <- 1000
@@ -49,11 +53,11 @@ py_pois2 <- dpois(yu2, exp(m02$coef))
 
 ## Probabilidades via COM-Poisson
 m2 <- cmp(y ~ 1, data = data.frame(y = y), sumto = 40)
-py_dcmp <- dcmp(yu, loglambda = m2@coef[-1], phi = m2@coef[1], 
-                sumto = 40)
+py_dcmp <- dcmp(yu, lambda = exp(m2@coef[-1]), 
+                nu = exp(m2@coef[1]), sumto = 40)
 m22 <- cmp(y ~ 1, data = data.frame(y = y2), sumto = 40)
-py_dcmp2 <- dcmp(yu2, loglambda = m22@coef[-1], phi = m22@coef[1], 
-                 sumto = 40)
+py_dcmp2 <- dcmp(yu2, lambda = exp(m22@coef[-1]), 
+                 nu = exp(m22@coef[1]), sumto = 40)
 
 ##----------------------------------------------------------------------
 cols <- c(trellis.par.get("dot.symbol")$col,

@@ -1,12 +1,18 @@
+<<setup-child, include=FALSE>>=
+set_parent("slides-mrdcr.Rnw")
 
-\begin{frame}[allowframebreaks]{Modelo Hurdle}
+## Pacotes utilizados nesta seção
+
+@
+
+\begin{frame}[allowframebreaks]{Modelos \textit{Hurdle}}
 
 \begin{itemize}
+    \item A variável de interesse é particionada em contagens nulas e 
+    não nulas;
     \item Consideram somente os zeros estruturais;
     \item São chamados também de modelos condicionais, hierárquicos ou de 
     duas partes;
-    \item A variável de interesse é particionada em contagens nulas e 
-    não nulas;
     \item Esta abordagem combina um modelo de contagem truncado à esquerda
     do ponto $y = 1$ e um modelo censurado à direita no mesmo ponto
     $y =1$
@@ -21,7 +27,7 @@
     \begin{dcases*}
         f_z(0) & \text{se } y = 0,\\
             (1 - f_z(0)) \frac{f_c(Y = y)}{1 - 
-                f_c(Y = y)} & \text{se } y = 1, 2, \dots
+                f_c(Y = 0)} & \text{se } y = 1, 2, \dots
     \end{dcases*}
 \end{equation*}
 
@@ -53,7 +59,7 @@ $$
 
 \end{frame}
 
-\begin{frame}{Modelos de barreira }
+\begin{frame}{Distribuição \textit{Hurdle}}
 
 \begin{columns}[c]
 \column{.4\textwidth}
@@ -186,8 +192,8 @@ para ambas as partes $f_z$ e $f_c$.
 
 \vspace{0.8cm}
 Sendo $\mathds{1}$ a função indicadora que assume o valor 1 se $y > 0$ e 
-0 se $y = 0$ e $\underline{\theta}$ o vetor de parâmetros do modelo (
 $\beta$, $\gamma$ e $\phi$, se houver).
+0 se $y = 0$ e $\underline{\theta}$ o vetor de parâmetros do modelo.
 
 \end{frame}
 
@@ -221,18 +227,5 @@ vglm(SurvS4(cy, st) ~ fz_preditor, cens.poisson,
      data = transform(data, cy = pmin(1, y), st = ifelse(y >= 1, 0, 1))
 
 @
-
-
-\end{frame}
-
-\begin{frame}{Estudos de caso}
-
-{\it Vignette} \href{run:../doc/v07_hurdle.html}{\tt v07\_hurdle.html}
-\begin{description}
-    \item[\tt peixe]: número de peixes capturados por grupos em um parque
-    estadual
-    \item[\tt sinistros]: número de sinistros em uma seguradora de
-    automóveis
-\end{description}
 
 \end{frame}

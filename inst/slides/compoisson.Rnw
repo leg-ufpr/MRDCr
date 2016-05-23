@@ -31,7 +31,7 @@ library(plyr)
 
 \framebreak
 
-\begin{block}{Densidade de probabilidade}
+\begin{block}{Distribuição de probabilidades}
 \begin{center}
 \begin{equation*} 
     \Pr(Y = y \mid \lambda, \nu) = \frac{\lambda^y}{(y!)^\nu 

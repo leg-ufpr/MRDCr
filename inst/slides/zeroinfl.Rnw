@@ -1,3 +1,9 @@
+<<setup-child, include=FALSE>>=
+set_parent("slides-mrdcr.Rnw")
+
+## Pacotes utilizados nesta seção
+
+@
 
 \begin{frame}[allowframebreaks]{Modelo  \textit{Zero Inflated}}
 
@@ -47,7 +53,7 @@ $$
 
 \end{frame}
 
-\begin{frame}{Modelos de mistura}
+\begin{frame}{Distribuição \textit{Zero Inflated}}
 
 \begin{columns}[c]
 \column{.4\textwidth}
@@ -55,7 +61,7 @@ $$
 \begin{itemize}
     \item $f_z$ é uma função de probabilidades degenerada no ponto $y=0$,
     ou seja, tem toda massa no ponto 0.
-    \item $f_c$ é uma função de probabilidades tradicional.
+    \item $f_c$ é uma função de probabilidades para dados de contagem.
     \item Os modelos de mistura misturam $f_z$ e $f_c$ para descrever $Y$
     \item Para a parte $f_c$ os dados ainda podem apresentar sub,
     superdispersão ou excesso de valores em outro ponto.
@@ -206,7 +212,7 @@ Usando o {\tt VGAM} ({\it Vector Generalized Linear and Additive Models})
 <<eval=FALSE, echo=TRUE>>=
 
 library(VGAM)
-vglm(y ~ preditor, family = zapoisson)
+vglm(y ~ preditor, family = zipoisson)
 
 @
 
@@ -215,7 +221,7 @@ vglm(y ~ preditor, family = zapoisson)
 
 \begin{frame}{Estudos de caso}
 
-{\it Vignette} \href{run:../doc/v07_zeroinfl.html}{\tt v07\_zeroinfl.html}
+{\it Vignette} \href{run:../doc/v07_excesso-zeros.html}{\tt v07\_excesso-zeros.html}
 \begin{description}
     \item[\tt peixe]: número de peixes capturados por grupos em um parque
     estadual
