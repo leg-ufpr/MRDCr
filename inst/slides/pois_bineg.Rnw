@@ -1,5 +1,5 @@
-<<setup-child, include=FALSE>>=
-set_parent("slides-mrdcr.Rnw")
+<<setup-childpoisbneg, include=FALSE>>=
+## set_parent("slides-mrdcr.Rnw")
 @
 
 %%%-----------------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ Alguns exemplos de problemas envolvendo contagens:
 \begin{itemize}
     \item Modelos probabilísticos para variáveis aleatórias discretas, com suporte no conjunto de números inteiros não-negativos, são potenciais candidatos para a análise de dados de contagens.
     
-\vspace{0.5cm}    
+\vspace{0.5cm}
     
     \item Algumas alternativas: Distribuição Binomial, Poisson e generalizações; distribuições geradas por misturas, como a beta-binomial, binomial negativa; distribuições fundamentadas na modelagem do tempo entre eventos, na razão de probabilidades sucessivas...
     
@@ -572,10 +572,8 @@ $$ \hat{\phi} = \frac{1}{n-p}\sum_{i=1}^n \frac{y_i-\hat{\mu}_i}{V(\hat{\mu}_i)}
 %%%-----------------------------------------------------------------------------------------
 
 %%% Slide 47
-\section{Modelos Paramétricos Alternativos}
-\label{sec-modelos-parametricos}
 
-\subsection{Modelo Binomial Negativa}
+\section{Modelo Binomial Negativa}
 \label{sec-binomial-negativa}
 
 \begin{frame}{Distribuição binomial negativa} 

@@ -1,5 +1,5 @@
-<<setup-child, include=FALSE>>=
-set_parent("slides-mrdcr.Rnw")
+<<setup-childcmp, include=FALSE>>=
+# set_parent("slides-mrdcr.Rnw")
 
 ## Pacotes utilizados nesta seção
 ## library(MRDCr)

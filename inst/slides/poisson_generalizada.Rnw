@@ -1,4 +1,4 @@
-<<setup-child, eval=FALSE, include=FALSE>>=
+<<setup-childpgnz, eval=FALSE, include=FALSE>>=
 set_parent("slides-mrdcr.Rnw")
 @
 
@@ -109,7 +109,8 @@ set_parent("slides-mrdcr.Rnw")
 \begin{frame}[fragile]
   \frametitle{Implementação da log-verossimilhança}
 <<echo = TRUE>>=
-library(MRDCr)
+## library(MRDCr)
+devtools::load_all()
 llpgnz
 @
 \end{frame}
@@ -159,7 +160,3 @@ useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
   \end{description}
 \end{frame}
 
-\begin{frame}
-  \frametitle{Conclusões}
-  TODO
-\end{frame}

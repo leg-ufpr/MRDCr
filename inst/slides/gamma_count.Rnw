@@ -1,4 +1,4 @@
-<<setup-child, eval=FALSE, include=FALSE>>=
+<<setup-childgcnt, eval=FALSE, include=FALSE>>=
 set_parent("slides-mrdcr.Rnw")
 @
 
@@ -114,7 +114,9 @@ set_parent("slides-mrdcr.Rnw")
 
 \begin{frame}[fragile]
 <<fig.width = 9, fig.height = 4.5, out.width = "0.95\\textwidth">>=
-library(MRDCr)
+## library(MRDCr)
+devtools::load_all()
+
 grid <- expand.grid(lambda = c(2, 8, 15),
                     alpha = c(0.5, 1, 2.5))
 y <- 0:30

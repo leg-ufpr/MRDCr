@@ -1,7 +1,5 @@
-<<setup-child, include=FALSE>>=
-set_parent("slides-mrdcr.Rnw")
-
-## Pacotes utilizados nesta seção
+<<setup-childzeroinfl, include=FALSE>>=
+## set_parent("slides-mrdcr.Rnw")
 
 @
 
