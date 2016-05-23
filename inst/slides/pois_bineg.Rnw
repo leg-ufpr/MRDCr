@@ -1,190 +1,12 @@
-\documentclass[10pt, aspectratio=169]{beamer}
-
-\usepackage[brazil]{babel}
-\usepackage[utf8]{inputenc}
-\usepackage{multicol}
-\usepackage{tikz}
-
-
-
-%% ======================================================================
-%% Cores para links
-\definecolor{url}{HTML}{000080}
-\definecolor{run}{HTML}{4A0082}
-\hypersetup{colorlinks, allcolors=., urlcolor=url, runcolor=run}
-
-\setbeamercolor{bibliography entry author}{fg=black}
-
-
-%% ======================================================================
-%% Tema e cores do documento
-\usetheme{CambridgeUS}
-\setbeamertemplate{itemize items}[triangle]
-\setbeamertemplate{navigation symbols}{}
-
-\setbeamertemplate{frametitle}{
-  \nointerlineskip
-  \begin{beamercolorbox}[sep=0.3cm, ht=1.8em,
-    wd=\paperwidth]{frametitle}
-    \vbox{}\vskip-2ex%
-    \strut\hspace*{3ex}\Large\bfseries\insertframetitle\strut
-    \vskip-0.8ex%
-  \end{beamercolorbox}
-}
-
-%% Slides em geral
-\setbeamercolor{frametitle}{bg=white, fg=teal}
-\setbeamercolor{structure}{fg=teal}
-\setbeamercolor{palette primary}{bg=gray!30, fg=teal}
-\setbeamercolor{palette tertiary}{bg=teal, fg=white}
-\setbeamercolor{footlinecolor}{fg=white,bg=teal}
-\setbeamercolor{caption name}{fg=teal}
-
-%% Slide Inicial
-\setbeamertemplate{title page}[default]
-\setbeamercolor{title}{fg=teal}
-\setbeamercolor{author}{fg=black!70}
-\setbeamercolor{institute}{fg=black!70}
-\setbeamercolor{date}{fg=black!70}
-\setbeamerfont{title}{series=\bfseries, size=\Large}
-
-%% ======================================================================
-%% Definição do cabeçalho e rodapé
-\setbeamerfont{headline}{size=\fontsize{6}{5}\selectfont}
-\setbeamertemplate{headline}{\bfseries
-  \leavevmode%
-  \hbox{%
-    \begin{beamercolorbox}[wd=.5\paperwidth, ht=2.2ex, dp=1ex, right, 
-      rightskip=1em]{section in head/foot}
-      \hspace*{2ex}\insertsectionhead
-    \end{beamercolorbox}%
-    \begin{beamercolorbox}[wd=.5\paperwidth, ht=2.2ex, dp=1ex, left,
-      leftskip=1em]{subsection in head/foot}
-      \insertsubsectionhead\hspace*{2ex}
-    \end{beamercolorbox}}
-  \vskip0pt
-}
-
-\setbeamerfont{footline}{size=\fontsize{6}{5}\selectfont}
-\makeatletter
-\setbeamertemplate{footline}{\ttfamily\bfseries
-  \leavevmode%
-  \hbox{%
-    \begin{beamercolorbox}[wd=.35\paperwidth, ht=2.4ex, dp=1ex, right, 
-      rightskip=1em]{footlinecolor}
-      \insertshortauthor%
-    \end{beamercolorbox}%
-    \begin{beamercolorbox}[wd=.55\paperwidth, ht=2.4ex, dp=1ex, left,
-      leftskip=1em]{footlinecolor}
-      \hfill\insertshorttitle%
-    \end{beamercolorbox}%
-    \begin{beamercolorbox}[wd=.1\paperwidth, ht=2.4ex, dp=1ex, left,
-      leftskip=1em]{footlinecolor}
-      Slide \insertframenumber
-    \end{beamercolorbox}}
-  \vskip0pt
-}
-\makeatother
-
-%% ======================================================================
-%% Layout do tableofcontents
-\setbeamertemplate{section in toc}{
-  {\color{teal} \bfseries\inserttocsectionnumber.}~
-  {\leftskip=0.5em\color{black}\inserttocsection\par}
-}
-
-\setbeamertemplate{subsection in toc}{
-  {\color{teal!80} 
-  \bfseries\inserttocsectionnumber.\inserttocsubsectionnumber}~
-  \leftskip=2em{\color{black}\inserttocsubsection\par}
-}
-
-%% ======================================================================
-%% Formatando slides para seções e subseções
-\AtBeginSection[]{
-  \begin{frame}[c, allowframebreaks]
-    \begin{center}
-      \textcolor{teal}{\thesection} \\ \vspace{0.3cm}
-      \parbox{0.6\textwidth}{
-        \centering \textcolor{teal}{\LARGE \bf \insertsection}}\\
-    \end{center}
-  \end{frame}
-}
-
-\AtBeginSubsection{
-  \begin{frame}[c, allowframebreaks]
-    \begin{center}
-      \textcolor{teal}{\thesection.\thesubsection} \\ \vspace{0.3cm}
-      \parbox{0.6\textwidth}{
-        \centering \textcolor{teal!80}{\large \insertsection}\\
-        \centering \textcolor{teal}{\Large \bf \insertsubsection}}\\
-    \end{center}
-  \end{frame}
-}
-
-%% ======================================================================
-%% Metadados do documento
-\title{Modelos de Regressão para Dados de Contagem com R}
-\author[Walmes Zeviani, Eduardo Jr \& Cesar Taconelli]{
-  Prof. Dr. Walmes M. Zeviani\\
-  Eduardo E. Ribeiro Jr\\ 
-  Prof. Dr. Cesar A. Taconelli
-}
-\institute[UFPR]{
-  Laboratório de Estatística e Geoinformação \\
-  Departamento de Estatística \\
-  Universidade Federal do Paraná}
-\date{\today \\[0.1cm] \url{edujrrib@gmail.com}}
-%\titlegraphic{\includegraphics[width=2cm]{images/MRDCr_logo}}
-
-%% ======================================================================
-
-%% Inicia o documento
-
-\begin{document}
-
-\begin{frame}
-  \titlepage
-\end{frame}
-
-
-
-\begin{frame}{Conteúdo}
-
-\begin{multicols}{2}
-
-\begin{enumerate}
-    \item Introdução
-    \item Modelos Lineares Generalizados
-    \item Modelo de Regressão Poisson
-    \item Modelo de Quase-Verossimilhança
-    \item Modelos Paramétricos Alternativos
-    
-    \begin{enumerate}
-        \item Modelo Binomial Negativo
-        \item Modelo Poisson Generalizado
-        \item Modelo COM-Poisson
-        \item Modelo Gamma-Count
-    \end{enumerate}
-    \item Modelos para Excesso de Zeros
-    \begin{enumerate}
-        \item Modelos de Barreira (Hurdle)
-        \item Modelos de Mistura (Zero Inflated)
-    \end{enumerate}
-    \item Modelos com Efeitos Aleatórios
-\end{enumerate}
-
-\end{multicols}
-
-\end{frame}
-
-
-
+<<setup-child, include=FALSE>>=
+set_parent("slides-mrdcr.Rnw")
+@
 
 %%%-----------------------------------------------------------------------------------------
 
-
 %%% Slide 2
+\section{Introdução}
+\label{sec-introducao}
 
 \begin{frame}\frametitle{Dados de contagens}
 Alguns exemplos de problemas envolvendo contagens:
@@ -292,6 +114,8 @@ aquém, em quantidade e diversidade, em relação ao verificado para dados cont�
 %%%-----------------------------------------------------------------------------------------
 
 %%% Slide 7
+\section{Modelo de Poisson}
+\label{sec-poisson}
 
 \begin{frame}{A distribuição de Poisson}
     
@@ -357,7 +181,7 @@ Dentre as principais propriedades da distribuição de Poisson, tem-se:
     \begin{figure}[h]
     \includegraphics[height=6cm,width=9cm]{images/Graf_Poisson.pdf}
     \caption{Distribuição de Poisson para diferentes valores de $\lambda$}
-    \label{Fig1}
+    %% \label{Fig1}
     \centering
     
 \end{figure}
@@ -439,7 +263,7 @@ dado que o evento não ocorreu até o tempo $t$, \textbf{é constante} para todo
     \includegraphics[height=8cm,width=10cm]{images/Graf_Risco.pdf}
     \vspace{-0.8cm}
     \caption{Diferentes comportamentos para $\lambda (t)$}
-    \label{Fig1}
+    %% \label{Fig1}
     \centering
     
 \end{figure}
@@ -642,7 +466,8 @@ A Regressão Poisson é um caso particular dos Modelos Lineares Generalizados (M
 
 
 %%%-----------------------------------------------------------------------------------------
-
+\section{Estimação via Quase-Verossimilhança}
+\label{sec-quase-verossimilhanca}
 
 \begin{frame}{Regressão Poisson - Quase-Verossimilhança} 
 
@@ -738,6 +563,11 @@ $$ \hat{\phi} = \frac{1}{n-p}\sum_{i=1}^n \frac{y_i-\hat{\mu}_i}{V(\hat{\mu}_i)}
 %%%-----------------------------------------------------------------------------------------
 
 %%% Slide 47
+\section{Modelos Paramétricos Alternativos}
+\label{sec-modelos-parametricos}
+
+\subsection{Modelo Binomial Negativa}
+\label{sec-binomial-negativa}
 
 \begin{frame}{Distribuição binomial negativa} 
 
@@ -829,15 +659,14 @@ com $E(\theta)=\theta=\alpha /\beta$ e variância $Var(\theta)=\alpha /\beta^2.$
 
 %%%-----------------------------------------------------------------------------------------
 
-
 %%% Slide 50
 
 \begin{frame}{Distribuição binomial negativa para diferentes parâmetros}
     
     \begin{figure}[h]
     \includegraphics[height=5.5cm,width=9cm]{images/Graf_BN.pdf}
-    \caption{Distribuição binomial negativa para $\lambda=2$ e diferentes valores de $\alpha.}
-    \label{Fig1}
+    \caption{Distribuição binomial negativa para $\lambda=2$ e diferentes valores de $\alpha$.}
+    %% \label{Fig1}
     \centering
     
 \end{figure}
@@ -866,5 +695,3 @@ com $E(\theta)=\theta=\alpha /\beta$ e variância $Var(\theta)=\alpha /\beta^2.$
 \end{itemize}
 
 \end{frame}
-
-\end{document}

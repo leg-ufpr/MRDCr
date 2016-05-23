@@ -199,23 +199,7 @@ source("_setup.R")
 \end{multicols}
 \end{frame}
 
-\section{Introdução}
-\label{sec-introducao}
 
-\section{Modelos Lineares Generalizados}
-\label{sec-mlg}
-
-\section{Modelo de Regressão Poisson}
-\label{sec-poisson}
-
-\section{Modelo de Quase-Verossimilhança}
-\label{sec-quase-verossimilhanca}
-
-\section{Modelos Paramétricos Alternativos}
-\label{sec-modelos-parametricos}
-
-\subsection{Modelo Binomial Negativa}
-\label{sec-binomial-negativa}
 
 \subsection{Modelo Poisson-Generalizada}
 \label{sec-poisson-generalizada}
