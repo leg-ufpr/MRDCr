@@ -93,7 +93,6 @@ m1ZBN <- zeroinfl(f1, data = peixe, dist = "negbin")
 m2ZBN <- zeroinfl(f2, data = peixe, dist = "negbin")
 
 
-
 ## ------------------------------------------------------------------------
 
 ## Via log-verossimilhança
@@ -144,14 +143,13 @@ lmtest::lrtest(m1HBN, m3HBN)
 vuong(m1BN, m3HBN)
 
 
-## ----diag, cache = TRUE--------------------------------------------------
+## ----diag, cache = TRUE, fig.height = 4----------------------------------
 
 ## Uma pequena avaliação dos resíduos 
 p1 <- xyplot(residuals(m3HBN) ~ fitted(m3HBN),
              type = c("p", "g", "spline"))
 
 p2 <- qqmath(~residuals(m3HBN, type = "pearson"),
-             aspect = "xy",
              type = c("p", "g"),
              panel = function(x, ...) {
                  panel.qqmathline(x, ...)
@@ -285,14 +283,14 @@ cbind("vglm_posnegbin" = exp(coef(mcount)[2]),
 
 ## ------------------------------------------------------------------------
 
-sinistros <- read.table("base.txt", header = TRUE)
-str(sinistros)
-## help(sinistros)
+data(seguros)
+str(seguros)
+## help(seguros)
 
 
 ## ------------------------------------------------------------------------
 
-summary(sinistros)
+summary(seguros)
 
 
 ## ------------------------------------------------------------------------
@@ -300,40 +298,40 @@ summary(sinistros)
 library(pscl)
 
 ## Preditores
-f0 <- nsinist ~ 1 + offset(log(expos))
-f1 <- nsinist ~ sexo + valor + offset(log(expos))
-f2 <- nsinist ~ sexo * valor + offset(log(expos))
+f0 <- nsinist ~ 1
+f1 <- nsinist ~ sexo + valor + log(expos)
+f2 <- nsinist ~ sexo * valor + log(expos)
 
 ## Poisson
-m0P <- glm(f0, data = sinistros, family = poisson)
-m1P <- glm(f1, data = sinistros, family = poisson)
-m2P <- glm(f2, data = sinistros, family = poisson)
+m0P <- glm(f0, data = seguros, family = poisson)
+m1P <- glm(f1, data = seguros, family = poisson)
+m2P <- glm(f2, data = seguros, family = poisson)
 
 ## Hurdle Poisson
-m0HP <- hurdle(f0, data = sinistros, dist = "poisson")
-m1HP <- hurdle(f1, data = sinistros, dist = "poisson")
-m2HP <- hurdle(f2, data = sinistros, dist = "poisson")
+m0HP <- hurdle(f0, data = seguros, dist = "poisson")
+m1HP <- hurdle(f1, data = seguros, dist = "poisson")
+m2HP <- hurdle(f2, data = seguros, dist = "poisson")
 
 ## Zero Inflated Poisson
-m0ZP <- zeroinfl(f0, data = sinistros, dist = "poisson")
-m1ZP <- zeroinfl(f1, data = sinistros, dist = "poisson")
-m2ZP <- zeroinfl(f2, data = sinistros, dist = "poisson")
+m0ZP <- zeroinfl(f0, data = seguros, dist = "poisson")
+m1ZP <- zeroinfl(f1, data = seguros, dist = "poisson")
+m2ZP <- zeroinfl(f2, data = seguros, dist = "poisson")
 
 ## Binomial Negativa
 library(MASS)
-m0BN <- glm.nb(f0, data = sinistros)
-m1BN <- glm.nb(f1, data = sinistros)
-m2BN <- glm.nb(f2, data = sinistros)
+m0BN <- glm.nb(f0, data = seguros)
+m1BN <- glm.nb(f1, data = seguros)
+m2BN <- glm.nb(f2, data = seguros)
 
 ## Hurdle Binomial Negativa
-m0HBN <- hurdle(f0, data = sinistros, dist = "negbin")
-m1HBN <- hurdle(f1, data = sinistros, dist = "negbin")
-m2HBN <- hurdle(f2, data = sinistros, dist = "negbin")
+m0HBN <- hurdle(f0, data = seguros, dist = "negbin")
+m1HBN <- hurdle(f1, data = seguros, dist = "negbin")
+m2HBN <- hurdle(f2, data = seguros, dist = "negbin")
 
 ## Zero Inflated Poisson
-m0ZBN <- zeroinfl(f0, data = sinistros, dist = "negbin")
-m1ZBN <- zeroinfl(f1, data = sinistros, dist = "negbin")
-m2ZBN <- zeroinfl(f2, data = sinistros, dist = "negbin")
+m0ZBN <- zeroinfl(f0, data = seguros, dist = "negbin")
+m1ZBN <- zeroinfl(f1, data = seguros, dist = "negbin")
+m2ZBN <- zeroinfl(f2, data = seguros, dist = "negbin")
 
 
 ## ------------------------------------------------------------------------
@@ -351,92 +349,68 @@ cbind("Poisson" = sapply(list(m0P, m1P, m2P), logLik),
 ## ------------------------------------------------------------------------
 
 ## Testes de razão de verossimilhanças
-lmtest::lrtest(m0ZP, m1ZP, m2ZP)
+lmtest::lrtest(m0HP, m1HP, m2HP)
 
-lmtest::lrtest(m0ZBN, m1ZBN, m2ZBN)
+lmtest::lrtest(m0HBN, m1HBN, m2HBN)
 
 
 ## ------------------------------------------------------------------------
 
 ## Para a componente de contagens não negativas é necessário um modelo
 ## Binomial Negativa, considerando superdispersão dos dados?
-vuong(m1ZP, m1ZBN)
+vuong(m1HP, m1HBN)
 
 
 ## ------------------------------------------------------------------------
 
 ## Estimativas do modelo proposto
-summary(m1ZP)
+summary(m1HP)
 
 ## Retira efeito de sexo na componente das contagens nulas
-m3ZP <- zeroinfl(nsinist ~ sexo + valor + offset(log(expos)) |
-                     offset(log(expos)) + valor,
-                 data = sinistros)
+m3HP <- hurdle(nsinist ~ 1 | sexo + valor + log(expos),
+               data = seguros)
 
-lmtest::lrtest(m1ZP, m3ZP)
+lmtest::lrtest(m1HP, m3HP)
+
+summary(m3HP)
 
 
 ## ------------------------------------------------------------------------
 
 ## Avaliação de diferentes especificações para a componente de contagens
 ## nulas 
-m3ZP.probi <- zeroinfl(nsinist ~ sexo + valor + offset(log(expos)) |
-                           offset(log(expos)) + valor, link = "probit",
-                       data = sinistros)
+m3HP.pois <- hurdle(nsinist ~ 1 | sexo + valor + log(expos),
+                    data = seguros, zero.dist = "poisson")
 
-m3ZP.clogl <- zeroinfl(nsinist ~ sexo + valor + offset(log(expos)) |
-                           offset(log(expos)) + valor, link = "cloglog",
-                       data = sinistros)
+m3HP.negb <- hurdle(nsinist ~ 1 | sexo + valor + log(expos),
+                    data = seguros, zero.dist = "negbin")
+
+m3HP.geom <- hurdle(nsinist ~ 1 | sexo + valor + log(expos),
+                    data = seguros, zero.dist = "geometric")
 
 ## Comparação das funções de ligação
-sapply(list("logit" = m3ZP, "probit" = m3ZP.probi,
-            "cloglog" = m3ZP.clogl), logLik)
-
-
-## ----diag2, cache = TRUE-------------------------------------------------
-
-##======================================================================
-## Uma pequena avaliação dos resíduos 
-p1 <- xyplot(residuals(m3ZP) ~ fitted(m3ZP),
-             ## aspect = "xy",
-             type = c("p", "g", "spline"))
-
-p2 <- qqmath(~residuals(m3ZP, type = "pearson"),
-             ## aspect = "xy",
-             type = c("p", "g"),
-             panel = function(x, ...) {
-                 panel.qqmathline(x, ...)
-                 panel.qqmath(x, ...)
-             })
-
-qqsimul <- hnp::hnp(m3ZP, plot = FALSE, sim = 50)
-
-p3 <- with(qqsimul,
-           xyplot(residuals ~ x, pch = 20) +
-           as.layer(
-               xyplot(median + lower + upper ~ x,
-                      type = "l", col = 1, lty = c(2, 1, 1)))
-           )
-
-print(p1, split = c(1, 1, 3, 1), more = TRUE)
-print(p2, split = c(2, 1, 3, 1), more = TRUE)
-print(p3, split = c(3, 1, 3, 1), more = FALSE)
+sapply(list("binomial" = m3HP, "poisson" = m3HP.pois,
+            "negbin" = m3HP.negb, "geometric" = m3HP.geom), logLik)
 
 
 ## ------------------------------------------------------------------------
 
 ## Região para predição
 pred <- expand.grid(sexo = c("M", "F"),
-                    valor = 1:200, expos = 1)
+                    valor = 1:200,
+                    expos = c(0.1, 0.5, 1))
 ##-------------------------------------------
 ## Estimando as médias
-aux <- predict(m3ZP, newdata = pred, type = "response")
+aux <- predict(m3HP, newdata = pred, type = "response")
 predmu <- cbind(pred, fit = aux)
 
-xyplot(fit ~ valor,
+xyplot(fit ~ valor | factor(expos),
+       layout = c(NA, 1),
        groups = sexo,
        data = predmu,
        type = c("l", "g"),
+       strip = strip.custom(strip.names = TRUE,
+                            var.name = "Exposição"),
        auto.key = list(
            columns = 2, cex.title = 1,
            lines = TRUE, points = FALSE,
@@ -448,9 +422,10 @@ xyplot(fit ~ valor,
 ##-------------------------------------------
 ## Estimando probabilidades
 pred <- expand.grid(sexo = c("M", "F"),
-                    valor = c(1, 50), expos = 1)
+                    valor = c(1, 50),
+                    expos = 0.5)
 
-py <- c(t(predict(m3ZP, type = "prob", at = 0:5, newdata = pred)))
+py <- c(t(predict(m3HP, type = "prob", at = 0:5, newdata = pred)))
 carac <- with(pred, paste("Sexo:", sexo, "Valor:", valor))
 da <- data.frame(y = 0:5, py = py,
                  sexo = rep(c("M", "F"), each = 6),
