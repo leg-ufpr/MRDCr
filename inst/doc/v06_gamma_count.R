@@ -32,6 +32,8 @@ grid <- cbind(grid[rep(1:nrow(grid), each = length(y)), ],
 
 useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
                       data = grid, type = "h",
+                      xlab = expression(y),
+                      ylab = expression(p(y)),
                       panel = function(x, y, ...) {
                           m <- sum(x * y)
                           panel.xyplot(x, y, ...)
