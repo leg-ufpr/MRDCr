@@ -1,4 +1,4 @@
-<<setup-child, include=FALSE>>=
+<<setup-child, eval=FALSE, include=FALSE>>=
 set_parent("slides-mrdcr.Rnw")
 @
 
