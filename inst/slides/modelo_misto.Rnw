@@ -1,0 +1,79 @@
+<<setup-childmisto, eval=FALSE, include=FALSE>>=
+set_parent("slides-mrdcr.Rnw")
+@
+
+\begin{frame}[allowframebreaks]
+  \frametitle{Modelos de efeito aleatório}
+  \begin{itemize}
+  \item Acomodam o efeito de termos aleatórios no modelo (ex: blocos,
+    indivíduos).
+  \item Podem representar estruturas hierárquicas de efeitos (ex:
+    municípios $>$ bairros $>$ escolas $>$ salas).
+  \item Podem acomodar superdispersão com efeito aleatório ao nível de
+    observação.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+  \frametitle{A formulação do modelo de efeito aleatório}
+  \begin{itemize}
+  \item Seja $b_{i}$ o vetor $q$-dimensional, $q \geq 1$, de efeito do
+    $i$-ésimo nível de um fator categórico.
+  \item Seja $Y_{ij}$ o valor observado da $j$-amostra sob efeito de
+    $b_{i}$ com o vetor linha de covariáveis $X_{ij}$.
+  \item Considere que uma função monótona $g$ da média de $Y$ seja
+    função linear do vetor de covariáveis $X_{ij}$ e do vetor de efeitos
+    aleatórios $b_{i}$
+    \begin{equation}
+      g(\mu_{ij}) = \eta_{ij} = X_{ij}\beta + Z_{i} b_{i}.
+    \end{equation}
+
+  \item A distribuição condicional de $Y_{ij}$ em relação a $b_{i}$ é
+    \begin{equation}
+      Y_{ij}|b_{i} \sim f(y_{ij}|b_{i}, \theta),
+    \end{equation}
+    em que $f$ é uma função densidade apropriada para $Y$ e
+    $\theta \subseteq \beta$ o vetor de parâmetros dessa distribuição.
+
+  \framebreak
+
+  \item Seja a distribuição do efeito aleatório $b_{i}$
+    \begin{equation}
+      b_i \overset{iid}{\sim} \text{Normal}(0, D(\alpha)).
+    \end{equation}
+
+  \item A esperança de $Y$ marginal é
+    \begin{equation}
+      \text{E}(Y_{ij}) = \mu_{ij},
+    \end{equation}
+    no qual $\alpha$ é o vetor de parâmetros presentes na especificação
+    da covariância dos efeitos aleatórios.
+  \end{itemize}
+
+  \framebreak
+
+  A função de verossimilhança do modelo
+  \begin{equation}
+    L(\theta, \alpha) = \prod_{i=1}^{m} \int_{\mathbb{R}^q}
+    \left[ \prod_{j=1}^{n_i} f(y_{ij}, \theta, b_i) \right ]
+    \times f(b_i, \alpha)\, \text{d}b_i.
+  \end{equation}
+
+  \framebreak
+
+  O problema é
+  \begin{itemize}
+  \item Calcular a verossimilhança requer avaliar a integral
+  \item Pode ser em muitas dimensões ($q > 1$,intercepto, inclinação,
+    etc)
+  \item Efeitos podem ser múltiplos, aninhados ou cruzados
+  \item Para modelar subdispersão com efeito ao nível de observação,
+    tem-se que $b_{i}$ é $b_{ij}$, ou seja, na mesma dimensão dos dos
+    dados.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Estudos de caso}
+  {\it Vignette} \href{run:../doc/v8_misto.html}{\tt
+    misto.html}
+\end{frame}

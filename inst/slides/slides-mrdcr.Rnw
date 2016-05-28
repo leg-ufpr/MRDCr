@@ -138,16 +138,16 @@
 %% ======================================================================
 %% Metadados do documento
 \title{Modelos de Regressão para Dados de Contagem com R}
-\author[Walmes Zeviani, Eduardo Jr \& Cesar Taconelli]{
+\author[Walmes Zeviani, Eduardo Jr \& Cesar Taconeli]{
   Prof. Dr. Walmes M. Zeviani\\
   Eduardo E. Ribeiro Jr\\ 
-  Prof. Dr. Cesar A. Taconelli
+  Prof. Dr. Cesar A. Taconeli
 }
 \institute[UFPR]{
   Laboratório de Estatística e Geoinformação \\
   Departamento de Estatística \\
   Universidade Federal do Paraná}
-\date{\today \\[0.1cm] \url{edujrrib@gmail.com}}
+\date{\today \\[0.1cm] \url{{walmes,eduardo.jr,taconeli}@ufpr.br}}
 %\titlegraphic{\includegraphics[width=2cm]{images/MRDCr_logo}}
 
 %% ======================================================================
@@ -245,9 +245,13 @@ source("_setup.R")
 \section{Modelos com Efeitos Aleatórios}
 \label{sec-efeito-aleatorio}
 
+<<misto, child = "modelo_misto.Rnw">>=
+@
+
 \begin{frame}[allowframebreaks]{Referências}
 \small
-\begin{thebibliography}{}
+
+\begin{thebibliography}{99}
 \bibitem{Conway1962} Conway, R. W., Maxwell, W. L. (1962).
 A queuing model with state dependent service rates. {\em Journal of
 Industrial Engineering}, 12, 132–136.
