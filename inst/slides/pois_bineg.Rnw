@@ -30,12 +30,12 @@ Alguns exemplos de problemas envolvendo contagens:
 
 \begin{itemize}
     \item Modelos probabilísticos para variáveis aleatórias discretas, com suporte no conjunto de números inteiros não-negativos, são potenciais candidatos para a análise de dados de contagens.
-    
+
 \vspace{0.5cm}
-    
+
     \item Algumas alternativas: Distribuição Binomial, Poisson e generalizações; distribuições geradas por misturas, como a beta-binomial, binomial negativa; distribuições fundamentadas na modelagem do tempo entre eventos, na razão de probabilidades sucessivas...
-    
-   
+
+
 \end{itemize}
 \end{frame}
 
@@ -66,22 +66,22 @@ aquém, em quantidade e diversidade, em relação ao verificado para dados cont�
 %%% Slide 5
 
 \begin{frame}{Regressão com erros normais na análise de dados de contagens}
-    
+
     \vspace{0,5cm}
-    
+
     \begin{itemize}
         \item O modelo linear com erros normais não considera a natureza discreta dos dados;
-        
+
         \vspace{0,5cm}
-        
+
         \item Associa probabilidade nula a qualquer possível contagem;
-        
+
         \vspace{0,5cm}
-        
+
         \item Admite probabilidades não nulas a valores negativos da variável;
-       
+
     \end{itemize}
-    
+
 \end{frame}
 
 %%%-----------------------------------------------------------------------------------------
@@ -90,25 +90,25 @@ aquém, em quantidade e diversidade, em relação ao verificado para dados cont�
 
 
 \begin{frame}{Regressão com erros normais na análise de dados de contagens}
-    
-    
+
+
     \vspace{0,2cm}
-    
+
     \begin{itemize}
- 
+
         \item O uso de transformações dificulta a interpretação dos resultados;
-        
+
         \vspace{0,5cm}
-        
+
         \item O uso da transformação logarítmica apresenta problemas para contagens iguais a zero;
-        
+
         \vspace{0,5cm}
-        
+
         \item Não se contempla a relação não constante entre variância e média, característica de  dados de contagens.
-        
-        
+
+
     \end{itemize}
-    
+
 \end{frame}
 
 %%%-----------------------------------------------------------------------------------------
@@ -118,26 +118,26 @@ aquém, em quantidade e diversidade, em relação ao verificado para dados cont�
 \label{sec-poisson}
 
 \begin{frame}{A distribuição de Poisson}
-    
+
     \begin{itemize}
         \item A distribuição de Poisson é a principal referência para a análise de dados de contagens.
- \vspace{0,3cm}       
+ \vspace{0,3cm}
         \item Função de probabilidades:
 
-        
+
 $$
     P\left ( Y=k \right )=\frac{e^{-\lambda}\lambda^{k}}{k!},\hspace{5mm}k=0,1,2,...; \lambda>0.
 $$
- 
-   \vspace{0,2cm}    
-   
-       \item Se os eventos sob contagem  ocorrem independentemente e sujeitos a uma taxa constante $\lambda >0$, sob o modelo Poisson,  para um intervalo de exposição de tamanho $t$ tem-se: 
-  
+
+   \vspace{0,2cm}
+
+       \item Se os eventos sob contagem  ocorrem independentemente e sujeitos a uma taxa constante $\lambda >0$, sob o modelo Poisson,  para um intervalo de exposição de tamanho $t$ tem-se:
+
 $$
     P\left ( Y_t=k \right )=\frac{e^{-\lambda t}(\lambda t)^{k}}{k!},\hspace{5mm}k=0,1,2,....
 $$
         \end{itemize}
-        
+
 \end{frame}
 
 %%%-----------------------------------------------------------------------------------------
@@ -157,18 +157,18 @@ Dentre as principais propriedades da distribuição de Poisson, tem-se:
 
     \item Média: $E(Y)= \lambda$;
     \vspace{0,5cm}
-    
+
     \item Variância: $Var(Y)=\lambda$ (equidispersão);
     \vspace{0,5cm}
-    
+
     \item Razão de probabilidades sucessivas: $\frac{P\left ( X=k \right )}{P\left ( X=k-1 \right )}=\frac{\lambda}{k},$ gerando a relação de recorrência:
-    
+
     $$
         P(Y=k)k=P(Y=k-1)\lambda;
     $$
-    
+
     \item Se $Y_{1},Y_{2},...,Y_{n}$ são v.a.s independentes com $Y_{i}\sim Poisson(\lambda_{i})$, e $\sum\lambda_{i}<\infty$, então $\sum Y_{i}\sim Poisson(\sum\lambda_{i})$.
-    
+
     \end{itemize}
 \end{frame}
 
@@ -177,13 +177,13 @@ Dentre as principais propriedades da distribuição de Poisson, tem-se:
 %%% Slide 13
 
 \begin{frame}{Distribuição Poisson para diferentes valores de $\lambda$}
-    
+
     \begin{figure}[h]
     \includegraphics[height=6cm,width=9cm]{images/Graf_Poisson.pdf}
     \caption{Distribuição de Poisson para diferentes valores de $\lambda$}
     %% \label{Fig1}
     \centering
-    
+
 \end{figure}
 \end{frame}
 
@@ -193,11 +193,11 @@ Dentre as principais propriedades da distribuição de Poisson, tem-se:
 %%% Slide 8
 
 \begin{frame}{Motivações para a distribuição de Poisson}
-    
+
 
 
     \vspace{0,5cm}
-    
+
     \begin{itemize}
         \item Caso limite da distribuição binomial$(n, \pi)$ quando $n\rightarrow \infty$ e $\pi\rightarrow 0$, fixado $\lambda=n\pi$, ou seja:
 
@@ -206,7 +206,7 @@ Dentre as principais propriedades da distribuição de Poisson, tem-se:
 $$
      \underset{n \to \infty  \pi \to 0 }{lim}
 \left [ \begin{pmatrix}
- n\\k 
+ n\\k
 \end{pmatrix} \left ( \frac{\lambda}{n} \right )^{k}\left ( 1-\frac{\lambda}{n} \right )^{n-k}\right ]=\frac{e^{-\lambda}\lambda^{k}}{k!}.
 $$
 
@@ -215,7 +215,7 @@ $$
         \item Resultado do processo estocástico de Poisson, em que os eventos contados ocorrem \textbf{aleatoriamente} ao longo do tempo, espaço,...
 
     \end{itemize}
-    
+
 \end{frame}
 
 %%%-----------------------------------------------------------------------------------------
@@ -225,32 +225,32 @@ $$
 \begin{frame}{Motivações para a distribuição de Poisson}
 
 \begin{itemize}
-    
+
 
         \item Se o tempo decorrido entre sucessivos eventos é uma variável aleatória com distribuição exponencial de média $\mu=1/\lambda$, então o número de eventos ocorridos em um intervalo t de tempo tem distribuição de Poisson com média $\lambda t$.
-        
+
          \vspace{0,3cm}
-         
-\begin{itemize}    
-        
+
+\begin{itemize}
+
         \item A dualidade entre as distribuições Poisson e exponencial implica que a taxa de ocorrência do evento, definida por:
-        
-        
+
+
 \end{itemize}
 
-    
+
 $$
     \lambda (t) =\lim_{\Delta t\rightarrow 0}\frac{P\left \{ \text{evento ocorrer em} \left ( t,t+\Delta t \right ) \right \}}{\Delta t},
-$$  
+$$
 
      \vspace{0,3cm}
-     
+
 dado que o evento não ocorreu até o tempo $t$, \textbf{é constante} para todo $t>0$.
 
-        
+
          \end{itemize}
-    
-\end{frame}   
+
+\end{frame}
 
 
 %%%-----------------------------------------------------------------------------------------
@@ -265,7 +265,7 @@ dado que o evento não ocorreu até o tempo $t$, \textbf{é constante} para todo
     \caption{Diferentes comportamentos para $\lambda (t)$}
     %% \label{Fig1}
     \centering
-    
+
 \end{figure}
 \end{frame}
 
@@ -275,21 +275,21 @@ dado que o evento não ocorreu até o tempo $t$, \textbf{é constante} para todo
 %%% Slide 10
 
 \begin{frame}{O processo de Poisson}
-    
+
     O Processo de Poisson configura um processo de contagem em que $Y(t),t\geqslant 0$, representa o número de eventos que ocorrem até $t$, satisfazendo:
-    
+
     \vspace{0,5cm}
-    
+
     \begin{enumerate}
         \item $Y(t)$ é inteiro e não negativo;
         \item Para $s<t$, $Y(s)\leq Y(t)$;
         \item $Y(t)-Y(s)$ é o número de eventos que ocorrem no intervalo $(s,t]$;
         \item O processo é estacionário:
-        
+
         $$
             Y(t_{2}+s)-Y(t_{1}+s) \overset{i.d. }{\sim}Y(t_{2})-Y(t_{1}), \forall s>0
        $$
-        
+
         \item O processo tem incrementos independentes, ou seja, os números de eventos verificados em intervalos disjuntos são independentes.
     \end{enumerate}
 
@@ -301,13 +301,13 @@ dado que o evento não ocorreu até o tempo $t$, \textbf{é constante} para todo
 %%% Slide 14
 
 \begin{frame}{Diferentes padrões em processos de contagens}
-    
+
 \begin{figure}[h]
     \includegraphics[scale=0.6]{images/processos14.pdf}
     \caption{Ilustração de diferentes tipos de processos pontuais}
     \label{Fig2}
     \centering
-    
+
 \end{figure}
 \end{frame}
 
@@ -315,19 +315,19 @@ dado que o evento não ocorreu até o tempo $t$, \textbf{é constante} para todo
 
 %%% Slide 15
 
-\begin{frame}{Regressão Poisson} 
+\begin{frame}{Regressão Poisson}
 
 \begin{itemize}
     \item O modelo de regressão Poisson (ou modelo log linear de Poisson) é o mais usado para a análise de dados de contagens.
-    
+
     \vspace{0,5cm}
-    
+
     \item A regressão Poisson baseia-se nos pressupostos inerentes ao processo e à distribuição de Poisson.
-    
+
     \vspace{0,5cm}
-    
+
     \item Caso tais pressupostos não sejam atendidos, a regressão Poisson ainda pode ser uma alternativa apropriada, desde que usada com os cuidados necessários.
-    
+
 \end{itemize}
 
 \end{frame}
@@ -336,7 +336,7 @@ dado que o evento não ocorreu até o tempo $t$, \textbf{é constante} para todo
 
 %%% Slide 16
 
-\begin{frame}{Regressão Poisson - Especificação do modelo} 
+\begin{frame}{Regressão Poisson - Especificação do modelo}
 
 \begin{itemize}
     \item Sejam $Y_{1},Y_{2},...,Y_{n}$ variáveis aleatórias condicionalmente independentes, dado o vetor de covariáveis ${\boldsymbol{x_{i}}}'=(x_{i1},x_{i2},...,x_{ip}), i=1,2,...,n$. A regressão Poisson é definida pela distribuição de Poisson:
@@ -347,7 +347,7 @@ $$
 $$
 
 \vspace{0,2cm}
- 
+
 sendo as covariáveis inseridas ao modelo por:
 
 $$
@@ -355,9 +355,9 @@ $$
 $$
 
 \vspace{0,2cm}
- 
+
 em que ${\boldsymbol{\beta }}$ é o vetor de parâmetros de regressão.
- 
+
 
 \end{itemize}
 
@@ -368,29 +368,29 @@ em que ${\boldsymbol{\beta }}$ é o vetor de parâmetros de regressão.
 
 %%% Slide 17
 
-\begin{frame}{Regressão Poisson - Propriedades} 
+\begin{frame}{Regressão Poisson - Propriedades}
 
 
-\vspace{0,8cm}  
-    
+\vspace{0,8cm}
+
     \begin{itemize}
-        
-        \item $f(y_{i}|\boldsymbol{x_{i}})=\frac{e^{-exp(\boldsymbol{x'_i\beta})}{exp({\boldsymbol{x'_i\beta}})}^{y_i}}{y_i!}$
-        
 
-  
-  \vspace{0,8cm}  
+        \item $f(y_{i}|\boldsymbol{x_{i}})=\frac{e^{-\exp(\boldsymbol{x'_i\beta})}{\exp({\boldsymbol{x'_i\beta}})}^{y_i}}{y_i!}$
 
-        
-        \item $E\left [ y_{i}|\boldsymbol{x_{i}} \right ]= \mu_{i}=exp\left ( \boldsymbol{x'_{i}\beta} \right );$
 
-\vspace{0,8cm}  
-   
-        \item $Var\left [ y_{i}|\mathbf{x_{i}} \right ]= \mu_{i}=exp\left ( \boldsymbol{x'_{i}\beta} \right ).$
-    
 
-    
-    
+  \vspace{0,8cm}
+
+
+        \item $E\left [ y_{i}|\boldsymbol{x_{i}} \right ]= \mu_{i}=\exp\left ( \boldsymbol{x'_{i}\beta} \right );$
+
+\vspace{0,8cm}
+
+        \item $Var\left [ y_{i}|\mathbf{x_{i}} \right ]= \mu_{i}=\exp\left ( \boldsymbol{x'_{i}\beta} \right ).$
+
+
+
+
 \end{itemize}
 
 \end{frame}
@@ -403,32 +403,32 @@ em que ${\boldsymbol{\beta }}$ é o vetor de parâmetros de regressão.
 
 %%% Slide 18
 
-\begin{frame}{Regressão Poisson - Estimação por máxima verossimilhança} 
+\begin{frame}{Regressão Poisson - Estimação por máxima verossimilhança}
 
 Para a regressão Poisson:
 
 \vspace{0.5cm}
 
-\begin{itemize} 
+\begin{itemize}
 
-\item Log-verossimilhança: $l(\boldsymbol{\beta})=\sum_{i=1}^{n} \{ y_{i}\boldsymbol{x_{i}'\beta}-\exp{(\boldsymbol{x_{i}'\beta}}\}-\ln{y_{i}!});$
+\item Log-verossimilhança: $l(\boldsymbol{\beta})=\sum_{i=1}^{n} \{ y_{i}\boldsymbol{x_{i}'\beta}-\exp{(\boldsymbol{x_{i}'\beta})}\}-\ln(y_{i}!));$
 
 \vspace{0.5cm}
 
 \item Vetir escore: $\boldsymbol{S}(\boldsymbol{\beta})=\frac{\partial l(\boldsymbol{\beta};\boldsymbol{y})}{\partial \boldsymbol{\beta}}=
-              \sum_{i=1}^{n}(y_{i}-\exp(\boldsymbol{x_{i}'\beta}))\boldsymbol{x_{i}};$       
+              \sum_{i=1}^{n}(y_{i}-\exp(\boldsymbol{x_{i}'\beta}))\boldsymbol{x_{i}};$
 \vspace{0.5cm}
-  
+
 \item Matriz Informação: $
-\boldsymbol{I({\beta})} = \sum_{i=1}^n \mu_i \boldsymbol{x_i x'_i}  = \exp{(\boldsymbol{x'_i \beta})\boldsymbol{x_i x'_i}}; 
+\boldsymbol{I({\beta})} = \sum_{i=1}^n \mu_i \boldsymbol{x_i x'_i}  = \exp{(\boldsymbol{x'_i \beta})\boldsymbol{x_i x'_i}};
 $
-  
+
 \vspace{0.5cm}
-  
+
 \item  Distribuição assintótica: $
-\boldsymbol{\hat{\beta}} \overset{a}{\sim} N \left ( \boldsymbol{\beta}, \left [ \sum_{i=1}^n \mu_i \boldsymbol{x_i x'_i} \right ]^{-1} \right ). 
-$ 
-       
+\boldsymbol{\hat{\beta}} \overset{a}{\sim} N \left ( \boldsymbol{\beta}, \left [ \sum_{i=1}^n \mu_i \boldsymbol{x_i x'_i} \right ]^{-1} \right ).
+$
+
 \end{itemize}
 
 \end{frame}
@@ -439,7 +439,7 @@ $
 
 %%% Slide 34
 
-\begin{frame}{Regressão Poisson - Modelo Linear Generalizado} 
+\begin{frame}{Regressão Poisson - Modelo Linear Generalizado}
 
 
 A Regressão Poisson é um caso particular dos Modelos Lineares Generalizados (MLG). Algumas propriedades dessa classe de modelos:
@@ -473,7 +473,7 @@ A Regressão Poisson é um caso particular dos Modelos Lineares Generalizados (M
 \section{Estimação via Quase-Verossimilhança}
 \label{sec-quase-verossimilhanca}
 
-\begin{frame}{Regressão Poisson - Quase-Verossimilhança} 
+\begin{frame}{Regressão Poisson - Quase-Verossimilhança}
 
 \begin{itemize}
     \item Para o ajuste de um modelo alternativo via Quase-Verossimilhança, definimos:
@@ -505,7 +505,7 @@ $$ Q\left ( \mu \right )=\int _y^\mu \frac{y-t}{\phi V(t)}dt $$.
 
 %%% Slide 39
 
-\begin{frame}{Estimação via Quase-Verossimilhança} 
+\begin{frame}{Estimação via Quase-Verossimilhança}
 
 \begin{itemize}
 
@@ -535,7 +535,7 @@ $$\ln(E(y_i|\boldsymbol{x_i}))=\boldsymbol{x'_i \beta};$$
 
 %%% Slide45
 
-\begin{frame}{Estimação via Quase Verossimilhança} 
+\begin{frame}{Estimação via Quase Verossimilhança}
 
 \begin{itemize}
 
@@ -555,7 +555,7 @@ com $\mu_{i}=exp({\boldsymbol{x'_{i}\beta}})$ e $\omega_{i}=Var(y_{i}|\boldsymbo
 
 \item Um estimador para $\phi$:
 
-$$ \hat{\phi} = \frac{1}{n-p}\sum_{i=1}^n \frac{y_i-\hat{\mu}_i}{V(\hat{\mu}_i)}. $$
+$$ \hat{\phi} = \frac{1}{n-p}\sum_{i=1}^n \frac{(y_i-\hat{\mu}_i)^2}{V(\hat{\mu}_i)}. $$
 
 
 \end{itemize}
@@ -576,7 +576,7 @@ $$ \hat{\phi} = \frac{1}{n-p}\sum_{i=1}^n \frac{y_i-\hat{\mu}_i}{V(\hat{\mu}_i)}
 \section{Modelo Binomial Negativa}
 \label{sec-binomial-negativa}
 
-\begin{frame}{Distribuição binomial negativa} 
+\begin{frame}{Distribuição binomial negativa}
 
 \begin{itemize}
 
@@ -606,7 +606,7 @@ $$
 
 %%% Slide 48
 
-\begin{frame}{Distribuição binomial negativa} 
+\begin{frame}{Distribuição binomial negativa}
 
 \begin{itemize}
 
@@ -616,14 +616,14 @@ $$
 
 $$
 P(Y=k) = \left ( \begin{matrix}
-r+k-1\\ 
+r+k-1\\
 r-1
 \end{matrix} \right ) (1-p)^rp^k, \hspace{0,5cm} k=0,1,2,...,
 $$
 
 \vspace{0.5cm}
 
-sendo $r=\alpha$ e $p=\lambda/(\lambda+\alpha),$ com $0<p<1$ e $r>0$.  
+sendo $r=\alpha$ e $p=\lambda/(\lambda+\alpha),$ com $0<p<1$ e $r>0$.
 \vspace{0.5cm}
 
 \item Modelagem do número de "sucessos" até o r-ésimo "fracasso" ($r = 1,2,3,...$), configurando uma generalização da distribuição geométrica (para $r=1$).
@@ -642,7 +642,7 @@ sendo $r=\alpha$ e $p=\lambda/(\lambda+\alpha),$ com $0<p<1$ e $r>0$.
 
 %%% Slide 48
 
-\begin{frame}{Distribuição binomial negativa} 
+\begin{frame}{Distribuição binomial negativa}
 
 \begin{itemize}
 
@@ -669,13 +669,13 @@ com $E(\theta)=\theta=\alpha /\beta$ e variância $Var(\theta)=\alpha /\beta^2.$
 %%% Slide 50
 
 \begin{frame}{Distribuição binomial negativa para diferentes parâmetros}
-    
+
     \begin{figure}[h]
     \includegraphics[height=5.5cm,width=9cm]{images/Graf_BN.pdf}
     \caption{Distribuição binomial negativa para $\lambda=2$ e diferentes valores de $\alpha$.}
     %% \label{Fig1}
     \centering
-    
+
 \end{figure}
 \end{frame}
 
@@ -685,11 +685,11 @@ com $E(\theta)=\theta=\alpha /\beta$ e variância $Var(\theta)=\alpha /\beta^2.$
 
 %%% Slide 51
 
-\begin{frame}{Distribuição binomial negativa} 
+\begin{frame}{Distribuição binomial negativa}
 
 \begin{itemize}
 
-\item O modelo de regressão com resposta binomial negativa pode ser especificado fazendo $E(y|\boldsymbol{x})=exp(\boldsymbol{x'\beta}).$
+\item O modelo de regressão com resposta binomial negativa pode ser especificado fazendo $E(y|\boldsymbol{x})=\exp(\boldsymbol{x'\beta}).$
 
 \vspace{0.5cm}
 

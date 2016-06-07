@@ -67,7 +67,7 @@ set_parent("slides-mrdcr.Rnw")
   \item Pode ser em muitas dimensões ($q > 1$,intercepto, inclinação,
     etc)
   \item Efeitos podem ser múltiplos, aninhados ou cruzados
-  \item Para modelar subdispersão com efeito ao nível de observação,
+  \item Para modelar superdispersão com efeito ao nível de observação,
     tem-se que $b_{i}$ é $b_{ij}$, ou seja, na mesma dimensão dos dos
     dados.
   \end{itemize}
