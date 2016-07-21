@@ -1,0 +1,39 @@
+trat	linh	npost
+Observ	Muito reativo	3
+Observ	Muito reativo	11
+Observ	Muito reativo	15
+Observ	Muito reativo	6
+Observ + Interv	Pouco reativo	1
+Observ + Interv	Pouco reativo	1
+Observ + Interv	Pouco reativo	4
+Observ + Interv	Pouco reativo	16
+Observ + Interv	Pouco reativo	2
+Observ + Interv	Pouco reativo	1
+Observ + Interv	Pouco reativo	3
+Observ + Interv	Pouco reativo	8
+Observ + Interv	Pouco reativo	8
+Observ + Interv	Pouco reativo	4
+Observ + Interv	Pouco reativo	3
+Observ	Muito reativo	10
+Observ	Muito reativo	12
+Observ	Muito reativo	35
+Observ	Muito reativo	5
+Observ	Pouco reativo	16
+Observ	Pouco reativo	4
+Observ	Pouco reativo	0
+Observ	Pouco reativo	8
+Observ	Pouco reativo	9
+Observ + Interv	Muito reativo	3
+Observ + Interv	Muito reativo	6
+Observ + Interv	Muito reativo	1
+Observ + Interv	Muito reativo	22
+Observ + Interv	Muito reativo	6
+Observ + Interv	Muito reativo	4
+Observ + Interv	Muito reativo	3
+Observ + Interv	Muito reativo	4
+Observ + Interv	Muito reativo	7
+Observ	Pouco reativo	13
+Observ	Pouco reativo	14
+Observ	Pouco reativo	12
+Observ	Pouco reativo	15
+Observ	Pouco reativo	5
