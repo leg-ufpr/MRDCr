@@ -16,7 +16,6 @@ source("_setup.R")
 
 ```{r, message=FALSE, error=FALSE, warning=FALSE}
 # Definições da sessão.
-# devtools::load_all("../")
 library(lattice)
 library(latticeExtra)
 library(bbmle)

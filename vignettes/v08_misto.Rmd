@@ -26,10 +26,6 @@ library(multcomp)
 library(MRDCr)
 ```
 
-```{r, eval=FALSE, include=FALSE}
-opts_chunk$set(eval = FALSE)
-```
-
 ## Acomodando superdispersão com efeito aleatório ##
 
 ```{r}
@@ -47,9 +43,6 @@ nematoide$ue <- 1:nrow(nematoide)
 m2 <- glmer(nema ~ offset(log(off)) + (1 | cult) + (1 | ue),
             data = nematoide, family = poisson)
 summary(m2)
-
-# ???
-
 ```
 
 ## Número de Grãos em Soja ##
@@ -137,7 +130,6 @@ xyplot(fit ~ K | umid, data = pred,
        prepanel = prepanel.cbH,
        desloc = 6 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
-
 ```
 
 ## Resfriamento de Cobertura em Aviários na Mortalidade das Aves ##
@@ -296,7 +288,6 @@ xyplot(fit ~ idade | modelo, groups = resfr, data = pred,
        panel.groups = panel.cbH,
        panel = panel.superpose) +
     as.layer(xyplot(nap ~ idade, groups = resfr, data = confterm))
-
 ```
 
 ## Informações da sessão

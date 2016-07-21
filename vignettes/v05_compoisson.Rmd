@@ -39,42 +39,37 @@ $\lambda_i = \exp(X_i\beta)$
 
 * Reparametrização do parâmetro $\nu$ para $\phi = \log(\nu)$. Assim o
   espaço paramétrico do modelo são os reais $\Re^n$.
-  
+
 * Truncamento da série infinita $Z(\lambda_i)$. `sumto` é tomado como
   argumento da função.
 
 * Para o cálculo de $Z(\lambda_i)$ faz-se, minimizando problemas de
   _overflow_
 $$
-\sum_{j=0}^\infty \lambda_i^j (j!)^{-\nu} = 
+\sum_{j=0}^\infty \lambda_i^j (j!)^{-\nu} =
 \sum_{j=0}^\infty \exp \left ( \log \left(
-    \lambda_i^j (j!)^{-\nu} \right ) \right ) = 
+    \lambda_i^j (j!)^{-\nu} \right ) \right ) =
 \sum_{j=0}^\infty \exp(i \log(\lambda_i) - \nu \log(i!))
 $$
 
 
 ```{r}
-
 llcmp
-
 ```
 
 ## Ajuste geral ##
 
 _Framework_ implementado em R que utiliza a forma de escrita de
-preditores no estilo de fórmulas, similar as funções `lm`, `glm`. 
+preditores no estilo de fórmulas, similar as funções `lm`, `glm`.
 
 ```{r}
-
 cmp
-
 ```
 
 Um exemplo de como são construídas as matrizes, definidos os chutes
 iniciais e ajustados os modelos na função:
 
 ```{r}
-
 set.seed(2016)
 x <- rep(1:3, 3)
 y <- rpois(9, lambda = x)
@@ -303,7 +298,7 @@ key <- list(
     rect = list(col = cols, alpha = 0.1, lty = 3, border = NA),
     text = list(c("COM-Poisson", "Poisson")))
 
-## Gráfico dos valores preditos e IC de 95% para média 
+## Gráfico dos valores preditos e IC de 95% para média
 update(xy, type = c("p", "g"), key = key, alpha = 0.7) +
     as.layer(xyplot(fit ~ dexp,
                     groups = modelo,
@@ -699,14 +694,14 @@ xy1 <- xyplot(nvag ~ K | umid, data = soja,
        as.table = TRUE,
        strip = strip.custom(
            strip.names = TRUE, var.name = "Umidade")) +
-    as.layer(    
+    as.layer(
         segplot(
             K ~ lwr + upr | umid,
             centers = fit, groups = modelo, data = da.nv,
             grid = TRUE, horizontal = FALSE, draw = FALSE,
             lwd = 2, pch = 1:nlevels(da$modelo) + 3,
             panel = panel.segplot.by, f = 0.1, as.table = TRUE)
-    )    
+    )
 
 xy2 <- xyplot(ngra ~ K | umid, data = soja,
        xlab = "Nível de adubação potássica",
@@ -717,14 +712,14 @@ xy2 <- xyplot(ngra ~ K | umid, data = soja,
        as.table = TRUE,
        strip = strip.custom(
            strip.names = TRUE, var.name = "Umidade")) +
-    as.layer(    
+    as.layer(
         segplot(
             K ~ lwr + upr | umid,
             centers = fit, groups = modelo, data = da.ng,
             grid = TRUE, horizontal = FALSE, draw = FALSE,
             lwd = 2, pch = 1:nlevels(da$modelo) + 3,
             panel = panel.segplot.by, f = 0.1, as.table = TRUE)
-    )    
+    )
 
 ## x11(width = 10, height = 50)
 print(xy1, split = c(1, 1, 1, 2), more = TRUE)
@@ -733,7 +728,7 @@ print(xy2, split = c(1, 2, 1, 2), more = FALSE)
 ```
 
 <!--==================================================================== -->
-<!----> 
+<!---->
 
 # Capulhos de algodão sob efeito de desfolha #
 
@@ -938,7 +933,7 @@ key <- list(
     rect = list(col = cols, alpha = 0.1, lty = 3, border = NA),
     text = list(c("COM-Poisson", "Poisson")))
 
-## Gráfico dos valores preditos e IC de 95% para média 
+## Gráfico dos valores preditos e IC de 95% para média
 update(xy, type = c("p", "g"), key = key, alpha = 0.7) +
     as.layer(xyplot(fit ~ des | est,
                     groups = modelo,
@@ -965,7 +960,7 @@ llcmp3 <- function (params, y, X, offset = NULL, sumto = 50) {
     betas <- params[-1]
     phi <- params[1]
     nu <- exp(phi)
-    if (is.null(offset)) 
+    if (is.null(offset))
         offset <- 0
     ##-------------------------------------------
     ## Reparametrização para a média
@@ -973,7 +968,7 @@ llcmp3 <- function (params, y, X, offset = NULL, sumto = 50) {
     Xb <- nu * log(mu + (nu - 1)/(2 * nu))
     ##-------------------------------------------
     i <- 0:sumto
-    zs <- sapply(Xb, function(loglambda) sum(exp(i * loglambda - 
+    zs <- sapply(Xb, function(loglambda) sum(exp(i * loglambda -
                                                  nu * lfactorial(i))))
     Z <- sum(log(zs))
     ll <- sum(y * Xb - nu * lfactorial(y)) - Z
@@ -993,14 +988,14 @@ cmp3 <- function (formula, data, start = NULL, sumto = NULL, ...) {
     y <- model.response(frame)
     X <- model.matrix(terms, frame)
     ## off <- model.offset(frame)
-    ## if (is.null(sumto)) 
+    ## if (is.null(sumto))
     ##     sumto <- ceiling(max(y)^1.5)
     if (is.null(start)) {
         m0 <- glm.fit(x = X, y = y, family = poisson())
         start <- c(phi = 0, m0$coefficients)
     }
     bbmle::parnames(llcmp3) <- names(start)
-    model <- bbmle::mle2(llcmp3, start = start, data = list(y = y, 
+    model <- bbmle::mle2(llcmp3, start = start, data = list(y = y,
         X = X), vecpar = TRUE, ...)
     return(model)
 }

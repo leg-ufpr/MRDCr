@@ -18,9 +18,6 @@ source("_setup.R")
 
 ```{r}
 library(MRDCr)
-```
-
-```{r}
 # help(soja)
 ls("package:MRDCr")
 

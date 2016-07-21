@@ -27,7 +27,6 @@ seguintes variáveis:
 
 ```{r, results = "hide", message = FALSE}
 # Pacotes necessários.
-
 library(lattice)
 library(MASS)
 library(effects)
@@ -324,4 +323,8 @@ kable(matfreq, format = "markdown",
 cat(format(Sys.time(),
            format = "Atualizado em %d de %B de %Y.\n\n"))
 sessionInfo()
+```
+
+```{r, include=FALSE}
+detach("package:effects")
 ```

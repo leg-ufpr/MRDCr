@@ -25,9 +25,6 @@ ou muito reativas), submetidas a dois tipos diferentes de intervenção
 A variável resposta aqui considerada é o número de mudanças na postura
 corporal do animal ao longo do período de observação (3 minutos).
 
-```{r, echo=FALSE, include=FALSE}
-devtools::load_all()
-```
 ```{r, results="hide", message=FALSE}
 # Pacotes requeridos.
 library("lmtest")
@@ -38,18 +35,15 @@ library("RColorBrewer")
 library("sandwich")
 library("hnp")
 library("knitr")
+library("MRDCr")
 ```
 
 ## Análise descritiva
 
 ```{r}
+data(postura)
 str(postura)
 summary(postura)
-
-# names(postura) <- c("npost", "trat", "linh")
-# postura <- postura[, c(2, 3, 1)]
-# use_data(postura, overwrite = TRUE)
-# tab <- xtabs(~trat + npost, data = postura)
 
 bwplot(npost ~ linh | trat,
        data = postura,
@@ -74,7 +68,7 @@ mdp <- aggregate(npost ~ trat + linh,
 mdp
 ```
 
-## Regressão poisson com estimação por máxima verossimilhança
+## Regressão Poisson com estimação por máxima verossimilhança
 
 ```{r}
 # Ajuste do modelo Poisson.
