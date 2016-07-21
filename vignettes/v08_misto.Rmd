@@ -136,7 +136,6 @@ xyplot(fit ~ K | umid, data = pred,
 
 ```{r}
 #-----------------------------------------------------------------------
-# devtools::load_all()
 
 data(confterm, package = "MRDCr")
 data(conftemp, package = "MRDCr")
