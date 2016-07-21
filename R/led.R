@@ -1,5 +1,5 @@
 #' @name led
-#' @title Efeito das Cores de Iluminação de LED na Produção de Poedeiras
+#' @title Efeito das Cores de Ilumina\enc{çã}{ca}o de LED na Produ\enc{çã}{ca}o de Poedeiras
 #' @description Experimento que estudou o efeito de 5 cores de
 #'     iluminação de LED na produção de ovos de galinha poedeira. O
 #'     experimento usou 360 aves divididas em 36 gaiolas e teve duração

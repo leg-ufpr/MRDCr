@@ -1,5 +1,5 @@
 #' @name nematoide
-#' @title Número de Nematóides em Raízes de Feijoeiro
+#' @title N\enc{ú}{u}mero de Nemat\enc{ó}{o}ides em Ra\enc{í}{i}zes de Feijoeiro
 #' @description Resultados de um experimento em casa de vegetação que
 #'     estudou a reprodução de nematóides em cultivares/linhagens de
 #'     feijoeiro. O solo dos vasos foi inicialmente contaminado com

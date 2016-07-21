@@ -1,5 +1,5 @@
 #' @name capdesfo
-#' @title Capulhos de Algodão em Função de Desfolha Artificial
+#' @title Capulhos de Algod\enc{ã}{a}o em Fun\enc{çã}{ca}o de Desfolha Artificial
 #' @description Experimento conduzido sob delineamento interamente
 #'     casualizado com 5 repetições em casa de vegetação com plantas de
 #'     algodão \emph{Gossypium hirsutum} submetidas à diferentes níveis

@@ -1,5 +1,5 @@
 #' @name soja
-#' @title Umidade do Solo e Doses de Potássio na Cultura da Soja
+#' @title Umidade do Solo e Doses de Pot\enc{á}{a}ssio na Cultura da Soja
 #' @description Variáveis de contagem de um experimento fatorial 5
 #'     \eqn{\times} 3 que estudou níveis de adubação com potássio e
 #'     níveis de umidade do solo nos componentes de produção da soja. O

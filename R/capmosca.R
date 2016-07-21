@@ -1,5 +1,5 @@
 #' @name capmosca
-#' @title Capulhos de Algodão em Função da Exposição à Mosca Branca
+#' @title Capulhos de Algod\enc{ã}{a}o em Fun\enc{çã}{ca}o da Exposi\enc{çã}{ca}o \enc{à}{a} Mosca Branca
 #' @description Experimento conduzido na Universidade Federal da Grande
 #'     Dourados (UFGD) em 2007, cujo objetivo foi avaliar os impactos da
 #'     exposição de plantas à alta infestação de Mosca-Branca

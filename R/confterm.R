@@ -1,5 +1,5 @@
 #' @name confterm
-#' @title Resfriamento da Cobertura de Aviários na Mortalidade de Aves
+#' @title Resfriamento da Cobertura de Avi\enc{á}{a}rios na Mortalidade de Aves
 #' @description Resultados de um experimento que estudou o efeito do
 #'     sistema de refriamento de cobertura de aviáros sob a mortalidade
 #'     das aves e o conforto térmico. Haviam 4 aviários disponíveis e

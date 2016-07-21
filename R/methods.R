@@ -4,7 +4,7 @@ NULL
 #' @name calc_mean_gcnt
 #' @author Walmes Zeviani, \email{walmes@@ufpr.br}.
 #' @export
-#' @title Calcula o Valor Esperado para a Distribuição Gamma Count
+#' @title Calcula o Valor Esperado para a Distribui\enc{çã}{ca}o Gamma Count
 #' @description Função para calcular a média do tipo \eqn{E(Y) = \mu =
 #'     \sum y\cdot \Pr(y)} para uma variável aleatória Gamma Count a
 #'     partir dos parâmetros \eqn{\lambda > 0} e \eqn{\alpha > 0}.

@@ -2,7 +2,7 @@
 #' @aliases panel.cbH
 #' @export
 #' @author Walmes Zeviani baseado na lista de discussão R-help.
-#' @title Função para Intervalos e Bandas de Confiança com a Lattice
+#' @title Fun\enc{çã}{ca}o para Intervalos e Bandas de Confian\enc{ç}{c}a com a Lattice
 #'
 #' @description Essa função permite representar intervalos de confiança
 #'     e bandas de confiança em gráficos do pacote lattice.

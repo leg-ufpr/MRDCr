@@ -1,5 +1,5 @@
 #' @name MRDCr
-#' @title Modelos de Regressão para Dados de Contagem
+#' @title Modelos de Regress\enc{ã}{a}o para Dados de Contagem
 #' @docType package
 #' @description Esse é um pacote com o material do Curso "Modelos de
 #'     Regressão para Dados de Contagem" oferecido pelos autores na 61

@@ -2,7 +2,7 @@
 #' @export
 #' @author Walmes Zeviani baseado no pacote
 #'     \href{http://www.cbs.dtu.dk/~eklund/beeswarm/}{beeswarm}.
-#' @title Diagrama de Dispersão com Aranjo dos Pontos como Colmeia
+#' @title Diagrama de Dispers\enc{ã}{a}o com Aranjo dos Pontos como Colmeia
 #'
 #' @description Used to make scatter plot of discrete variables with no
 #' overlapping points. Observations with the same y value are spread.

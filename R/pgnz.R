@@ -1,4 +1,4 @@
-#' @title Log-Verossimilhança do Modelo Poisson Generalizada
+#' @title Log-Verossimilhan\enc{ç}{c}a do Modelo Poisson Generalizada
 #' @author Walmes Zeviani, \email{walmes@@ufpr.br}
 #' @export
 #' @description Calcula a log-verossimilhança de um modelo de regressão
