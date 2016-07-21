@@ -1,7 +1,7 @@
 Package: MRDCr
 Title: Modelos de Regressão para Dados de Contagem
-Version: 0.0-1
-Date: 2016-04-26
+Version: 0.0-2
+Date: 2016-07-21
 Authors@R: as.person(c(
     "Walmes Marques Zeviani <walmes@ufpr.br> [cre,aut]",
     "Eduardo Elias Ribeiro Junior <edujrrib@gmail.com> [aut]",
