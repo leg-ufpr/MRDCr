@@ -1,11 +1,10 @@
-## ----setup, include=FALSE------------------------------------------------
+## ----setup, include=FALSE-----------------------------------------
 source("_setup.R")
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 library(MRDCr)
 
-## ------------------------------------------------------------------------
-
+## -----------------------------------------------------------------
 data(peixe)
 peixe$campista <- as.factor(peixe$campista)
 levels(peixe$campista) <- c("Não", "Sim")
@@ -14,8 +13,7 @@ str(peixe)
 ## help(peixe)
 
 
-## ------------------------------------------------------------------------
-
+## -----------------------------------------------------------------
 ## Estudo observacional
 ftable(with(peixe, table(npessoas, ncriancas, campista)))
 
@@ -33,7 +31,7 @@ p2 <- histogram(~npeixes, data = subset(peixe, npeixes > 0),
 print(p1, split = c(1, 1, 2, 1), more = TRUE)
 print(p2, split = c(2, 1, 2, 1))
 
-## Proporção dos valores observados 
+## Proporção dos valores observados
 (proptb <- cbind("Proporção" = prop.table(table(peixe$npeixes)),
                  "N. observ" = table(peixe$npeixes)))
 
@@ -57,7 +55,7 @@ xyplot(lnpeixes ~ ncriancas + npessoas,
        type = c("p", "g", "spline"))
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ##======================================================================
 ## Ajuste de modelos hurdle
@@ -93,7 +91,7 @@ m1ZBN <- zeroinfl(f1, data = peixe, dist = "negbin")
 m2ZBN <- zeroinfl(f2, data = peixe, dist = "negbin")
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Via log-verossimilhança
 cbind("Poisson" = sapply(list(m1P, m2P), logLik),
@@ -105,7 +103,7 @@ cbind("Poisson" = sapply(list(m1P, m2P), logLik),
       )
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Testes de razão de verossimilhanças para o efeito de interação
 anova(m1BN, m2BN)
@@ -113,7 +111,7 @@ lmtest::lrtest(m1HBN, m2HBN)
 lmtest::lrtest(m1ZBN, m2ZBN)
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Teste de Vuong para diferença entre os modelos BN e HUBN
 vuong(m1BN, m1HBN)
@@ -122,7 +120,7 @@ vuong(m1BN, m1HBN)
 vuong(m1ZBN, m1HBN)
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Estimativas dos parâmetros e testes de Wald
 summary(m1BN)
@@ -130,7 +128,7 @@ summary(m1HBN)
 summary(m1ZBN)
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Ajuste de preditor do modelo proposto
 ## Retira o efeito de campista no preditor para as contagens não nula
@@ -143,9 +141,9 @@ lmtest::lrtest(m1HBN, m3HBN)
 vuong(m1BN, m3HBN)
 
 
-## ----diag, cache = TRUE, fig.height = 4----------------------------------
+## ----diag, cache = TRUE, fig.height = 4---------------------------
 
-## Uma pequena avaliação dos resíduos 
+## Uma pequena avaliação dos resíduos
 p1 <- xyplot(residuals(m3HBN) ~ fitted(m3HBN),
              type = c("p", "g", "spline"))
 
@@ -169,13 +167,13 @@ print(p2, split = c(2, 1, 3, 1), more = TRUE)
 print(p3, split = c(3, 1, 3, 1), more = FALSE)
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Estimativas dos parâmetros e testes de Wald
 summary(m3HBN)
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ##----------------------------------------------------------------------
 
@@ -215,7 +213,7 @@ barchart(py ~ y | factor(ncriancas), data = da,
          ))
 
 
-## ----boot, cache = TRUE--------------------------------------------------
+## ----boot, cache = TRUE-------------------------------------------
 
 ## Intervalos de confiança para predição
 
@@ -228,7 +226,7 @@ start <- list(zero = coef(m3HBN, "zero"), count = coef(m3HBN, "count"))
 boots <- replicate(100, {
     id <- sample(1:n, replace = TRUE)
     model <- hurdle(formula, data = peixe[id, ], start = start)
-    yhat <- predict(model, newdata = predmu, type = "response")    
+    yhat <- predict(model, newdata = predmu, type = "response")
 })
 
 pred2 <- cbind(predmu, t(apply(boots, 1, function(x) {
@@ -238,7 +236,7 @@ names(pred2)[5:6] <- c("lwr", "upr")
 ## Viasualizando graficamente
 xyplot(fit ~ npessoas | campista,
        groups = ncriancas, data = pred2,
-       type = c("l", "g"), cty = "bands", 
+       type = c("l", "g"), cty = "bands",
        ly = pred2$lwr, uy = pred2$upr,
        prepanel = prepanel.cbH, alpha = 0.5,
        panel = panel.superpose,
@@ -252,9 +250,9 @@ xyplot(fit ~ npessoas | campista,
          ))
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
-## Modelo Hurdle (binomial e binomial negativa) 
+## Modelo Hurdle (binomial e binomial negativa)
 m3HBN$formula
 
 ##-------------------------------------------
@@ -267,33 +265,31 @@ mzero <- glm(indica ~ campista + npessoas + ncriancas,
 cbind("glm_binomial" = coef(mzero),
       "zeroinfl" = coef(m3HBN, model = "zero"))
 
-##-------------------------------------------
-## Componente da contagem nula (f_count)
-library(VGAM)
-countp <- subset(peixe, npeixes > 0)
-mcount <- vglm(npeixes ~ npessoas + ncriancas,
-               family = posnegbinomial, data = countp)
+# ##-------------------------------------------
+# ## Componente da contagem nula (f_count)
+# library(VGAM)
+# countp <- subset(peixe, npeixes > 0)
+# mcount <- vglm(npeixes ~ npessoas + ncriancas,
+#                family = posnegbinomial, data = countp)
+#
+# ## Comparando os coeficientes (betas e theta (da BN))
+# cbind("vglm_posnegbin" = coef(mcount)[-2],
+#       "zeroinfl" = coef(m3HBN, model = "count"))
+# cbind("vglm_posnegbin" = exp(coef(mcount)[2]),
+#       "zeroinfl" = m3HBN$theta)
 
-## Comparando os coeficientes (betas e theta (da BN))
-cbind("vglm_posnegbin" = coef(mcount)[-2],
-      "zeroinfl" = coef(m3HBN, model = "count"))
-cbind("vglm_posnegbin" = exp(coef(mcount)[2]), 
-      "zeroinfl" = m3HBN$theta)
 
-
-## ------------------------------------------------------------------------
-
+## -----------------------------------------------------------------
 data(seguros)
 str(seguros)
 ## help(seguros)
 
-
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 summary(seguros)
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 library(pscl)
 
@@ -334,7 +330,7 @@ m1ZBN <- zeroinfl(f1, data = seguros, dist = "negbin")
 m2ZBN <- zeroinfl(f2, data = seguros, dist = "negbin")
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Via log-verossimilhança
 cbind("Poisson" = sapply(list(m0P, m1P, m2P), logLik),
@@ -346,7 +342,7 @@ cbind("Poisson" = sapply(list(m0P, m1P, m2P), logLik),
       )
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Testes de razão de verossimilhanças
 lmtest::lrtest(m0HP, m1HP, m2HP)
@@ -354,14 +350,14 @@ lmtest::lrtest(m0HP, m1HP, m2HP)
 lmtest::lrtest(m0HBN, m1HBN, m2HBN)
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Para a componente de contagens não negativas é necessário um modelo
 ## Binomial Negativa, considerando superdispersão dos dados?
 vuong(m1HP, m1HBN)
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Estimativas do modelo proposto
 summary(m1HP)
@@ -375,10 +371,10 @@ lmtest::lrtest(m1HP, m3HP)
 summary(m3HP)
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Avaliação de diferentes especificações para a componente de contagens
-## nulas 
+## nulas
 m3HP.pois <- hurdle(nsinist ~ 1 | sexo + valor + log(expos),
                     data = seguros, zero.dist = "poisson")
 
@@ -393,7 +389,7 @@ sapply(list("binomial" = m3HP, "poisson" = m3HP.pois,
             "negbin" = m3HP.negb, "geometric" = m3HP.geom), logLik)
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ## Região para predição
 pred <- expand.grid(sexo = c("M", "F"),
@@ -417,7 +413,7 @@ xyplot(fit ~ valor | factor(expos),
            title = "Número de crianças"))
 
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------
 
 ##-------------------------------------------
 ## Estimando probabilidades
