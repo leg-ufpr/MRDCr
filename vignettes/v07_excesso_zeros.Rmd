@@ -21,7 +21,6 @@ library(MRDCr)
 # Números de peixes capturados em um Parque Estadual #
 
 ```{r}
-
 data(peixe)
 peixe$campista <- as.factor(peixe$campista)
 levels(peixe$campista) <- c("Não", "Sim")
@@ -36,19 +35,15 @@ informações coletadas foram refentes a presenção ou não de um campista,
 ao número de crianças no grupo e ao número de indivíduos no grupo. Assim
 as variáveis definidas são:
 
-`campista`: Fator com dois níveis que representa a presença (_Sim_) ou
-ausência (_Não_) de um campista no grupo.
-
-`ncriancas`: Número de crianças no grupo.
-
-`npessoas`: Número total de pessoas no grupo.
-
-`npeixes`: Número de peixes capturados pelo grupo.
+  * `campista`: Fator com dois níveis que representa a presença (_Sim_)
+    ou ausência (_Não_) de um campista no grupo.
+  * `ncriancas`: Número de crianças no grupo.
+  * `npessoas`: Número total de pessoas no grupo.
+  * `npeixes`: Número de peixes capturados pelo grupo.
 
 ## Análise exploratória ##
 
 ```{r}
-
 ## Estudo observacional
 ftable(with(peixe, table(npessoas, ncriancas, campista)))
 
@@ -66,7 +61,7 @@ p2 <- histogram(~npeixes, data = subset(peixe, npeixes > 0),
 print(p1, split = c(1, 1, 2, 1), more = TRUE)
 print(p2, split = c(2, 1, 2, 1))
 
-## Proporção dos valores observados 
+## Proporção dos valores observados
 (proptb <- cbind("Proporção" = prop.table(table(peixe$npeixes)),
                  "N. observ" = table(peixe$npeixes)))
 
@@ -191,7 +186,7 @@ vuong(m1BN, m3HBN)
 
 ```{r diag, cache = TRUE, fig.height = 4}
 
-## Uma pequena avaliação dos resíduos 
+## Uma pequena avaliação dos resíduos
 p1 <- xyplot(residuals(m3HBN) ~ fitted(m3HBN),
              type = c("p", "g", "spline"))
 
@@ -279,7 +274,7 @@ start <- list(zero = coef(m3HBN, "zero"), count = coef(m3HBN, "count"))
 boots <- replicate(100, {
     id <- sample(1:n, replace = TRUE)
     model <- hurdle(formula, data = peixe[id, ], start = start)
-    yhat <- predict(model, newdata = predmu, type = "response")    
+    yhat <- predict(model, newdata = predmu, type = "response")
 })
 
 pred2 <- cbind(predmu, t(apply(boots, 1, function(x) {
@@ -289,7 +284,7 @@ names(pred2)[5:6] <- c("lwr", "upr")
 ## Viasualizando graficamente
 xyplot(fit ~ npessoas | campista,
        groups = ncriancas, data = pred2,
-       type = c("l", "g"), cty = "bands", 
+       type = c("l", "g"), cty = "bands",
        ly = pred2$lwr, uy = pred2$upr,
        prepanel = prepanel.cbH, alpha = 0.5,
        panel = panel.superpose,
@@ -308,7 +303,7 @@ xyplot(fit ~ npessoas | campista,
 
 ```{r}
 
-## Modelo Hurdle (binomial e binomial negativa) 
+## Modelo Hurdle (binomial e binomial negativa)
 m3HBN$formula
 
 ##-------------------------------------------
@@ -321,18 +316,18 @@ mzero <- glm(indica ~ campista + npessoas + ncriancas,
 cbind("glm_binomial" = coef(mzero),
       "zeroinfl" = coef(m3HBN, model = "zero"))
 
-##-------------------------------------------
-## Componente da contagem nula (f_count)
-library(VGAM)
-countp <- subset(peixe, npeixes > 0)
-mcount <- vglm(npeixes ~ npessoas + ncriancas,
-               family = posnegbinomial, data = countp)
-
-## Comparando os coeficientes (betas e theta (da BN))
-cbind("vglm_posnegbin" = coef(mcount)[-2],
-      "zeroinfl" = coef(m3HBN, model = "count"))
-cbind("vglm_posnegbin" = exp(coef(mcount)[2]), 
-      "zeroinfl" = m3HBN$theta)
+# ##-------------------------------------------
+# ## Componente da contagem nula (f_count)
+# library(VGAM)
+# countp <- subset(peixe, npeixes > 0)
+# mcount <- vglm(npeixes ~ npessoas + ncriancas,
+#                family = posnegbinomial, data = countp)
+#
+# ## Comparando os coeficientes (betas e theta (da BN))
+# cbind("vglm_posnegbin" = coef(mcount)[-2],
+#       "zeroinfl" = coef(m3HBN, model = "count"))
+# cbind("vglm_posnegbin" = exp(coef(mcount)[2]),
+#       "zeroinfl" = m3HBN$theta)
 
 ```
 
@@ -341,27 +336,25 @@ cbind("vglm_posnegbin" = exp(coef(mcount)[2]),
 ## Análise exploratória ##
 
 ```{r}
-
 data(seguros)
 str(seguros)
 ## help(seguros)
-
 ```
 
 Dados referentes ao acompanhamento de clientes de uma seguradora de
 automóveis ao longo de um ano. Foram registrados as variáveis descritas
 abaixo para 16483 clientes.
 
-* `tipo`: Tipo de veículo segurado. Fator com seis níveis (_hatch_,
-    _mono_, _picape_, _sedan_, _wagon_ e _suv_).
-* `idade`: Idade do cliente, em anos.
-* `sexo`: Sexo do cliente. Fator com dois níveis, _M_ para clientes do
-    sexo masculino e _F_ para feminino.
-* `civil`: Estado civil do cliente. Fator com quatro níveis (_Casado_,
-  _Divorciado_, _Solteiro_ e _Viuvo_).
-* `valor`: Valor do veículo segurado, em 1000 reais.
-* `expos`: Período de cobertura do cliente durante o ano sob análise.
-* `nsinist`: Número de sinistros registrados no período.
+  * `tipo`: Tipo de veículo segurado. Fator com seis níveis (_hatch_,
+      _mono_, _picape_, _sedan_, _wagon_ e _suv_).
+  * `idade`: Idade do cliente, em anos.
+  * `sexo`: Sexo do cliente. Fator com dois níveis, _M_ para clientes do
+      sexo masculino e _F_ para feminino.
+  * `civil`: Estado civil do cliente. Fator com quatro níveis (_Casado_,
+    _Divorciado_, _Solteiro_ e _Viuvo_).
+  * `valor`: Valor do veículo segurado, em 1000 reais.
+  * `expos`: Período de cobertura do cliente durante o ano sob análise.
+  * `nsinist`: Número de sinistros registrados no período.
 
 ```{r}
 
@@ -465,7 +458,7 @@ summary(m3HP)
 ```{r}
 
 ## Avaliação de diferentes especificações para a componente de contagens
-## nulas 
+## nulas
 m3HP.pois <- hurdle(nsinist ~ 1 | sexo + valor + log(expos),
                     data = seguros, zero.dist = "poisson")
 
