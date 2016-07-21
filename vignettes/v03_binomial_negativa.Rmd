@@ -25,9 +25,6 @@ seguintes variáveis:
   * **Sexo**: M para masculino e F para feminino;
   * **Valor**: Valor do veículo segurado (em reais).
 
-```{r, include=FALSE}
-devtools::load_all()
-```
 ```{r, results = "hide", message = FALSE}
 # Pacotes necessários.
 
@@ -35,67 +32,70 @@ library(lattice)
 library(MASS)
 library(effects)
 library(knitr)
+library(MRDCr)
 ```
 
 ## Verificação do conteúdo e a estrutura dos dados
 
 ```{r}
 # Dez primeiras linhas da base.
-head(seguro, 10)
-str(seguro)
+head(seguros, 10)
+str(seguros)
+
+seguros$lexpo <- log(seguros$expos)
 ```
 
 ## Análise descritiva da distribuição do número de sinistros
 
 ```{r}
 # Distribuição do números de sinistros.
-tb <- table(seguro$Sinistros)
+tb <- table(seguros$nsinist)
 tb
 
 barchart(tb, horizontal = FALSE)
 
 # Taxa de sinistros na amostra.
-taxageral <- sum(seguro$Sinistros)/sum(seguro$Exposicao)
+taxageral <- sum(seguros$nsinist)/sum(seguros$expos)
 taxageral
 
-tab <- aggregate(cbind(Exposicao, Sinistros) ~ Sexo,
-                 data = seguro, FUN = sum)
-taxa <- with(tab, Sinistros/Exposicao)
+tab <- aggregate(cbind(expos, nsinist) ~ sexo,
+                 data = seguros, FUN = sum)
+taxa <- with(tab, nsinist/expos)
 tab <- cbind(tab, taxa)
 
 # Distribuição do número de sinistros por sexo.
 kable(tab, align = "c",
-      caption = "**Taxa de sinistros segundo Sexo**")
+      caption = "**Taxa de sinistros segundo sexo**")
 
-seguro$idadecat <- cut(seguro$Idade,
+seguros$idadecat <- cut(seguros$idade,
                        breaks = c(18, 30, 60, 92),
                        include.lowest = TRUE)
-tab <- aggregate(cbind(Exposicao, Sinistros) ~ idadecat,
-                 data = seguro, FUN = sum)
-taxa <- with(tab, Sinistros/Exposicao)
+tab <- aggregate(cbind(expos, nsinist) ~ idadecat,
+                 data = seguros, FUN = sum)
+taxa <- with(tab, nsinist/expos)
 tab <- cbind(tab, taxa)
 
 # Distribuição do número de sinistros por sexo.
 kable(tab, align = "c",
-      caption = "**Taxa de sinistros segundo Idade**")
+      caption = "**Taxa de sinistros segundo idade**")
 
-tabidsex <- aggregate(cbind(Exposicao, Sinistros) ~ Sexo + idadecat,
-                      data = seguro, FUN = sum)
-taxa <- with(tabidsex, Sinistros/Exposicao)
+tabidsex <- aggregate(cbind(expos, nsinist) ~ sexo + idadecat,
+                      data = seguros, FUN = sum)
+taxa <- with(tabidsex, nsinist/expos)
 tabidsex <- cbind(tabidsex, taxa)
 
 # Distribuição do número de sinistros por idade e sexo.
 kable(tabidsex, align = "c",
-      caption = "**Taxa de sinistros segundo Sexo e Idade**")
+      caption = "**Taxa de sinistros segundo sexo e idade**")
 ```
 
 ## Regressão usando o modelo log-linear Poisson
 
 ```{r}
-seguro <- na.omit(seguro)
-mP <- glm(Sinistros ~ Sexo + Idade + I(Idade^2) + Valor +
-              offset(log(Exposicao)),
-          data = seguro, family = poisson)
+seguros <- na.omit(seguros)
+mP <- glm(nsinist ~ sexo + idade + I(idade^2) + valor +
+              offset(log(expos)),
+          data = seguros, family = poisson)
 summary(mP)
 
 # Estimação do parâmetro de dispersão.
@@ -152,9 +152,9 @@ envelope(mP)
 ## Ajuste do modelo associando um parâmetro ao termo offset (log-exposicao)
 
 ```{r}
-mPo <- glm(Sinistros ~ Sexo + Idade + I(Idade^2) + Valor +
-               log(Exposicao),
-           data = seguro, family = poisson)
+mPo <- glm(nsinist ~ sexo + idade + I(idade^2) + valor +
+               log(expos),
+           data = seguros, family = poisson)
 summary(mPo)
 anova(mP, mPo, test = "Chisq")
 ```
@@ -162,8 +162,8 @@ anova(mP, mPo, test = "Chisq")
 ## Regressão usando a distribuição binomial negativa
 
 ```{r}
-mBNo <- glm.nb(Sinistros ~ Sexo + Idade + I(Idade^2) + Valor +
-                   log(Exposicao), data = seguro)
+mBNo <- glm.nb(nsinist ~ sexo + idade + I(idade^2) + valor +
+                   log(expos), data = seguros)
 summary(mBNo)
 ```
 
@@ -177,11 +177,11 @@ plot(mBNo)
 
 ```{r}
 dadosnb3 <-
-    seguro[, c("Sexo", "Idade", "Valor", "Exposicao", "Sinistros")]
-dadosnb3$lexpo <- log(seguro$Exposicao)
+    seguros[, c("sexo", "idade", "valor", "expos", "nsinist")]
+dadosnb3$lexpo <- log(seguros$expos)
 
-mBNo <- glm.nb(Sinistros ~ Sexo + Idade + I(Idade^2) +
-                   Valor + lexpo,
+mBNo <- glm.nb(nsinist ~ sexo + idade + I(idade^2) +
+                   valor + lexpo,
                data = dadosnb3)
 
 envelope <- function(modelo) {
@@ -241,19 +241,19 @@ trellis.par.set(list(axis.text = list(cex = 1.2)))
 
 plot(efeitos[[2]],
      type = "response",
-     main = "Taxa de sinistros vs. Idade",
+     main = "Taxa de sinistros vs. idade",
      xlab = "Idade (anos)",
      ylab = "Taxa de sinistros")
 
 plot(efeitos[[1]],
      type = "response",
-     main = "Taxa de sinistros vs. Sexo",
+     main = "Taxa de sinistros vs. sexo",
      xlab = "Sexo",
      ylab = "Taxa de  sinistros")
 
 plot(efeitos[[4]],
      type = "response",
-     main = "Taxa de sinistros vs. Valor do automóvel",
+     main = "Taxa de sinistros vs. valor do automóvel",
      xlab = "Valor (x1000 reais)",
      ylab = "Taxa de sinistros")
 ```
@@ -263,23 +263,23 @@ plot(efeitos[[4]],
 ```{r}
 
 # Poisson sem ajuste de covariáveis.
-n <- nrow(seguro)
-mediasin <- mean(seguro$Sinistros)
+n <- nrow(seguros)
+mediasin <- mean(seguros$nsinist)
 freqps <- round(n * dpois(0:10, mediasin))
 
 # Poisson com covariaveis
 pred1 <- predict(mPo, type = "response")
 intervalo <- 0:10
-matprob <- matrix(0, nrow = nrow(seguro), ncol = length(intervalo))
+matprob <- matrix(0, nrow = nrow(seguros), ncol = length(intervalo))
 probpois <- function(interv, taxa) dpois(intervalo, taxa)
-for (i in 1:nrow(seguro)) {
+for (i in 1:nrow(seguros)) {
     matprob[i, ] <- probpois(interv = intervalo, taxa = pred1[i])
 }
 pbarra <- colMeans(matprob)
 freqpsaj <- round(n * pbarra)
 
 # Binomial negativa sem covariaveis.
-ajustenb <- glm.nb(Sinistros ~ 1, data = seguro)
+ajustenb <- glm.nb(nsinist ~ 1, data = seguros)
 
 media <- exp(coefficients(ajustenb))
 shape <- ajustenb$theta
@@ -289,18 +289,18 @@ freqbn <- round(n * dnbinom(0:10, mu = media, size = shape))
 pred2 <- predict(mBNo, type = "response")
 
 intervalo <- 0:10
-matprob <- matrix(0, nrow = nrow(seguro), ncol = length(intervalo))
+matprob <- matrix(0, nrow = nrow(seguros), ncol = length(intervalo))
 probnb <- function(interv, media, shape) {
     dnbinom(intervalo, mu = media,
             size = shape)
 }
-for (i in 1:nrow(seguro)) {
+for (i in 1:nrow(seguros)) {
     matprob[i, ] <- probnb(interv = intervalo, media = pred2[i],
                            shape = mBNo$theta)
 }
 pbarra <- colMeans(matprob)
 frebnaj <- round(n * pbarra)
-ams <- c(table(seguro$Sinistros), rep(0, 5))
+ams <- c(table(seguros$nsinist), rep(0, 5))
 matfreq <- rbind(ams, freqps, freqpsaj, freqbn, frebnaj)
 colnames(matfreq) <- 0:10
 rownames(matfreq) <- c("Amostra",
