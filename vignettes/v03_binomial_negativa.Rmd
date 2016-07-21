@@ -236,7 +236,6 @@ kable(round(estimat, 5), align = "c",
 
 ```{r}
 efeitos <- allEffects(mBNo, given.values = c(lexpo = 0))
-trellis.par.set(list(axis.text = list(cex = 1.2)))
 
 plot(efeitos[[2]],
      type = "response",
@@ -255,6 +254,8 @@ plot(efeitos[[4]],
      main = "Taxa de sinistros vs. valor do automóvel",
      xlab = "Valor (x1000 reais)",
      ylab = "Taxa de sinistros")
+
+dev.off()
 ```
 
 ## Frequências ajustadas pelas duas distribuições

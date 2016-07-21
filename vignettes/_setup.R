@@ -25,6 +25,7 @@ ps <- list(box.rectangle = list(col = 1, fill = c("gray70")),
            superpose.line = list(col = mycol, lty = 1),
            superpose.symbol = list(col = mycol, pch = 1),
            superpose.polygon = list(col = mycol),
-           strip.background = list(col = c("gray80", "gray50")))
+           strip.background = list(col = c("gray80", "gray50")),
+           axis.text = list(cex = 0.8))
 trellis.par.set(ps)
 # show.settings()
