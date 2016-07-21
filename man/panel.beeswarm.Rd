@@ -2,7 +2,7 @@
 % Please edit documentation in R/panel.beeswarm.R
 \name{panel.beeswarm}
 \alias{panel.beeswarm}
-\title{Diagrama de Dispersão com Aranjo dos Pontos como Colmeia}
+\title{Diagrama de Dispers\enc{ã}{a}o com Aranjo dos Pontos como Colmeia}
 \usage{
 panel.beeswarm(x, y, subscripts, spread, ...)
 }

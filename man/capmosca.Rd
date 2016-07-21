@@ -2,7 +2,7 @@
 % Please edit documentation in R/capmosca.R
 \name{capmosca}
 \alias{capmosca}
-\title{Capulhos de Algodão em Função da Exposição à Mosca Branca}
+\title{Capulhos de Algod\enc{ã}{a}o em Fun\enc{çã}{ca}o da Exposi\enc{çã}{ca}o \enc{à}{a} Mosca Branca}
 \format{Um \code{data.frame} com 60 observações e 8 variáveis.
     \describe{
 

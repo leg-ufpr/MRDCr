@@ -2,15 +2,15 @@
 % Please edit documentation in R/cmp.R
 \name{convergencez}
 \alias{convergencez}
-\title{Avaliação da Convergência da Constante Normalizadora}
+\title{Avalia\enc{çã}{ca}o da Converg\enc{ê}{e}ncia da Constante Normalizadora}
 \usage{
 convergencez(model, tol = 1e-04, incremento = 10, maxit = 150,
   plot = TRUE)
 }
 \arguments{
-\item{model}{Objeto resultante da função \code{\link[MRDCr]{cmp}}.}
+\item{model}{Objeto resultante da fun\enc{çã}{ca}o \code{\link[MRDCr]{cmp}}.}
 
-\item{tol}{Critério de parada do algoritmo, representa o valor
+\item{tol}{Crit\enc{é}{e}rio de parada do algoritmo, representa o valor
 tolerado para a diferença de \eqn{\frac{\lambda^i}{(i!)^\nu} -
 0}, pois no limite \eqn{i \rightarrow \infty} o incremente
 \eqn{\frac{\lambda^i}{(i!)^\nu}} tende a 0.}
@@ -33,9 +33,9 @@ Uma lista com os incrementos das constantes Z,
     para cada observação.
 }
 \description{
-Avalia a convergência da constante de normalização de um
+Avalia a converg\enc{ê}{e}ncia da constante de normaliza\enc{çã}{ca}o de um
     modelo COM-Poisson definida por: \deqn{Z = \sum
-    \frac{\lambda^i}{(i!)^\nu}}, em que o parâmetro \eqn{\nu} é
+    \frac{\lambda^i}{(i!)^\nu}}, em que o parâmetro \eqn{\nu} \enc{é}{e}
     tomado como \eqn{\exp{\phi}}.
 }
 \examples{

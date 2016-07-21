@@ -2,7 +2,7 @@
 % Please edit documentation in R/led.R
 \name{led}
 \alias{led}
-\title{Efeito das Cores de Iluminação de LED na Produção de Poedeiras}
+\title{Efeito das Cores de Ilumina\enc{çã}{ca}o de LED na Produ\enc{çã}{ca}o de Poedeiras}
 \format{Um \code{data.frame} com 2100 observações e 6 variáveis.
 
 \describe{

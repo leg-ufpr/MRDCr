@@ -4,7 +4,7 @@
 \name{MRDCr}
 \alias{MRDCr}
 \alias{MRDCr-package}
-\title{Modelos de Regressão para Dados de Contagem}
+\title{Modelos de Regress\enc{ã}{a}o para Dados de Contagem}
 \description{
 Esse é um pacote com o material do Curso "Modelos de
     Regressão para Dados de Contagem" oferecido pelos autores na 61

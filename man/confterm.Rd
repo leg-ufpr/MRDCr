@@ -3,7 +3,7 @@
 \name{confterm}
 \alias{conftemp}
 \alias{confterm}
-\title{Resfriamento da Cobertura de Aviários na Mortalidade de Aves}
+\title{Resfriamento da Cobertura de Avi\enc{á}{a}rios na Mortalidade de Aves}
 \format{\code{confterm} é um \code{data.frame} com 176 observações e
     4 variáveis, em que
 

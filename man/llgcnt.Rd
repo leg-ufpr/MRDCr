@@ -2,7 +2,7 @@
 % Please edit documentation in R/gcnt.R
 \name{llgcnt}
 \alias{llgcnt}
-\title{Log-Verossimilhança do Modelo Gamma Count}
+\title{Log-Verossimilhan\enc{ç}{c}a do Modelo Gamma Count}
 \usage{
 llgcnt(params, y, X, offset = NULL)
 }

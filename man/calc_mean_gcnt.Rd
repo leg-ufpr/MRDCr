@@ -2,7 +2,7 @@
 % Please edit documentation in R/methods.R
 \name{calc_mean_gcnt}
 \alias{calc_mean_gcnt}
-\title{Calcula o Valor Esperado para a Distribuição Gamma Count}
+\title{Calcula o Valor Esperado para a Distribui\enc{çã}{ca}o Gamma Count}
 \usage{
 calc_mean_gcnt(lambda, alpha, tol = 1e-05)
 }

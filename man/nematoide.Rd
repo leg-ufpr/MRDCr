@@ -2,7 +2,7 @@
 % Please edit documentation in R/nematoide.R
 \name{nematoide}
 \alias{nematoide}
-\title{Número de Nematóides em Raízes de Feijoeiro}
+\title{N\enc{ú}{u}mero de Nemat\enc{ó}{o}ides em Ra\enc{í}{i}zes de Feijoeiro}
 \format{Um \code{data.frame} com 94 observações e 4 variáveis.
 
 \describe{

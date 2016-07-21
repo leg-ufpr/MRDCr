@@ -3,7 +3,7 @@
 \name{panel.cbH}
 \alias{panel.cbH}
 \alias{prepanel.cbH}
-\title{Função para Intervalos e Bandas de Confiança com a Lattice}
+\title{Fun\enc{çã}{ca}o para Intervalos e Bandas de Confian\enc{ç}{c}a com a Lattice}
 \usage{
 panel.cbH(x, y, ly, uy, subscripts, cty, col.line = plot.line$col,
   lwd = plot.line$lwd, desloc = NULL, fill = 1, alpha = 0.1,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/capdesfo.R
 \name{capdesfo}
 \alias{capdesfo}
-\title{Capulhos de Algodão em Função de Desfolha Artificial}
+\title{Capulhos de Algod\enc{ã}{a}o em Fun\enc{çã}{ca}o de Desfolha Artificial}
 \format{Um code{data.frame} com 125 observações e 4 variáveis
 
 \describe{

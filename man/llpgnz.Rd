@@ -2,7 +2,7 @@
 % Please edit documentation in R/pgnz.R
 \name{llpgnz}
 \alias{llpgnz}
-\title{Log-Verossimilhança do Modelo Poisson Generalizada}
+\title{Log-Verossimilhan\enc{ç}{c}a do Modelo Poisson Generalizada}
 \usage{
 llpgnz(params, y, X, offset = NULL)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/soja.R
 \name{soja}
 \alias{soja}
-\title{Umidade do Solo e Doses de Potássio na Cultura da Soja}
+\title{Umidade do Solo e Doses de Pot\enc{á}{a}ssio na Cultura da Soja}
 \format{Um \code{data.frame} com 75 observações e 5 variáveis, em que
 
 \describe{
