@@ -1,10 +1,8 @@
-## ----setup, include=FALSE-----------------------------------------
+## ----setup, include=FALSE------------------------------------------------
 source("_setup.R")
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 library(MRDCr)
-
-## -----------------------------------------------------------------
 # help(soja)
 ls("package:MRDCr")
 
@@ -28,7 +26,7 @@ xyplot(nvag + ngra ~ K, groups = umid, outer = TRUE,
 
 soja <- soja[-74, ]
 
-## ---- message=FALSE-----------------------------------------------
+## ---- message=FALSE------------------------------------------------------
 # Considerar K categórico.
 soja <- transform(soja, K = factor(K))
 
@@ -96,7 +94,7 @@ lapply(K,
                    test = adjusted(type = "fdr"))
        })
 
-## ---- message=FALSE-----------------------------------------------
+## ---- message=FALSE------------------------------------------------------
 m1 <- glm(ngra ~ bloc + umid * K, data = soja, family = poisson)
 
 par(mfrow = c(2, 2))
@@ -154,7 +152,7 @@ lapply(K,
                    test = adjusted(type = "fdr"))
        })
 
-## ---- echo=FALSE, results="hold"----------------------------------
+## ---- echo=FALSE, results="hold"-----------------------------------------
 cat(format(Sys.time(),
            format = "Atualizado em %d de %B de %Y.\n\n"))
 sessionInfo()

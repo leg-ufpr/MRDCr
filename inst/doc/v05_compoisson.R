@@ -1,23 +1,18 @@
-## ----setup, include=FALSE-----------------------------------------
+## ----setup, include=FALSE------------------------------------------------
 source("_setup.R")
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 library(MRDCr)
 
 
-## -----------------------------------------------------------------
-
+## ------------------------------------------------------------------------
 llcmp
 
-
-## -----------------------------------------------------------------
-
+## ------------------------------------------------------------------------
 cmp
 
-
-## -----------------------------------------------------------------
-
+## ------------------------------------------------------------------------
 set.seed(2016)
 x <- rep(1:3, 3)
 y <- rpois(9, lambda = x)
@@ -47,20 +42,20 @@ mle2(llcmp, start = start,
      vecpar = TRUE)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 data(capmosca)
 str(capmosca)
 ## help(capmosca)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 capmosca <- aggregate(ncap ~ vaso + dexp, data = capmosca, FUN = sum)
 str(capmosca)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Experimento balanceado
 xtabs(~dexp, data = capmosca)
@@ -81,7 +76,7 @@ library(latticeExtra)
                  FUN = function(x) c(mean = mean(x), var = var(x))))
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Preditores considerados
 f1 <- ncap ~ 1
@@ -99,7 +94,7 @@ m2C <- cmp(f2, data = capmosca)
 m3C <- cmp(f3, data = capmosca)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Verossimilhancas dos modelos ajustados
 cbind("Poisson" = sapply(list(m1P, m2P, m3P), logLik),
@@ -110,14 +105,14 @@ anova(m1P, m2P, m3P, test = "Chisq")
 anova(m1C, m2C, m3C)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Estimativas dos parâmetros
 summary(m3P)
 summary(m3C)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Um dos problemas computacionais do modelo COM-Poisson é a obtenção da
 ## constante de normalização Z. Assim uma visualização pós ajuste para
@@ -129,7 +124,7 @@ convergencez(m3C)
 logLik(m3C <- cmp(f3, data = capmosca, sumto = 30))
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Dado que o modelo COM-Poisson leva as mesmas estimativas pontuais que
 ## o modelo Poisson a análise de diagnóstico padrão pode ser utilizada
@@ -137,7 +132,7 @@ par(mfrow = c(2, 2))
 plot(m3P)
 
 
-## ---- cache = TRUE------------------------------------------------
+## ---- cache = TRUE-------------------------------------------------------
 
 ##-------------------------------------------
 ## Testando a nulidade do parâmetro phi
@@ -157,7 +152,7 @@ confint(perf)
 plot(perf)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ##-------------------------------------------
 ## Verificando a matriz ve variâncias e covariâncias
@@ -170,7 +165,7 @@ corrplot.mixed(Corr, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Predição pontual/intervalar
 pred <- with(capmosca,
@@ -207,7 +202,7 @@ key <- list(
     rect = list(col = cols, alpha = 0.1, lty = 3, border = NA),
     text = list(c("COM-Poisson", "Poisson")))
 
-## Gráfico dos valores preditos e IC de 95% para média 
+## Gráfico dos valores preditos e IC de 95% para média
 update(xy, type = c("p", "g"), key = key, alpha = 0.7) +
     as.layer(xyplot(fit ~ dexp,
                     groups = modelo,
@@ -222,21 +217,21 @@ update(xy, type = c("p", "g"), key = key, alpha = 0.7) +
                     panel = panel.superpose))
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 data(soja)
 str(soja)
 ## help(soja)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Observação 74 foi diagnosticada como outlier
 soja <- soja[-74, ]
 soja <- transform(soja, K = factor(K))
 
 
-## ---- fig.height = 12---------------------------------------------
+## ---- fig.height = 12----------------------------------------------------
 
 ## Experimento (des)balanceado
 xtabs(~K + umid, data = soja)
@@ -258,7 +253,7 @@ xyplot(ngra + nvag ~ K | umid,
            strip.names = TRUE, var.name = "Umidade"))
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Avaliando preliminarmente suposição de equidispersão
 (mv <- aggregate(cbind(ngra, nvag, ng2v = ngra/nvag) ~ K + umid,
@@ -297,7 +292,7 @@ print(mvp1, split = c(1, 1, 2, 1), more = TRUE)
 print(mvp2, split = c(2, 1, 2, 1), more = FALSE)
 
 
-## ----ajuste2, cache = TRUE----------------------------------------
+## ----ajuste2, cache = TRUE-----------------------------------------------
 
 ##-------------------------------------------
 ## Para o número de vagens viáveis por parcela
@@ -330,7 +325,7 @@ m1C.ng <- cmp(f1.ng, data = soja, sumto = 700)
 m2C.ng <- cmp(f2.ng, data = soja, sumto = 700)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ##-------------------------------------------
 ## Verossimilhancas dos modelos ajustados
@@ -354,7 +349,7 @@ anova(m1P.ng, m2P.ng, test = "Chisq")
 anova(m1C.ng, m2C.ng)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 ##-------------------------------------------
 ## Estimativas dos parâmetros do modelo proposto para
 
@@ -367,7 +362,7 @@ summary(m2P.ng)
 summary(m2C.ng)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Um dos problemas computacionais do modelo COM-Poisson é a obtenção da
 ## constante de normalização Z. Assim uma visualização pós ajuste para
@@ -381,7 +376,7 @@ convergencez(m2C.nv)
 convergencez(m2C.ng)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Dado que o modelo COM-Poisson leva as mesmas estimativas pontuais que
 ## o modelo Poisson a análise de diagnóstico padrão pode ser utilizada
@@ -395,7 +390,7 @@ par(mfrow = c(2, 2))
 plot(m2P.ng)
 
 
-## ---- cache = TRUE------------------------------------------------
+## ---- cache = TRUE-------------------------------------------------------
 
 ## Testando a nulidade do parâmetro phi
 
@@ -426,7 +421,7 @@ m2Cfixed.ng <- cmp(f2.ng, data = soja, fixed = list("phi" = 0),
 anova(m2C.ng, m2Cfixed.ng)
 
 
-## ----perf2, echo = FALSE, warnings = FALSE------------------------
+## ----perf2, echo = FALSE, warnings = FALSE-------------------------------
 
 ##-------------------------------------------
 ## Via perfis de log-verossimilhança
@@ -441,7 +436,7 @@ plot(perf.nv)
 plot(perf.ng)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Verificando a matriz de variâncias e covariâncias
 
@@ -464,7 +459,7 @@ corrplot.mixed(Corr, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 
 
-## ---- fig.height = 18---------------------------------------------
+## ---- fig.height = 18----------------------------------------------------
 
 ## Predição pontual/intervalar
 pred <- with(soja,
@@ -551,14 +546,14 @@ xy1 <- xyplot(nvag ~ K | umid, data = soja,
        as.table = TRUE,
        strip = strip.custom(
            strip.names = TRUE, var.name = "Umidade")) +
-    as.layer(    
+    as.layer(
         segplot(
             K ~ lwr + upr | umid,
             centers = fit, groups = modelo, data = da.nv,
             grid = TRUE, horizontal = FALSE, draw = FALSE,
             lwd = 2, pch = 1:nlevels(da$modelo) + 3,
             panel = panel.segplot.by, f = 0.1, as.table = TRUE)
-    )    
+    )
 
 xy2 <- xyplot(ngra ~ K | umid, data = soja,
        xlab = "Nível de adubação potássica",
@@ -569,28 +564,28 @@ xy2 <- xyplot(ngra ~ K | umid, data = soja,
        as.table = TRUE,
        strip = strip.custom(
            strip.names = TRUE, var.name = "Umidade")) +
-    as.layer(    
+    as.layer(
         segplot(
             K ~ lwr + upr | umid,
             centers = fit, groups = modelo, data = da.ng,
             grid = TRUE, horizontal = FALSE, draw = FALSE,
             lwd = 2, pch = 1:nlevels(da$modelo) + 3,
             panel = panel.segplot.by, f = 0.1, as.table = TRUE)
-    )    
+    )
 
 ## x11(width = 10, height = 50)
 print(xy1, split = c(1, 1, 1, 2), more = TRUE)
 print(xy2, split = c(1, 2, 1, 2), more = FALSE)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 data(capdesfo)
 str(capdesfo)
 ## help(capdesfo)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Experimento balanceado
 xtabs(~est + des, data = capdesfo)
@@ -619,7 +614,7 @@ xyplot(ncap[, "var"] ~ ncap[, "mean"],
        })
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Preditores considerados
 f1 <- ncap ~ 1
@@ -640,7 +635,7 @@ m3C <- cmp(f3, data = capdesfo)
 m4C <- cmp(f4, data = capdesfo)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Verossimilhancas dos modelos ajustados
 cbind("Poisson" = sapply(list(m1P, m2P, m3P, m4P), logLik),
@@ -651,14 +646,14 @@ anova(m1P, m2P, m3P, m4P, test = "Chisq")
 anova(m1C, m2C, m3C, m4C)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Estimativas dos parâmetros
 summary(m4P)
 summary(m4C)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Um dos problemas computacionais do modelo COM-Poisson é a obtenção da
 ## constante de normalização Z. Assim uma visualização pós ajuste para
@@ -670,7 +665,7 @@ convergencez(m4C)
 logLik(m4C <- cmp(f4, data = capdesfo, sumto = 30))
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Dado que o modelo COM-Poisson leva as mesmas estimativas pontuais que
 ## o modelo Poisson a análise de diagnóstico padrão pode ser utilizada
@@ -678,7 +673,7 @@ par(mfrow = c(2, 2))
 plot(m4P)
 
 
-## ---- cache = TRUE------------------------------------------------
+## ---- cache = TRUE-------------------------------------------------------
 
 ##-------------------------------------------
 ## Testando a nulidade do parâmetro phi
@@ -693,7 +688,7 @@ m4Cfixed <- cmp(f4, data = capdesfo, fixed = list("phi" = 0))
 anova(m4C, m4Cfixed)
 
 
-## ----perf3, cache = TRUE------------------------------------------
+## ----perf3, cache = TRUE-------------------------------------------------
 
 ## Via perfil de log-verossimilhança
 perf <- profile(m4C, which = "phi")
@@ -701,7 +696,7 @@ confint(perf)
 plot(perf)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ##-------------------------------------------
 ## Verificando a matriz ve variâncias e covariâncias
@@ -714,7 +709,7 @@ corrplot.mixed(Corr, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Predição pontual/intervalar
 pred <- with(capdesfo,
@@ -752,7 +747,7 @@ key <- list(
     rect = list(col = cols, alpha = 0.1, lty = 3, border = NA),
     text = list(c("COM-Poisson", "Poisson")))
 
-## Gráfico dos valores preditos e IC de 95% para média 
+## Gráfico dos valores preditos e IC de 95% para média
 update(xy, type = c("p", "g"), key = key, alpha = 0.7) +
     as.layer(xyplot(fit ~ des | est,
                     groups = modelo,
@@ -767,14 +762,14 @@ update(xy, type = c("p", "g"), key = key, alpha = 0.7) +
                     panel = panel.superpose))
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Reparametriza para a média (aproximada)
 llcmp3 <- function (params, y, X, offset = NULL, sumto = 50) {
     betas <- params[-1]
     phi <- params[1]
     nu <- exp(phi)
-    if (is.null(offset)) 
+    if (is.null(offset))
         offset <- 0
     ##-------------------------------------------
     ## Reparametrização para a média
@@ -782,7 +777,7 @@ llcmp3 <- function (params, y, X, offset = NULL, sumto = 50) {
     Xb <- nu * log(mu + (nu - 1)/(2 * nu))
     ##-------------------------------------------
     i <- 0:sumto
-    zs <- sapply(Xb, function(loglambda) sum(exp(i * loglambda - 
+    zs <- sapply(Xb, function(loglambda) sum(exp(i * loglambda -
                                                  nu * lfactorial(i))))
     Z <- sum(log(zs))
     ll <- sum(y * Xb - nu * lfactorial(y)) - Z
@@ -790,7 +785,7 @@ llcmp3 <- function (params, y, X, offset = NULL, sumto = 50) {
 }
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Modifica framework para llcmp3
 cmp3 <- function (formula, data, start = NULL, sumto = NULL, ...) {
@@ -799,27 +794,27 @@ cmp3 <- function (formula, data, start = NULL, sumto = NULL, ...) {
     y <- model.response(frame)
     X <- model.matrix(terms, frame)
     ## off <- model.offset(frame)
-    ## if (is.null(sumto)) 
+    ## if (is.null(sumto))
     ##     sumto <- ceiling(max(y)^1.5)
     if (is.null(start)) {
         m0 <- glm.fit(x = X, y = y, family = poisson())
         start <- c(phi = 0, m0$coefficients)
     }
     bbmle::parnames(llcmp3) <- names(start)
-    model <- bbmle::mle2(llcmp3, start = start, data = list(y = y, 
+    model <- bbmle::mle2(llcmp3, start = start, data = list(y = y,
         X = X), vecpar = TRUE, ...)
     return(model)
 }
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Ajustando o modelo
 m4C2 <- cmp3(f4, data = capdesfo)
 convergencez(m4C2)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Perfis de verossimilhança para phi
 perf <- profile(m4C2, which = "phi")
@@ -827,7 +822,7 @@ confint(perf)
 plot(perf)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ##-------------------------------------------
 ## Verificando a matriz de variâncias e covariâncias
@@ -839,7 +834,7 @@ corrplot.mixed(Corr, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 X <- m4C2@data$X
 mu <- c(exp(X %*% coef(m4C2)[-1]))
@@ -885,14 +880,14 @@ update(xy, type = c("p", "g"), key = key, alpha = 0.7) +
                     panel = panel.superpose))
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 data(ninfas)
 str(ninfas)
 ## help(ninfas)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Somente as cultivares que contém BRS na identificação
 ninfas <- droplevels(subset(ninfas, grepl("BRS", x = cult)))
@@ -903,7 +898,7 @@ ninfas$aval <- factor(ninfas$dias)
 str(ninfas)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Experimento balanceado
 xtabs(~aval + cult, data = ninfas)
@@ -929,7 +924,7 @@ xyplot(ntot[, "var"] ~ ntot[, "mean"],
        })
 
 
-## ---- cache = TRUE------------------------------------------------
+## ---- cache = TRUE-------------------------------------------------------
 
 ## Preditores considerados
 f1 <- ntot ~ bloco + cult + aval
@@ -944,7 +939,7 @@ m1C <- cmp(f1, data = ninfas, sumto = 800)
 m2C <- cmp(f2, data = ninfas, sumto = 800)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Verossimilhancas dos modelos ajustados
 cbind("Poisson" = sapply(list(m1P, m2P), logLik),
@@ -955,14 +950,14 @@ anova(m1P, m2P, test = "Chisq")
 anova(m1C, m2C)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Estimativas dos parâmetros
 summary(m1P)
 summary(m1C)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Um dos problemas computacionais do modelo COM-Poisson é a obtenção da
 ## constante de normalização Z. Assim uma visualização pós ajuste para
@@ -971,7 +966,7 @@ summary(m1C)
 convergencez(m1C)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Dado que o modelo COM-Poisson leva as mesmas estimativas pontuais que
 ## o modelo Poisson a análise de diagnóstico padrão pode ser utilizada
@@ -979,7 +974,7 @@ par(mfrow = c(2, 2))
 plot(m1P)
 
 
-## ---- cache = TRUE------------------------------------------------
+## ---- cache = TRUE-------------------------------------------------------
 
 ##-------------------------------------------
 ## Testando a nulidade do parâmetro phi
@@ -994,7 +989,7 @@ m1Cfixed <- cmp(f1, data = ninfas, fixed = list("phi" = 0))
 anova(m1C, m1Cfixed)
 
 
-## ----perf4, cache = TRUE, warnings = FALSE------------------------
+## ----perf4, cache = TRUE, warnings = FALSE-------------------------------
 
 ## Via perfil de log-verossimilhança
 perf <- profile(m1C, which = "phi")
@@ -1002,7 +997,7 @@ confint(perf)
 plot(perf)
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ##-------------------------------------------
 ## Verificando a matriz ve variâncias e covariâncias
@@ -1015,7 +1010,7 @@ corrplot.mixed(Corr, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 
 ## Predição pontual/intervalar
 pred <- with(ninfas,

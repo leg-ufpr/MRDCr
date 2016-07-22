@@ -1,7 +1,7 @@
-## ----setup, include=FALSE-----------------------------------------
+## ----setup, include=FALSE------------------------------------------------
 source("_setup.R")
 
-## ---- message=FALSE, error=FALSE, warning=FALSE-------------------
+## ---- message=FALSE, error=FALSE, warning=FALSE--------------------------
 # Definições da sessão.
 library(lattice)
 library(latticeExtra)
@@ -14,7 +14,7 @@ library(doBy)
 library(multcomp)
 library(MRDCr)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Função densidade na parametrização original.
 dgcnt
 
@@ -48,7 +48,7 @@ useOuterStrips(xyplot(py ~ y | factor(lambda) + factor(alpha),
                    var.name = expression(alpha == ""),
                    sep = ""))
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # A média da Gamma-Count.
 
@@ -121,7 +121,7 @@ xyplot(m ~ lambda, groups = alpha, type = "l",
     layer(panel.abline(a = -0.5, b = 1, lty = 2)) +
     layer(panel.abline(a = 1, b = 1, lty = 2))
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 h <- function(...) {
     dgamma(...)/(1 - pgamma(...))
 }
@@ -156,7 +156,7 @@ legend("topright", legend = sprintf("%0.3f", shape),
        col = col, lty = 1, lwd = 2, bty = "n",
        title = expression(alpha))
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Função de log-Verossimilhança da Poisson Generalizada na
 # parametrização de modelo de regressão.
@@ -199,7 +199,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Carregando e explorando os dados.
 
@@ -276,7 +276,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -348,7 +348,7 @@ xyplot(fit ~ K | umid, data = pred,
        desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 
 xyplot(ngra ~ K | umid, data = soja, layout = c(NA, 1),
@@ -430,7 +430,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -504,7 +504,7 @@ xyplot(fit ~ K | umid, data = pred,
        desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Número de grãos por vagem (offset).
 
@@ -574,7 +574,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -658,7 +658,7 @@ xyplot(ngra/nvag ~ K | umid, data = soja, layout = c(NA, 1),
                                   scale = FALSE),
                panel = panel.cbH))
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Número de capulhos em função do nível de desfolha artificial e fase
 # fenológica do algodoeiro.
@@ -729,7 +729,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -801,12 +801,12 @@ p2 <- xyplot(fit ~ des | est, data = pred, groups = modelo,
              panel = panel.superpose)
 # p2
 
-## ---- fig.width=7, fig.height=3.5---------------------------------
+## ---- fig.width=7, fig.height=3.5----------------------------------------
 update(p1, type = "p", layout = c(NA, 1),
        key = key, spread = 0.07) +
     as.layer(p2, under = TRUE)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 
 data(nematoide, package = "MRDCr")
@@ -878,7 +878,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -933,7 +933,7 @@ xyplot(nema/off ~ cult, data = nematoide,
                                     scale = FALSE),
                panel = panel.cbH))
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Log-verossimilhança para o número de gols dos times em uma partida.
 
@@ -1177,7 +1177,7 @@ colnames(dwl) <- sprintf(paste(levels(db$home)[i], collapse = " %s "),
                          c("=", ">", "<"))
 t(dwl)
 
-## ---- echo=FALSE, results="hold"----------------------------------
+## ---- echo=FALSE, results="hold"-----------------------------------------
 cat(format(Sys.time(),
            format = "Atualizado em %d de %B de %Y.\n\n"))
 sessionInfo()

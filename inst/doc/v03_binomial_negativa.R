@@ -1,23 +1,22 @@
-## ----setup, include=FALSE-----------------------------------------
+## ----setup, include=FALSE------------------------------------------------
 source("_setup.R")
 
-## ---- results = "hide", message = FALSE---------------------------
+## ---- results = "hide", message = FALSE----------------------------------
 # Pacotes necessários.
-
 library(lattice)
 library(MASS)
 library(effects)
 library(knitr)
 library(MRDCr)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Dez primeiras linhas da base.
 head(seguros, 10)
 str(seguros)
 
 seguros$lexpo <- log(seguros$expos)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Distribuição do números de sinistros.
 tb <- table(seguros$nsinist)
 tb
@@ -58,7 +57,7 @@ tabidsex <- cbind(tabidsex, taxa)
 kable(tabidsex, align = "c",
       caption = "**Taxa de sinistros segundo sexo e idade**")
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 seguros <- na.omit(seguros)
 mP <- glm(nsinist ~ sexo + idade + I(idade^2) + valor +
               offset(log(expos)),
@@ -72,7 +71,7 @@ phichap <- X2/mP$df.residual
 # Indicador de superdispersão.
 phichap
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 envelope <- function(modelo) {
     dados <- na.omit(modelo$data)
     nsim <- 100
@@ -103,7 +102,7 @@ envelope <- function(modelo) {
     points(quantis, r1, pch = 16, cex = 0.75)
 }
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Diagnóstico do modelo - gráficos.
 par(mfrow = c(2, 2))
 plot(mP)
@@ -111,24 +110,24 @@ plot(mP)
 par(mfrow = c(1, 1))
 envelope(mP)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 mPo <- glm(nsinist ~ sexo + idade + I(idade^2) + valor +
                log(expos),
            data = seguros, family = poisson)
 summary(mPo)
 anova(mP, mPo, test = "Chisq")
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 mBNo <- glm.nb(nsinist ~ sexo + idade + I(idade^2) + valor +
                    log(expos), data = seguros)
 summary(mBNo)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Diagnóstico do modelo - gráficos.
 par(mfrow = c(2, 2))
 plot(mBNo)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 dadosnb3 <-
     seguros[, c("sexo", "idade", "valor", "expos", "nsinist")]
 dadosnb3$lexpo <- log(seguros$expos)
@@ -167,11 +166,11 @@ envelope <- function(modelo) {
     points(quantis, r1, pch = 16, cex = 0.75)
 }
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 par(mfrow = c(1, 1))
 envelope(mBNo)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 intervalos <- confint(mBNo)
 estimat <- cbind(mBNo$coefficients, intervalos)
 colnames(estimat)[1] <- "Estimativa pontual"
@@ -181,9 +180,8 @@ kable(round(estimat, 5), align = "c",
       caption = paste("**Estimativas pontuais e intervalos de",
                       "confiança - Modelo Binomial Negativo**"))
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 efeitos <- allEffects(mBNo, given.values = c(lexpo = 0))
-trellis.par.set(list(axis.text = list(cex = 1.2)))
 
 plot(efeitos[[2]],
      type = "response",
@@ -203,7 +201,9 @@ plot(efeitos[[4]],
      xlab = "Valor (x1000 reais)",
      ylab = "Taxa de sinistros")
 
-## -----------------------------------------------------------------
+dev.off()
+
+## ------------------------------------------------------------------------
 
 # Poisson sem ajuste de covariáveis.
 n <- nrow(seguros)
@@ -252,13 +252,16 @@ rownames(matfreq) <- c("Amostra",
                        "BN não ajustada por covariáveis",
                        "BN ajustada por covariáveis")
 
-## ---- results="markup"--------------------------------------------
+## ---- results="markup"---------------------------------------------------
 kable(matfreq, format = "markdown",
       caption = paste("Frequências amostrais e frequências",
                       "ajustadas para o número de sinistros"))
 
-## ---- echo=FALSE, results="hold"----------------------------------
+## ---- echo=FALSE, results="hold"-----------------------------------------
 cat(format(Sys.time(),
            format = "Atualizado em %d de %B de %Y.\n\n"))
 sessionInfo()
+
+## ---- include=FALSE------------------------------------------------------
+detach("package:effects")
 

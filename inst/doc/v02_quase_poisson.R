@@ -1,10 +1,7 @@
-## ----setup, include=FALSE-----------------------------------------
+## ----setup, include=FALSE------------------------------------------------
 source("_setup.R")
 
-## ---- echo=FALSE, include=FALSE-----------------------------------
-devtools::load_all()
-
-## ---- results="hide", message=FALSE-------------------------------
+## ---- results="hide", message=FALSE--------------------------------------
 # Pacotes requeridos.
 library("lmtest")
 library("boot")
@@ -14,15 +11,12 @@ library("RColorBrewer")
 library("sandwich")
 library("hnp")
 library("knitr")
+library("MRDCr")
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
+data(postura)
 str(postura)
 summary(postura)
-
-# names(postura) <- c("npost", "trat", "linh")
-# postura <- postura[, c(2, 3, 1)]
-# use_data(postura, overwrite = TRUE)
-# tab <- xtabs(~trat + npost, data = postura)
 
 bwplot(npost ~ linh | trat,
        data = postura,
@@ -46,7 +40,7 @@ mdp <- aggregate(npost ~ trat + linh,
                  })
 mdp
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Ajuste do modelo Poisson.
 mP <- glm(npost ~ trat + linh,
                 data = postura,
@@ -68,12 +62,12 @@ X2 <- sum(resid(mP, type = "pearson")^2)
 phichap <- X2/df.residual(mP)
 phichap
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Diagnóstico do modelo - gráficos padrão do R.
 par(mfrow = c(2, 2))
 plot(mP)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 envelope <- function(modelo) {
     dados <- na.omit(modelo$data)
     nsim <- 100
@@ -104,12 +98,12 @@ envelope <- function(modelo) {
     points(quantis, r1, pch = 16, cex = 0.75)
 }
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Gráfico quantil-quantil com envelopes simulados.
 layout(1)
 envelope(mP)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Modelo quasi poisson (V(mu) = mu).
 mQP0 <- glm(npost ~ trat + linh,
             data = postura,
@@ -142,7 +136,7 @@ qqnorm(resid(mQP1, type = "deviance"),
        pch = 20, main = "QL", las = 1)
 qqline(resid(mQP1, type = "deviance"))
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Estimador sanduíche.
 estrb <- coeftest(mP, vcov = sandwich)
 estrb
@@ -153,7 +147,7 @@ mB <- Boot(mP)
 # Resultados obtidos via bootstrap.
 summary(mB)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 erroz <- rbind(summary(mP)$coefficients[2,2:3],
                summary(mQP0)$coefficients[2,2:3],
                summary(mQP1)$coefficients[2,2:3],
@@ -179,7 +173,7 @@ kable(quadres,
       format = "markdown",
       caption = "Comparativo dos modelos ajustados")
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 postura.ex <- postura[-c(8, 18, 28), ]
 
 # Ajustando o modelo Poisson sem as três observações.
@@ -218,7 +212,7 @@ exp(coef(mPe)[2])
 # O efeito de intervenção aumenta, e torna-se mais significativo,
 # mediante exclusão dos outliers.
 
-## ---- echo=FALSE, results="hold"----------------------------------
+## ---- echo=FALSE, results="hold"-----------------------------------------
 cat(format(Sys.time(),
            format = "Atualizado em %d de %B de %Y.\n\n"))
 sessionInfo()

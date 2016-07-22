@@ -1,9 +1,8 @@
-## ----setup, include=FALSE-----------------------------------------
+## ----setup, include=FALSE------------------------------------------------
 source("_setup.R")
 
-## ---- message=FALSE, error=FALSE, warning=FALSE-------------------
+## ---- message=FALSE, error=FALSE, warning=FALSE--------------------------
 # Definições da sessão.
-# devtools::load_all("../")
 library(lattice)
 library(latticeExtra)
 library(bbmle)
@@ -14,7 +13,7 @@ library(doBy)
 library(multcomp)
 library(MRDCr)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 grid <- expand.grid(lambda = c(2, 8, 15),
                     alpha = c(-0.05, 0, 0.05))
 y <- 0:35
@@ -60,7 +59,7 @@ for (a in seq_along(alpha)) {
           add = TRUE, xname = "lambda", col = col[a], lwd = 2)
 }
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Gráfico do espaço paramétrico de lambda x alpha.
 
@@ -87,7 +86,7 @@ levelplot(sum ~ lambda + alpha,
 
 # Já que lambda * alpha > -1, então alpha = -1/lambda dá a fronteira.
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Função de log-Verossimilhança da Poisson Generalizada na
 # parametrização de modelo de regressão.
 MRDCr::llpgnz
@@ -128,7 +127,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Carregando e explorando os dados.
 
@@ -203,7 +202,7 @@ dev.off()
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Testes de hipótese.
 
@@ -273,7 +272,7 @@ xyplot(fit ~ K | umid, data = pred,
        desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 
 xyplot(ngra ~ K | umid, data = soja, layout = c(NA, 1),
@@ -338,7 +337,7 @@ dev.off()
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Teste de Wald para a interação.
 a <- c(0, attr(model.matrix(m0), "assign"))
 ai <- a == max(a)
@@ -405,7 +404,7 @@ xyplot(fit ~ K | umid, data = pred,
        desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Número de grãos por vagem (offset).
 
@@ -482,7 +481,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -556,7 +555,7 @@ xyplot(fit ~ K | umid, data = pred,
        desloc = 8 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # Número de capulhos em função do nível de desfolha artificial e fase
 # fenológica do algodoeiro.
@@ -622,7 +621,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -689,12 +688,12 @@ p2 <- xyplot(fit ~ des | est, data = pred, groups = modelo,
              panel = panel.superpose)
 # p2
 
-## ---- fig.width=7, fig.height=3.5---------------------------------
+## ---- fig.width=7, fig.height=3.5----------------------------------------
 update(p1, type = "p", layout = c(NA, 1),
        key = key, spread = 0.07) +
     as.layer(p2, under = TRUE)
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
 
 data(nematoide, package = "MRDCr")
@@ -763,7 +762,7 @@ corrplot.mixed(V, lower = "number", upper = "ellipse",
                tl.cex = 0.8, col = brewer.pal(9, "Greys")[-(1:3)])
 dev.off()
 
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 # Tamanho das covariâncias com \alpha.
 each(sum, mean, max)(abs(V[1, -1]))
 
@@ -884,7 +883,7 @@ qqmath(~values | ind, data = rp,
        })
 
 
-## ---- echo=FALSE, results="hold"----------------------------------
+## ---- echo=FALSE, results="hold"-----------------------------------------
 cat(format(Sys.time(),
            format = "Atualizado em %d de %B de %Y.\n\n"))
 sessionInfo()

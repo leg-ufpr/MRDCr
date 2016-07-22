@@ -1,7 +1,7 @@
-## ----setup, include=FALSE-----------------------------------------
+## ----setup, include=FALSE------------------------------------------------
 source("_setup.R")
 
-## ---- message=FALSE, error=FALSE, warning=FALSE-------------------
+## ---- message=FALSE, error=FALSE, warning=FALSE--------------------------
 # Definições da sessão.
 library(lattice)
 library(latticeExtra)
@@ -12,10 +12,7 @@ library(doBy)
 library(multcomp)
 library(MRDCr)
 
-## ---- eval=FALSE, include=FALSE-----------------------------------
-#  opts_chunk$set(eval = FALSE)
-
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 data(nematoide, package = "MRDCr")
 str(nematoide)
 
@@ -31,10 +28,7 @@ m2 <- glmer(nema ~ offset(log(off)) + (1 | cult) + (1 | ue),
             data = nematoide, family = poisson)
 summary(m2)
 
-# ???
-
-
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 data(soja, package = "MRDCr")
 str(soja)
 
@@ -118,10 +112,8 @@ xyplot(fit ~ K | umid, data = pred,
        desloc = 6 * scale(as.integer(pred$modelo), scale = FALSE),
        panel = panel.cbH)
 
-
-## -----------------------------------------------------------------
+## ------------------------------------------------------------------------
 #-----------------------------------------------------------------------
-# devtools::load_all()
 
 data(confterm, package = "MRDCr")
 data(conftemp, package = "MRDCr")
@@ -274,8 +266,7 @@ xyplot(fit ~ idade | modelo, groups = resfr, data = pred,
        panel = panel.superpose) +
     as.layer(xyplot(nap ~ idade, groups = resfr, data = confterm))
 
-
-## ---- echo=FALSE, results="hold"----------------------------------
+## ---- echo=FALSE, results="hold"-----------------------------------------
 cat(format(Sys.time(),
            format = "Atualizado em %d de %B de %Y.\n\n"))
 sessionInfo()
