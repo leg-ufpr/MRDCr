@@ -1,10 +1,10 @@
 library(knitr)
-opts_chunk$set(cache = FALSE,
+opts_chunk$set(cache = TRUE,
                tidy = FALSE,
-               fig.width = 8,
+               fig.width = 7,
                fig.height = 6,
                fig.align = "center",
-               dpi = 100,
+               dpi = 96,
                dev = "png",
                warning = FALSE,
                dev.args = list(family = "Palatino"))
