@@ -108,9 +108,10 @@ necessário ter o pacote `devtools`. Execute o código abaixo para
 instalar o pacote.
 
 ```r
+# Carrega o devtools.
 library(devtools)
 
-library(devtools)
+# Instala direto do fonte no GitHub.
 install_github(repo = "MRDCr",
                username = "leg-ufpr",
                ref = "devel")
@@ -119,9 +120,9 @@ install_github(repo = "MRDCr",
 Caso não consiga instalar o pacote, tente fazer a partir dos aquivos
 comprimidos disponíveis em <http://leg.ufpr.br/~walmes/pacotes/>. Se
 você usa Windows, use o `zip`, se Linux use o `tar.gz`. O código abaixo
-mostra como fazer a instalação.
+mostra como fazer a instalação. Modifique a versão, caso necessário.
 
-```
+```r
 # Instalando a partir do tarball (Linux).
 install.packages(pkgs = "MRDCr_0.0-2.tar.gz",
                  repos = NULL, type = "source")
@@ -131,24 +132,24 @@ install.packages(pkgs = "MRDCr_0.0.2.zip",
                  repos = NULL, type = "source")
 ```
 
-Lembre-se que esse procedimento não instala as dependências do
-pacote. Portanto, na hora de usar pode ser dado falta de algo. Para
-evitar isso, antes de instalar, procure instalar todos os pacotes que
-dependências para o MRDCr. Eles são listadoss no arquivo [DESCRIPTION].
+Lembre-se que esse procedimento não instala as dependências do pacote,
+portanto, na hora de usar pode faltar de algo. Para evitar isso, procure
+instalar todos os pacotes que são dependências para o MRDCr. Eles estão
+listadoss no arquivo [DESCRIPTION].
 
 Agradecimentos
 --------------
 
 O pacote MRDCr foi feito como material do Curso **Modelos de Regressão
-para Análise de Dados de Contagem** que foi aceito para o [62 RBRAS],
+para Análise de Dados de Contagem** que foi aceito para o [61 RBRAS],
 que aconteceu em Salvador - BA no período de 23 a 25 de Maio
-de 2016. Portanto agradecemos à Organização da 61 RBRAS pela
-oportunidade cedida para oferta deste Curso.
+de 2016. Agradecemos à Organização da 61 RBRAS pela oportunidade cedida
+para oferta deste Curso.
 
-O Curso foi baseado em estudos de casos feito com conjuntos de dados
+Este Curso foi baseado em estudos de casos feito com conjuntos de dados
 reais. Agradecemos às pessoas que permitiram que os dados fossem
 utilizados pois os dados foram o substrato base para a construção deste
-Curso.
+Curso. Sem eles nada disso seria possível.
 
 <!------------------------------------------- -->
 
@@ -156,5 +157,5 @@ Curso.
 [Eduardo Elias Ribeiro Jr]: https://jreduardo.github.io/
 [Cesar Augusto Taconeli]: https://docs.ufpr.br/~taconeli/
 [GitHub]: https://github.com/leg-ufpr/MRDCr
-[62 RBRAS]: http://rbras2016.ufba.br/pt/
+[61 RBRAS]: http://rbras2016.ufba.br/pt/
 [DESCRIPTION]: https://github.com/leg-ufpr/MRDCr/blob/devel/DESCRIPTION
