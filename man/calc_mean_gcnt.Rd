@@ -31,4 +31,3 @@ Função para calcular a média do tipo \eqn{E(Y) = \mu =
 \author{
 Walmes Zeviani, \email{walmes@ufpr.br}.
 }
-

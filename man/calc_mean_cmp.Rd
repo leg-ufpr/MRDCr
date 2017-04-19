@@ -34,4 +34,3 @@ Função para calcular a média do tipo \eqn{E(Y) = \mu =
 \author{
 Eduardo E. R. Junior, \email{edujrrib@gmail.com}
 }
-

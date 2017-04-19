@@ -67,4 +67,3 @@ plot(profile(n0, which = "alpha"))
 \author{
 Walmes Zeviani, \email{walmes@ufpr.br}.
 }
-

@@ -67,4 +67,3 @@ within(probs, {
 \author{
 Walmes Zeviani, \email{walmes@ufpr.br}
 }
-

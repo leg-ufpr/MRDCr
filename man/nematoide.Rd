@@ -72,4 +72,3 @@ m1 <- pgnz(formula(m0), data = nematoide)
 summary(m1)
 
 }
-

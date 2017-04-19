@@ -71,10 +71,9 @@ glht(m0, linfct = K)
 aggregate(cbind(log(breaks)) ~ trt, data = warpbreaks, FUN = mean)
 
 }
-\author{
-Walmes Zeviani baseado na lista de discussão R-help.
-}
 \seealso{
 \code{\link[doBy]{LSmatrix}}.
 }
-
+\author{
+Walmes Zeviani baseado na lista de discussão R-help.
+}

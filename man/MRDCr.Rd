@@ -25,4 +25,3 @@ Esse é um pacote com o material do Curso "Modelos de
     Curso, as funções e alguns dos dados utitizados nos estudos de
     caso.
 }
-

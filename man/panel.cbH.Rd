@@ -100,10 +100,9 @@ xyplot(y ~ x, groups = trt, data = da) +
                     panel.groups = panel.cbH))
 
 }
-\author{
-Walmes Zeviani baseado na lista de discussão R-help.
-}
 \seealso{
 \code{\link{prepanel.cbH}}.
 }
-
+\author{
+Walmes Zeviani baseado na lista de discussão R-help.
+}

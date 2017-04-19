@@ -82,4 +82,3 @@ pl10$pos <- rank(-pl10$pts)
 pl10
 
 }
-

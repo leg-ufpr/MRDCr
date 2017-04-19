@@ -36,4 +36,3 @@ tb
 mosaicplot(tb)
 
 }
-

@@ -56,11 +56,10 @@ xyplot(ncap ~ est | factor(des), data = capdesfo,
        spread = 0.35, panel = panel.beeswarm)
 
 }
+\seealso{
+\code{\link[lattice]{xyplot}}.
+}
 \author{
 Walmes Zeviani baseado no pacote
     \href{http://www.cbs.dtu.dk/~eklund/beeswarm/}{beeswarm}.
 }
-\seealso{
-\code{\link[lattice]{xyplot}}.
-}
-

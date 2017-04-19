@@ -82,4 +82,3 @@ xyplot(ovos ~ corled | period, data = led,
        xlab = "Cor emitida pelo LED")
 
 }
-

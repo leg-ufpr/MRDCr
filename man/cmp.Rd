@@ -62,4 +62,3 @@ plot(profile(m1, which = "phi"))
 \author{
 Eduardo E. R. Junior, \email{edujrrib@gmail.com}
 }
-

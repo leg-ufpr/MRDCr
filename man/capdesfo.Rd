@@ -73,4 +73,3 @@ Zeviani, W. M., Ribeiro, P. J., Bonat, W. H., Shimakura, S. E., &
     Statistics, 41(12),
     1–11. \url{http://doi.org/10.1080/02664763.2014.922168}
 }
-

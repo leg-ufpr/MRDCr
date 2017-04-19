@@ -35,4 +35,3 @@ Função para calcular a variância do tipo \eqn{V(Y) =
 \author{
 Eduardo E. R. Junior, \email{edujrrib@gmail.com}
 }
-

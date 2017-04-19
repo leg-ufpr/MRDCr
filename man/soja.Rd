@@ -73,4 +73,3 @@ xyplot(nvag + ngra ~ K, groups = umid, outer = TRUE,
                              "Número de grãos")))
 
 }
-

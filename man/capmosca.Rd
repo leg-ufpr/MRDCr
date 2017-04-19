@@ -74,4 +74,3 @@ xyplot(nnos ~ dexp, groups = planta,
        type = c("p", "g", "smooth"))
 
 }
-

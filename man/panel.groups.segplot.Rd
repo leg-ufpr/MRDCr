@@ -53,10 +53,9 @@ segplot(wool ~ lwr + upr, centers = fit, data = pred,
         panel = panel.groups.segplot)
 
 }
-\author{
-Walmes Zeviani
-}
 \seealso{
 \code{\link[latticeExtra]{segplot}}.
 }
-
+\author{
+Walmes Zeviani
+}

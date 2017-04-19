@@ -59,4 +59,3 @@ within(probs, {
 \author{
 Eduardo E. R. Junior, \email{edujrrib@gmail.com}
 }
-

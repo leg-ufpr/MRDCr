@@ -78,10 +78,9 @@ Para que não seja necessário restringir o algoritmo de maximização da
     estimado será \eqn{\phi} que tem suporte nos reais, assim como o
     vetor \eqn{\beta}.
 }
-\author{
-Eduardo E. R. Junior, \email{edujrrib@gmail.com}
-}
 \seealso{
 \code{\link[bbmle]{mle2}}
 }
-
+\author{
+Eduardo E. R. Junior, \email{edujrrib@gmail.com}
+}

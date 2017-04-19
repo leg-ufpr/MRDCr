@@ -73,4 +73,3 @@ Suekane, R., Degrande, P. E., de Lima Junior, I. S., de
     Instituto Biológico, 80(2), 151-158.
     \href{http://200.129.209.183/arquivos/arquivos/78/MESTRADO-DOUTORADO-AGRONOMIA/Dissertação Renato Suekane.pdf}{Dissertação de Renato Suekane.}
 }
-

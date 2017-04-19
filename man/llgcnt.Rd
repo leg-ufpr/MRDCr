@@ -111,10 +111,9 @@ levelplot(ll ~ alpha + lambda, data = grid) +
     layer(panel.abline(v = 0, h = 1, lty = 2))
 
 }
-\author{
-Walmes Zeviani, \email{walmes@ufpr.br}.
-}
 \seealso{
 \code{\link[bbmle]{mle2}}.
 }
-
+\author{
+Walmes Zeviani, \email{walmes@ufpr.br}.
+}

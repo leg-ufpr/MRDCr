@@ -52,4 +52,3 @@ str(tablez)
 \author{
 Eduardo E. R. Junior, \email{edujrrib@gmail.com}
 }
-

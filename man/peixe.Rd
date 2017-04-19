@@ -45,4 +45,3 @@ xyplot(npeixes ~ ncriancas + npessoas,
 Calvin, J. A. (1998). Regression Models for Categorical
     and Limited Dependent Variables. Technometrics, 40(1), 80-81.
 }
-

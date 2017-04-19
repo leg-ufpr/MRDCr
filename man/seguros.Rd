@@ -39,4 +39,3 @@ str(seguros)
 summary(seguros)
 }
 \keyword{excesso-zeros}
-
