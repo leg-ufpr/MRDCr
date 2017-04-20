@@ -149,7 +149,7 @@ library(latticeExtra)
               ylab = "Número de capulhos produzidos",
               type = c("p", "g", "smooth"),
               panel = panel.beeswarm,
-              r = 0.05))
+              spread = 0.05))
 
 ## Avaliando preliminarmente suposição de equidispersão
 (mv <- aggregate(ncap ~ dexp, data = capmosca,
@@ -361,7 +361,7 @@ Abaixo definimos as variáveis que são utilizadas na modelagem.
 
 ## Análise Exploratória ##
 
-```{r, fig.height = 12}
+```{r, fig.height=4, fig.width=8}
 
 ## Experimento (des)balanceado
 xtabs(~K + umid, data = soja)
@@ -384,7 +384,7 @@ xyplot(ngra + nvag ~ K | umid,
 
 ```
 
-```{r}
+```{r, fig.height=4, fig.width=8}
 
 ## Avaliando preliminarmente suposição de equidispersão
 (mv <- aggregate(cbind(ngra, nvag, ng2v = ngra/nvag) ~ K + umid,
@@ -565,7 +565,7 @@ anova(m2C.ng, m2Cfixed.ng)
 
 ```
 
-```{r perf2, echo = FALSE, warnings = FALSE}
+```{r perf2, echo = FALSE, warnings = FALSE, fig.height=4, fig.width=8}
 
 ##-------------------------------------------
 ## Via perfis de log-verossimilhança
@@ -607,7 +607,7 @@ corrplot.mixed(Corr, lower = "number", upper = "ellipse",
 
 ## Predição ##
 
-```{r, fig.height = 18}
+```{r, fig.height=10, fig.width=8}
 
 ## Predição pontual/intervalar
 pred <- with(soja,
@@ -678,30 +678,30 @@ da.nv <- da.nv[with(da.nv, order(umid, K, modelo)), ]
 da.ng <- rbind(predP.ng, predC.ng)
 da.ng <- da.ng[with(da.ng, order(umid, K, modelo)), ]
 
-source(paste0("https://gitlab.c3sl.ufpr.br/leg/legTools/raw/",
-              "issue%2315/R/panel.segplot.by.R"))
-
 key <- list(type = "o", divide = 1,
             lines = list(pch = 1:nlevels(da.nv$modelo) + 3, lty = 1),
             text = list(c("Poisson", "COM-Poisson")))
 
 xy1 <- xyplot(nvag ~ K | umid, data = soja,
-       xlab = "Nível de adubação potássica",
-       ylab = "Contagem",
-       type = c("p", "g"), alpha = 0.7,
-       key = key,
-       layout = c(NA, 1),
-       as.table = TRUE,
-       strip = strip.custom(
-           strip.names = TRUE, var.name = "Umidade")) +
+              xlab = "Nível de adubação potássica",
+              ylab = "Contagem",
+              type = c("p", "g"), alpha = 0.7,
+              key = key,
+              layout = c(NA, 1),
+              as.table = TRUE,
+              strip = strip.custom(
+                  strip.names = TRUE, var.name = "Umidade")) +
     as.layer(
-        segplot(
-            K ~ lwr + upr | umid,
-            centers = fit, groups = modelo, data = da.nv,
-            grid = TRUE, horizontal = FALSE, draw = FALSE,
-            lwd = 2, pch = 1:nlevels(da$modelo) + 3,
-            panel = panel.segplot.by, f = 0.1, as.table = TRUE)
+        xyplot(fit ~ K | umid, data = da.nv,
+               pch = 1:nlevels(da.nv$modelo) + 3,
+               ly = da.nv$lwr, uy = da.nv$upr,
+               cty = "bars", length = 0,
+               prepanel = prepanel.cbH,
+               desloc = 0.25 * scale(as.integer(da.nv$modelo),
+                                     scale = FALSE),
+               panel = panel.cbH)
     )
+
 
 xy2 <- xyplot(ngra ~ K | umid, data = soja,
        xlab = "Nível de adubação potássica",
@@ -713,12 +713,14 @@ xy2 <- xyplot(ngra ~ K | umid, data = soja,
        strip = strip.custom(
            strip.names = TRUE, var.name = "Umidade")) +
     as.layer(
-        segplot(
-            K ~ lwr + upr | umid,
-            centers = fit, groups = modelo, data = da.ng,
-            grid = TRUE, horizontal = FALSE, draw = FALSE,
-            lwd = 2, pch = 1:nlevels(da$modelo) + 3,
-            panel = panel.segplot.by, f = 0.1, as.table = TRUE)
+        xyplot(fit ~ K | umid, data = da.ng,
+               pch = 1:nlevels(da.ng$modelo) + 3,
+               ly = da.ng$lwr, uy = da.ng$upr,
+               cty = "bars", length = 0,
+               prepanel = prepanel.cbH,
+               desloc = 0.25 * scale(as.integer(da.ng$modelo),
+                                     scale = FALSE),
+               panel = panel.cbH)
     )
 
 ## x11(width = 10, height = 50)
@@ -754,7 +756,7 @@ florecimento, maça, capulho);
 
 ## Análise Exploratória ##
 
-```{r}
+```{r, fig.height=4, fig.width=9}
 
 ## Experimento balanceado
 xtabs(~est + des, data = capdesfo)
@@ -765,7 +767,11 @@ xtabs(~est + des, data = capdesfo)
              ylab = "Número de capulhos produzidos",
              type = c("p", "g", "smooth"),
              panel = panel.beeswarm,
-             r = 0.05))
+             spread = 0.05))
+
+```
+
+```{r}
 
 ## Avaliando preliminarmente suposição de equidispersão
 (mv <- aggregate(ncap ~ est + des, data = capdesfo,
@@ -895,7 +901,7 @@ corrplot.mixed(Corr, lower = "number", upper = "ellipse",
 
 ## Predição ##
 
-```{r}
+```{r fig.height=4, fig.width=9}
 
 ## Predição pontual/intervalar
 pred <- with(capdesfo,
@@ -1301,19 +1307,20 @@ predC <- cbind(pred, aux)
 da <- rbind(predP, predC)
 da <- da[order(da$cult, da$aval, da$modelo), ]
 
-source(paste0("https://gitlab.c3sl.ufpr.br/leg/legTools/raw/",
-              "issue%2315/R/panel.segplot.by.R"))
-
 key <- list(type = "o", divide = 1,
             lines = list(pch = 1:nlevels(da$modelo) + 3, lty = 1),
             text = list(c("Poisson", "COM-Poisson")))
 
 update(xy, type = c("p", "g"), key = key, alpha = 0.7) +
-    as.layer(segplot(
-        aval ~ lwr + upr | cult,
-        centers = fit, groups = modelo, data = da,
-        grid = TRUE, horizontal = FALSE, draw = FALSE,
-        lwd = 2, pch = 1:nlevels(da$modelo) + 3,
-        panel = panel.segplot.by, f = 0.1))
+    as.layer(
+        xyplot(fit ~ aval | cult, data = da,
+               pch = 1:nlevels(da$modelo) + 3,
+               ly = da$lwr, uy = da$upr,
+               cty = "bars", length = 0,
+               prepanel = prepanel.cbH,
+               desloc = 0.25 * scale(as.integer(da$modelo),
+                                     scale = FALSE),
+               panel = panel.cbH)
+    )
 
 ```
